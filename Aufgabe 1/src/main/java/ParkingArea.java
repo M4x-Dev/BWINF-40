@@ -54,7 +54,7 @@ public class ParkingArea {
             //Dabei wird die Iterationsvariable i, der Schleife, in einen ASCII-Code umgewandelt.
             for(int i = 0; i < verticalCars; i++) parkingSpots[0][i] = Character.toString(Character.toUpperCase((char)i + 97));
 
-            //Diese Schleife liest die horizontal geparkten Fahrzeuge aus der gegebenen Datei und füllte diese in das Array.
+            //Diese Schleife liest die horizontal geparkten Fahrzeuge aus der gegebenen Datei und füllt diese in das Array.
             //Dabei nimmt ein horizontal geparktes Fahrzeug immer zwei Einheiten ein (i und i + 1).
             int horizontalCars = Integer.parseInt(contentLines[1]);
             for(int i = 0; i < horizontalCars; i++) {
