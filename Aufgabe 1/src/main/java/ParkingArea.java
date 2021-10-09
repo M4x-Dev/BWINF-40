@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Diese Klasse repräsentiert einen Parkplatz, wie in der Aufgabenstellung beschrieben.
@@ -8,7 +9,14 @@ public class ParkingArea {
 
     public static final String SPOT_EMPTY = "-"; //Zeichen für einen leeren Parkplatz
 
-    String[][] parkingSpots;
+    public static final String MOVE_SEPARATOR = ", "; //Zeichen zum Abtrennen mehrerer Lösungsschritte
+    public static final String MOVE_PATTERN = ", %s %d %s"; //Muster für einen Lösungsschritt (, <Auto> <Einheiten> <Richtung>, z.B. ", A 1 rechts")
+    public static final String MOVE_PREFIX = "%s: "; //Präfix für eine gesamte Lösungsabfolge (<Auto>: , z.B. "A: ")
+
+    public static final String MOVE_LEFT = "links"; //Horizontales Fahrzeug wird nach links bewegt
+    public static final String MOVE_RIGHT = "rechts"; //Horizontales Fahrzeug wird nach rechts bewegt
+
+    String[][] parkingSpots; //2-dimensionales Array zur Darstellung des Parkplatzes
 
     /**
      * Konstruktor der Parkplatzklasse, welcher die Instanz aus einer Datei erstellt.
@@ -22,22 +30,32 @@ public class ParkingArea {
      */
     public ParkingArea(String filePath) {
         try {
+            //Benötigte Instanzen zum Lesen der Datei
             StringBuilder contentBuilder = new StringBuilder();
-            InputStream fileStream = getClass().getResourceAsStream(filePath);
+            FileInputStream fileStream = new FileInputStream(filePath);
             BufferedReader streamReader = new BufferedReader(new InputStreamReader(fileStream));
 
+            //Lesen der einzelnen Zeilen der Datei
             String line;
             while((line = streamReader.readLine()) != null) contentBuilder.append(line).append("\n");
 
+            //Aufteilen des gelesenen Textes in die einzelnen Dateien
             String[] contentLines = contentBuilder.toString().split("\n");
 
             //Interpretieren der Daten
-            int verticalCars = (int)Character.toLowerCase(contentLines[0].charAt(2)) - 96; //Berechnen der Position des zweiten Buchstaben im Alphabet
+            //Diese Anweisung berechnet die Breite des Parkplatzes, indem der zweite Buchstabe in ASCII konvertiert und vom Ergebnis 96 subtrahiert wird.
+            //Somit erhält man die Stelle des Buchstabens im Alphabet
+            int verticalCars = (int)Character.toLowerCase(contentLines[0].charAt(2)) - 96;
 
             //Initialisieren und Befüllen des Parkplatzes mit den gegebenen Daten
             parkingSpots = new String[2][verticalCars];
-            for(int i = 0; i < verticalCars; i++) parkingSpots[0][i] = Character.toString(Character.toUpperCase((char)i + 97)); //Befüllen der Fahrzeuge der ersten Reihe
 
+            //Diese Schleife füllt die erste Reihe des Arrays mit den Buchstaben A bis <Zielbuchstabe>, welche vorher aus der Datei gelesen wurden.
+            //Dabei wird die Iterationsvariable i, der Schleife, in einen ASCII-Code umgewandelt.
+            for(int i = 0; i < verticalCars; i++) parkingSpots[0][i] = Character.toString(Character.toUpperCase((char)i + 97));
+
+            //Diese Schleife liest die horizontal geparkten Fahrzeuge aus der gegebenen Datei und füllte diese in das Array.
+            //Dabei nimmt ein horizontal geparktes Fahrzeug immer zwei Einheiten ein (i und i + 1).
             int horizontalCars = Integer.parseInt(contentLines[1]);
             for(int i = 0; i < horizontalCars; i++) {
                 String horizontalCar = contentLines[i + 2];
@@ -47,13 +65,15 @@ public class ParkingArea {
                 parkingSpots[1][startPosition + 1] = horizontalCar.split(" ")[0];
             }
 
+            //Diese Schleife füllt die restlichen Parkplätze mit einem Leerzeichen, welches später benötigt wird.
             for(int i = 0; i < parkingSpots[1].length; i++) {
                 if(parkingSpots[1][i] == null)
                     parkingSpots[1][i] = SPOT_EMPTY;
             }
 
-            streamReader.close(); //Schließen des Readers
-            fileStream.close(); //Schließen des Streams
+            //Schließen der benötigten Resourcen zum Lesen der Datei
+            streamReader.close();
+            fileStream.close();
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Something went wrong :/ - " + e.getMessage());
@@ -67,7 +87,7 @@ public class ParkingArea {
      */
     public void clearParkingArea(String filePath) {
         try {
-            PrintWriter outputWriter = new PrintWriter(this.getClass().getResource(filePath).getPath());
+            PrintWriter outputWriter = new PrintWriter(filePath, StandardCharsets.UTF_8);
             for(int i = 0; i < parkingSpots[0].length; i++) outputWriter.println(leaveSpot(parkingSpots[0][i]));
             outputWriter.flush();
             outputWriter.close();
@@ -86,27 +106,22 @@ public class ParkingArea {
      * @return Gibt die erforderlichen Schritte zurück.
      */
     public String leaveSpot(String car) {
-        StringBuilder chainBuilder = new StringBuilder(car + ": "); //StringBuilder, welcher das Zusammenschließen der Lösungsschritte übernimmt
+        StringBuilder chainBuilder = new StringBuilder(String.format(MOVE_PREFIX, car)); //StringBuilder, welcher das Zusammenschließen der Lösungsschritte übernimmt
         int carIndex = getVerticalCarPosition(car); //Ermitteln der Position des Fahrzeuges auf dem Parkplatz
 
-        if(parkingSpots[1][carIndex].equalsIgnoreCase(SPOT_EMPTY)) {
-            //Einfachster Fall: Das Fahrzeug wird von keinem weiteren Fahrzeug blockiert.
-            return chainBuilder.toString();
-        } else {
-            //Ansonsten: Das Fahrzeug wird von mindestens einem weiteren Fahrzeug blockiert, welches zuerst verschoben werden muss.
+        //Das Fahrzeug wird von einem horizontalen Fahrzeug blockiert, welches zuerst verschoben werden muss
+        if(!parkingSpots[1][carIndex].equalsIgnoreCase(SPOT_EMPTY)) {
             String blockingCar = parkingSpots[1][carIndex];
-            boolean overlappingLeft = carIndex == 0 || parkingSpots[1][carIndex - 1].equalsIgnoreCase(blockingCar); //Ragt das Fahrzeug nach links oder rechts über das ausparkende hinaus?
+            boolean overlappingLeft = carIndex > 1 && parkingSpots[1][carIndex - 1].equalsIgnoreCase(blockingCar); //Ragt das Fahrzeug nach links oder rechts über das ausparkende hinaus?
 
-            if(overlappingLeft) {
-                //Horizontales Fahrzeug muss nach links bewegt werden
-                chainBuilder.append(moveHorizontalCar(blockingCar, -1, ""));
-            } else {
-                //Horizontales Fahrzeug muss nach rechts bewegt werden
-                chainBuilder.append(moveHorizontalCar(blockingCar, 1, ""));
-            }
-
-            return chainBuilder.toString();
+            chainBuilder.append(returnSmarterMove(
+                    moveHorizontalCar(blockingCar, overlappingLeft ? -1 : 1, ""),
+                    moveHorizontalCar(blockingCar, overlappingLeft ? 2 : -2, "")
+            ));
         }
+
+        //Rückgabe der Schrittfolge
+        return chainBuilder.toString();
     }
 
     /**
@@ -119,22 +134,23 @@ public class ParkingArea {
      *
      * @return Ermittelt die benötigten Lösungsschritte, um ein horizontales Fahrzeug in eine bestimmte Richtung zu bewegen.
      */
-    public String moveHorizontalCar(String car, int move, String instructions) {
+    private String moveHorizontalCar(String car, int move, String instructions) {
         StringBuilder chainBuilder = new StringBuilder(instructions);
         int carStartPosition = getHorizontalCarPosition(car);
 
         if(move < 0 && carStartPosition == 0) return moveHorizontalCar(car, 2, instructions);
-        if(move > 0 && carStartPosition == parkingSpots[1].length - 2) return moveHorizontalCar(car, -2, instructions);
+        if(move > 0 && carStartPosition + 1 == parkingSpots[1].length - 1) return moveHorizontalCar(car, -2, instructions);
 
-        String change = ", " + car + " " + Math.abs(move) + (move > 0 ? " rechts" : " links");
+        String change = String.format(MOVE_PATTERN, car, Math.abs(move), (move > 0 ? MOVE_RIGHT : MOVE_LEFT));
+
         chainBuilder.insert(0, change);
 
         if(canMove(carStartPosition, move)) {
             //Das horizontale Fahrzeug kann, ohne ein weiteres Fahrzeug zu bewegen, bewegt werden, um dem senkrechten Fahrzeug Platz zu machen.
-            return chainBuilder.toString().startsWith(", ") ? chainBuilder.substring(2) : chainBuilder.toString();
+            return chainBuilder.toString().startsWith(MOVE_SEPARATOR) ? chainBuilder.substring(2) : chainBuilder.toString();
         } else {
             //Das horizontale Fahrzeug kann nur bewegt werden, wenn ein weiteres horizontales Fahrzeug bewegt wird (rekursiver Funktionsaufruf).
-            return moveHorizontalCar(getNextCar(carStartPosition, move), getDifference(carStartPosition, move), chainBuilder.toString());
+            return moveHorizontalCar(getNextCar(carStartPosition, move), calculateDelta(carStartPosition, move), chainBuilder.toString());
         }
     }
 
@@ -147,7 +163,7 @@ public class ParkingArea {
      *
      * @return Gibt die Position des Fahrzeuges oder -1 zurück, falls die Position nicht ermittelt werden kann.
      */
-    public int getVerticalCarPosition(String car) {
+    private int getVerticalCarPosition(String car) {
         for(int i = 0; i < parkingSpots[0].length; i++) {
             if(parkingSpots[0][i].equalsIgnoreCase(car))
                 return i; //Rückgabe der Position
@@ -166,13 +182,37 @@ public class ParkingArea {
      *
      * @return Gibt die Position des Fahrzeuges oder -1 zurück, falls die Position nicht ermittelt werden kann.
      */
-    public int getHorizontalCarPosition(String car) {
+    private int getHorizontalCarPosition(String car) {
         for(int i = 0; i < parkingSpots[1].length; i++) {
             if(parkingSpots[1][i].equalsIgnoreCase(car))
                 return i; //Rückgabe der ersten Position
         }
 
         return -1; //Rückgabe des Ausweichwertes
+    }
+
+    /**
+     * Diese Funktion ermittelt den besseren der zwei gegebenen Lösungsabfolgen.
+     * Eine Lösungsabfolge ist besser als eine andere, wenn sie weniger Schritte bis zum Ziel benötigt.
+     * Um die zwei Lösungsabfolgen zu vergleichen werden alle Sonderzeichen, Leerzeichen und Richtungsanweisungen entfernt, sodass nur noch die Bezeichnungen und Bewegungen der einzelnen Fahrzeuge verglichen werden müssen.
+     *
+     * <br><b>Beispiel:</b>
+     * <br>moveA: "A: H 2 rechts, Q 4 links"
+     * <br>moveB: "B: L 1 links"
+     * <br>In diesem Fall gibt die Funktion "moveB" zurück, da diese Schrittabfolge weniger Teilschritte beeinhaltet, als "moveA".
+     *
+     * @param moveA Erste Abfolge an Lösungsschritten.
+     * @param moveB Zweite Abfolge an Lösungsschritten.
+     *
+     * @return Ermittelt die Lösungsabfolge mit weniger Teilschritten.
+     */
+    private String returnSmarterMove(String moveA, String moveB) {
+        //Lokale Variablen, welche die veränderten Anweisungen beeinhalten
+        String compareA = moveA.replace(MOVE_LEFT, "").replace(MOVE_RIGHT, "").replace(MOVE_SEPARATOR, "").replace(" ", "");
+        String compareB = moveB.replace(MOVE_LEFT, "").replace(MOVE_RIGHT, "").replace(MOVE_SEPARATOR, "").replace(" ", "");
+
+        //Rückgabe des Ergebnisses
+        return compareA.length() > compareB.length() ? moveB : moveA;
     }
 
     /**
@@ -184,18 +224,25 @@ public class ParkingArea {
      *
      * @return Gibt zurück, ob sich das horizontale Fahrzeug ohne Kollision mit einem anderen Fahrzeug um die gegebenen Einheiten bewegt werden kann.
      */
-    public boolean canMove(int start, int amount) {
+    private boolean canMove(int start, int amount) {
         if(amount < 0) {
             //Linke Seite überprüfen
-            for(int i = 1; i <= -amount; i++)
+            for(int i = 1; i <= -amount; i++) {
+                if(start - i < 0)
+                    return false; //Das Fahrzeug würde mit der linken Wand kollidieren
+
                 if(!parkingSpots[1][start - i].equalsIgnoreCase(SPOT_EMPTY))
-                    return false;
+                    return false; //Es befindet sich ein weiteres horizontales Fahrzeug im Weg des Fahrzeuges
+            }
         } else if(amount > 0) {
             //Rechte Seite überprüfen
             start++; //Startposition um eine Einheit nach rechts verschieben, da ein horizontales Fahrzeug zwei Einheiten breit ist
             for(int i = 1; i <= amount; i++) {
+                if(start + i >= parkingSpots[1].length)
+                    return false; //Das Fahrzeug würde mit der rechten Wand kollidieren
+
                 if(!parkingSpots[1][start + i].equalsIgnoreCase(SPOT_EMPTY))
-                    return false;
+                    return false; //Es befindet sich ein weiteres horizontales Fahrzeug im Weg des Fahrzeuges
             }
         }
 
@@ -213,7 +260,7 @@ public class ParkingArea {
      *
      * @return Gibt das nächste Fahrzeug in der gegebenen Richtung oder ein Leerzeichen ("-") zurück, wenn sich kein Fahrzeug in der Nähe befindet.
      */
-    public String getNextCar(int start, int direction) {
+    private String getNextCar(int start, int direction) {
         if(direction < 0) {
             //Auf der linken Seite suchen
             for(int i = start - 1; i >= 0; i--) {
@@ -234,39 +281,42 @@ public class ParkingArea {
 
     /**
      * Diese Funktion berechnet die Distanz zwischen zwei horizontalen Fahrzeugen.
-     * <br><br>Falls der "direction" Parameter negativ ist, sucht die Funktion auf der linken Seite des Fahrzeuges<br>
-     * <br>Falls der "direction" Parameter positiv ist, sucht die Funktion auf der rechten Seite des Fahrzeuges<br>
+     * <br><br>Falls der "move" Parameter negativ ist, sucht die Funktion auf der linken Seite des Fahrzeuges<br>
+     * <br>Falls der "move" Parameter positiv ist, sucht die Funktion auf der rechten Seite des Fahrzeuges<br>
      *
      * @param start Position des ersten horizontalen Fahrzeuges.
-     * @param direction Richtung, in welche die Funktion suchen soll.
+     * @param move Richtung, in welche die Funktion suchen soll.
      *
      * @return Ermittelt die Distanz zum nächsten horizontalen Fahrzeug in der gegebenen Richtung.
      */
-    public int getDifference(int start, int direction) {
-        //Distanz wird mit dem Wert 1 bzw. -1 initialisiert
-        int distance = direction < 0 ? -1 : 1;
+    private int calculateDelta(int start, int move) {
+        if(move < 0) {
+            //Linke Seite überprüfen
+            if(!parkingSpots[1][start - 1].equalsIgnoreCase(SPOT_EMPTY))
+                return move;
 
-        if(direction < 0) {
-            //Auf der linken Seite suchen
+            int emptySpots = 0;
             for(int i = start - 1; i >= 0; i--) {
-                if(!parkingSpots[1][i].equalsIgnoreCase(SPOT_EMPTY)) {
-                    return distance;
-                } else {
-                    distance--;
-                }
+                if(parkingSpots[1][i].equalsIgnoreCase(SPOT_EMPTY))
+                    emptySpots++;
+                else break;
             }
-        } else {
-            //Auf der rechten Seite suchen
-            for(int i = start + 2; i < parkingSpots[1].length - 1; i++) {
-                if(!parkingSpots[1][i].equalsIgnoreCase(SPOT_EMPTY)) {
-                    return distance;
-                } else {
-                    distance++;
-                }
-            }
-        }
 
-        return distance;
+            return move + emptySpots;
+        } else {
+            //Rechte Seite überprüfen
+            if(!parkingSpots[1][start + 2].equalsIgnoreCase(SPOT_EMPTY))
+                return move;
+
+            int emptySpots = 0;
+            for(int i = start + 2; i < parkingSpots[1].length; i++) {
+                if(parkingSpots[1][i].equalsIgnoreCase(SPOT_EMPTY))
+                    emptySpots++;
+                else break;
+            }
+
+            return move - emptySpots;
+        }
     }
 
 }
