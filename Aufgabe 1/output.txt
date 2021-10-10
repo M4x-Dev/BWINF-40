@@ -1,14 +1,16 @@
-A: 
-B: 
-C: O 1 rechts
-D: O 1 links
+A: R 1 rechts, Q 1 rechts
+B: R 1 rechts, Q 1 rechts
+C: R 1 rechts
+D: R 2 rechts
 E: 
-F: O 1 links, P 2 links
-G: P 1 links
-H: R 1 rechts, Q 1 rechts
-I: P 1 links, Q 1 links
-J: R 1 rechts
-K: P 1 links, Q 1 links, R 1 links
-L: 
-M: P 1 links, Q 1 links, R 1 links, S 2 links
-N: S 1 links
+F: 
+G: S 1 rechts
+H: S 1 links
+I: 
+J: 
+K: T 1 rechts
+L: T 1 links
+M: 
+N: U 1 rechts
+O: U 1 links
+P: 
