@@ -213,6 +213,8 @@ G: I 1 links
 |-|-|-|-|-|-|-|
 |-|-|H|H|<span style="color:red">**I**</span>|<span style="color:red">**I**</span>|-|
 
+---
+
 ### Beispiel 2 (parkplatz1.txt)
 
 **_Eingabe:_**
@@ -281,11 +283,15 @@ N:
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |-|O|O|P|P|-|Q|Q|-|-|R|R|-|-|
 
+|A|B|C|<span style="color:green">**D**</span>|E|F|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|O|O|P|P|-|Q|Q|-|-|R|R|-|-|
+
 **E:** Es müssen zwei weitere Fahrzeuge verschoben werden, damit dieses Fahrzeug bewegt werden kann.
 
 |A|B|C|D|<span style="color:green">**E**</span>|F|G|H|I|J|K|L|M|N|
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|
-|-|O|O|P|P|-|Q|Q|-|-|R|R|-|-|
+|-|O|O|-|<span style="color:red">**P**</span>|<span style="color:red">**P**</span>|Q|Q|-|-|R|R|-|-|
 
 **F:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
 
@@ -299,11 +305,19 @@ N:
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |-|O|O|P|P|-|Q|Q|-|-|R|R|-|-|
 
+|A|B|C|D|E|F|<span style="color:green">**G**</span>|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|O|O|P|P|-|-|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|-|R|R|-|-|
+
 **H:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
 
 |A|B|C|D|E|F|G|<span style="color:green">**H**</span>|I|J|K|L|M|N|
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |-|O|O|P|P|-|Q|Q|-|-|R|R|-|-|
+
+|A|B|C|D|E|F|G|<span style="color:green">**H**</span>|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|O|O|P|P|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|-|-|-|R|R|-|-|
 
 **I:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
 
@@ -323,11 +337,19 @@ N:
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |-|O|O|P|P|-|Q|Q|-|-|R|R|-|-|
 
+|A|B|C|D|E|F|G|H|I|J|<span style="color:green">**K**</span>|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|O|O|P|P|-|Q|Q|-|-|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|-|
+
 **L:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
 
 |A|B|C|D|E|F|G|H|I|J|K|<span style="color:green">**L**</span>|M|N|
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |-|O|O|P|P|-|Q|Q|-|-|R|R|-|-|
+
+|A|B|C|D|E|F|G|H|I|J|K|<span style="color:green">**L**</span>|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|O|O|P|P|-|Q|Q|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|-|-|-|
 
 **M:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
 
@@ -340,6 +362,8 @@ N:
 |A|B|C|D|E|F|G|H|I|J|K|L|M|<span style="color:green">**N**</span>|
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |-|O|O|P|P|-|Q|Q|-|-|R|R|-|-|
+
+---
 
 ### Beispiel 3 (parkplatz2.txt)
 
@@ -355,9 +379,178 @@ S 12
 
 **_Generierter Parkplatz des Programmes:_**
 
+|A|B|C|D|E|F|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
 **_Generierte Lösung des Programmes:_**
 
+A:   
+B:   
+C: O 1 rechts  
+D: O 1 links  
+E:   
+F: O 1 links, P 2 links  
+G: P 1 links  
+H: R 1 rechts, Q 1 rechts  
+I: P 1 links, Q 1 links  
+J: R 1 rechts  
+K: P 1 links, Q 1 links, R 1 links  
+L:   
+M: P 1 links, Q 1 links, R 1 links, S 2 links  
+N: S 1 links  
+
 **_Analyse der Lösung:_**
+
+**A:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+|<span style="color:green">**A**</span>|B|C|D|E|F|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+**B:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+|A|<span style="color:green">**B**</span>|C|D|E|F|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+**C:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|<span style="color:green">**C**</span>|D|E|F|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|<span style="color:green">**C**</span>|D|E|F|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|-|<span style="color:red">**O**</span>|<span style="color:red">**O**</span>|P|P|Q|Q|R|R|-|S|S|
+
+**D:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|<span style="color:green">**C**</span>|D|E|F|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|<span style="color:green">**D**</span>|E|F|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|<span style="color:red">**O**</span>|<span style="color:red">**O**</span>|-|-|P|P|Q|Q|R|R|-|S|S|
+
+**E:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**F:** Es müssen zwei weitere Fahrzeuge bewegt werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|<span style="color:green">**F**</span>|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|<span style="color:green">**F**</span>|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|<span style="color:red">**O**</span>|<span style="color:red">**O**</span>|-|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|<span style="color:green">**F**</span>|G|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|O|O|<span style="color:red">**P**</span>|<span style="color:red">**P**</span>|-|-|Q|Q|R|R|-|S|S|
+
+**G:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|F|<span style="color:green">**G**</span>|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|<span style="color:green">**G**</span>|H|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|<span style="color:red">**P**</span>|<span style="color:red">**P**</span>|-|Q|Q|R|R|-|S|S|
+
+**H:** Es müssen zwei weitere Fahrzeuge verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|F|G|<span style="color:green">**H**</span>|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|<span style="color:green">**H**</span>|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|S|S|
+
+|A|B|C|D|E|F|G|<span style="color:green">**H**</span>|I|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|-|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|R|R|S|S|
+
+**I:** Es müssen zwei weitere Fahrzeuge verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|F|G|H|<span style="color:green">**I**</span>|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|<span style="color:green">**I**</span>|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|<span style="color:red">**P**</span>|<span style="color:red">**P**</span>|-|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|<span style="color:green">**I**</span>|J|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|P|P|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|-|R|R|-|S|S|
+
+**J:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|F|G|H|I|<span style="color:green">**J**</span>|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|I|<span style="color:green">**J**</span>|K|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|S|S|
+
+**K:** Es müssen drei weitere Fahrzeuge verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|F|G|H|I|J|<span style="color:green">**K**</span>|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|I|J|<span style="color:green">**K**</span>|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|<span style="color:red">**P**</span>|<span style="color:red">**P**</span>|-|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|I|J|<span style="color:green">**K**</span>|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|P|P|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|-|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|I|J|<span style="color:green">**K**</span>|L|M|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|P|P|Q|Q|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|-|-|S|S|
+
+**L:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**M:** Es müssen vier weitere Fahrzeuge verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|F|G|H|I|J|K|L|<span style="color:green">**M**</span>|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|I|J|K|L|<span style="color:green">**M**</span>|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|<span style="color:red">**P**</span>|<span style="color:red">**P**</span>|-|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|I|J|K|L|<span style="color:green">**M**</span>|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|P|P|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|-|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|I|J|K|L|<span style="color:green">**M**</span>|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|P|P|Q|Q|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|-|-|S|S|
+
+|A|B|C|D|E|F|G|H|I|J|K|L|<span style="color:green">**M**</span>|N|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|P|P|Q|Q|R|R|<span style="color:red">**S**</span>|<span style="color:red">**S**</span>|-|-|
+
+**N:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|F|G|H|I|J|K|L|M|<span style="color:green">**N**</span>|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|-|S|S|
+
+|A|B|C|D|E|F|G|H|I|J|K|L|M|<span style="color:green">**N**</span>|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|O|O|-|P|P|Q|Q|R|R|<span style="color:red">**S**</span>|<span style="color:red">**S**</span>|-|
+
+---
 
 ### Beispiel 4 (parkplatz3.txt)
 
@@ -377,6 +570,8 @@ S 12
 
 **_Analyse der Lösung:_**
 
+---
+
 ### Beispiel 5 (parkplatz4.txt)
 
 **_Eingabe:_**
@@ -394,6 +589,8 @@ U 13
 **_Generierte Lösung des Programmes:_**
 
 **_Analyse der Lösung:_**
+
+---
 
 ### Beispiel 6 (parkplatz5.txt)
 
