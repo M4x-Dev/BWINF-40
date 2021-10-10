@@ -867,4 +867,50 @@ S 12
 
 **_Generierte Lösung des Programmes:_**
 
+A:   
+B:   
+C: P 2 links  
+D: P 1 links  
+E: Q 1 rechts  
+F: Q 2 rechts  
+G:   
+H:   
+I: R 1 rechts  
+J: R 1 links  
+K:   
+L:   
+M: S 1 rechts  
+N: S 1 links  
+O:   
+
 **_Analyse der Lösung:_**
+
+**A:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**B:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**C:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+**D:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+**E:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+**F:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+**G:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**H:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**I:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+**J:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+**K:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**L:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**M:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+**N:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+**O:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
