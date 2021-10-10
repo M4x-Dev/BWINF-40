@@ -112,7 +112,7 @@ public class ParkingArea {
         //Das Fahrzeug wird von einem horizontalen Fahrzeug blockiert, welches zuerst verschoben werden muss
         if(!parkingSpots[1][carIndex].equalsIgnoreCase(SPOT_EMPTY)) {
             String blockingCar = parkingSpots[1][carIndex];
-            boolean overlappingLeft = carIndex > 1 && parkingSpots[1][carIndex - 1].equalsIgnoreCase(blockingCar); //Ragt das Fahrzeug nach links oder rechts über das ausparkende hinaus?
+            boolean overlappingLeft = carIndex >= 1 && parkingSpots[1][carIndex - 1].equalsIgnoreCase(blockingCar); //Ragt das Fahrzeug nach links oder rechts über das ausparkende hinaus?
 
             chainBuilder.append(returnSmarterMove(
                     moveHorizontalCar(blockingCar, overlappingLeft ? -1 : 1, ""),

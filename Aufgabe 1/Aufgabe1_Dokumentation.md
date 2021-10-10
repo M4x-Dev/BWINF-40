@@ -79,7 +79,7 @@ public String leaveSpot(String car) {
         String blockingCar = parkingSpots[1][carIndex];
 
         //Ragt das horizontale Fahrzeug nach links oder rechts über das vertikale Fahrzeug hinaus?
-        boolean overlappingLeft = carIndex > 1 && parkingSpots[1][carIndex - 1].equalsIgnoreCase(blockingCar);
+        boolean overlappingLeft = carIndex >= 1 && parkingSpots[1][carIndex - 1].equalsIgnoreCase(blockingCar);
 
         //Bestimmen der Lösungsschritte, um das blockierende Fahrzeug zu verschieben
         chainBuilder.append(
@@ -713,7 +713,144 @@ U 13
 
 **_Generierte Lösung des Programmes:_**
 
+A: R 1 rechts, Q 1 rechts  
+B: R 2 rechts, Q 2 rechts  
+C: R 1 rechts  
+D: R 2 rechts  
+E:   
+F:   
+G: S 1 rechts  
+H: S 1 links  
+I:   
+J:   
+K: T 1 rechts  
+L: T 1 links  
+M:   
+N: U 1 rechts  
+O: U 1 links  
+P:   
+
 **_Analyse der Lösung:_**
+
+**A:** Es müssen zwei weitere Fahrzeuge verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|<span style="color:green">**A**</span>|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|<span style="color:green">**A**</span>|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|-|S|S|-|-|T|T|-|U|U|-|
+
+|<span style="color:green">**A**</span>|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|R|R|-|S|S|-|-|T|T|-|U|U|-|
+
+**B:** Es müssen zwei weitere Fahrzeuge verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|A|<span style="color:green">**B**</span>|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|A|<span style="color:green">**B**</span>|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|-|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|S|S|-|-|T|T|-|U|U|-|
+
+|A|<span style="color:green">**B**</span>|C|D|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|R|R|S|S|-|-|T|T|-|U|U|-|
+
+**C:** Es muss ein weiteres Fahrzeug verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|A|B|<span style="color:green">**C**</span>|D|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|A|B|<span style="color:green">**C**</span>|D|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|-|S|S|-|-|T|T|-|U|U|-|
+
+**D:** Es muss ein weiteres Fahrzeug verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|A|B|C|<span style="color:green">**D**</span>|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|A|B|C|<span style="color:green">**D**</span>|E|F|G|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|-|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|S|S|-|-|T|T|-|U|U|-|
+
+**E:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**F:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**G:** Es muss ein weiteres Fahrzeug verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|A|B|C|D|E|F|<span style="color:green">**G**</span>|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|A|B|C|D|E|F|<span style="color:green">**G**</span>|H|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|-|<span style="color:red">**S**</span>|<span style="color:red">**S**</span>|-|T|T|-|U|U|-|
+
+**H:** Es muss ein weiteres Fahrzeug verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|A|B|C|D|E|F|G|<span style="color:green">**H**</span>|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|A|B|C|D|E|F|G|<span style="color:green">**H**</span>|I|J|K|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|<span style="color:red">**S**</span>|<span style="color:red">**S**</span>|-|-|-|T|T|-|U|U|-|
+
+**I:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**J:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**K:** Es muss ein weiteres Fahrzeug verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|A|B|C|D|E|F|G|H|I|J|<span style="color:green">**K**</span>|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|A|B|C|D|E|F|G|H|I|J|<span style="color:green">**K**</span>|L|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|-|<span style="color:red">**T**</span>|<span style="color:red">**T**</span>|U|U|-|
+
+**L:** Es muss ein weiteres Fahrzeug verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|A|B|C|D|E|F|G|H|I|J|K|<span style="color:green">**L**</span>|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|A|B|C|D|E|F|G|H|I|J|K|<span style="color:green">**L**</span>|M|N|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|<span style="color:red">**T**</span>|<span style="color:red">**T**</span>|-|-|U|U|-|
+
+**M:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
+
+**N:** Es muss ein weiteres Fahrzeug verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|A|B|C|D|E|F|G|H|I|J|K|L|M|<span style="color:green">**N**</span>|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|A|B|C|D|E|F|G|H|I|J|K|L|M|<span style="color:green">**N**</span>|O|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|-|<span style="color:red">**U**</span>|<span style="color:red">**U**</span>|
+
+**O:** Es muss ein weiteres Fahrzeug verschoben werden, um dieses Fahrzeug zu bewegen.
+
+|A|B|C|D|E|F|G|H|I|J|K|L|M|N|<span style="color:green">**O**</span>|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|-|U|U|-|
+
+|A|B|C|D|E|F|G|H|I|J|K|L|M|N|<span style="color:green">**O**</span>|P|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|Q|Q|R|R|-|-|S|S|-|-|T|T|<span style="color:red">**U**</span>|<span style="color:red">**U**</span>|-|-|
+
+**P:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
 
 ---
 

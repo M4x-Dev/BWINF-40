@@ -1,5 +1,5 @@
 A: R 1 rechts, Q 1 rechts
-B: R 1 rechts, Q 1 rechts
+B: R 2 rechts, Q 2 rechts
 C: R 1 rechts
 D: R 2 rechts
 E: 
