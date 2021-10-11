@@ -891,11 +891,43 @@ O:
 
 **C:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
 
+|A|B|<span style="color:green">**C**</span>|D|E|F|G|H|I|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|-|S|S|-|
+
+|A|B|<span style="color:green">**C**</span>|D|E|F|G|H|I|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|<span style="color:red">**P**</span>|<spans style="color:red">**P**</span>|-|-|Q|Q|-|-|R|R|-|-|S|S|-|
+
 **D:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|<span style="color:green">**D**</span>|E|F|G|H|I|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|-|S|S|-|
+
+|A|B|C|<span style="color:green">**D**</span>|E|F|G|H|I|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|<span style="color:red">**P**</span>|<span style="color:red">**P**</span>|-|Q|Q|-|-|R|R|-|-|S|S|-|
 
 **E:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
 
+|A|B|C|D|<span style="color:green">**E**</span>|F|G|H|I|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|-|S|S|-|
+
+|A|B|C|D|<span style="color:green">**E**</span>|F|G|H|I|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|-|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|-|R|R|-|-|S|S|-|
+
 **F:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|<span style="color:green">**F**</span>|G|H|I|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|-|S|S|-|
+
+|A|B|C|D|E|<span style="color:green">**F**</span>|G|H|I|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|-|-|<span style="color:red">**Q**</span>|<span style="color:red">**Q**</span>|R|R|-|-|S|S|-|
 
 **G:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
 
@@ -903,7 +935,23 @@ O:
 
 **I:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
 
+|A|B|C|D|E|F|G|H|<span style="color:green">**I**</span>|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|-|S|S|-|
+
+|A|B|C|D|E|F|G|H|<span style="color:green">**I**</span>|J|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|-|S|S|-|
+
 **J:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|F|G|H|I|<span style="color:green">**J**</span>|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|-|S|S|-|
+
+|A|B|C|D|E|F|G|H|I|<span style="color:green">**J**</span>|K|L|M|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|<span style="color:red">**R**</span>|<span style="color:red">**R**</span>|-|-|-|S|S|-|-|
 
 **K:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
 
@@ -911,6 +959,22 @@ O:
 
 **M:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
 
+|A|B|C|D|E|F|G|H|I|J|K|L|<span style="color:green">**M**</span>|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|-|S|S|-|
+
+|A|B|C|D|E|F|G|H|I|J|K|L|<span style="color:green">**M**</span>|N|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|-|-|<span style="color:red">**S**</span>|<span style="color:red">**S**</span>|
+
 **N:** Es muss ein weiteres Fahrzeug verschoben werden, damit dieses Fahrzeug bewegt werden kann.
+
+|A|B|C|D|E|F|G|H|I|J|K|L|M|<span style="color:green">**N**</span>|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|-|S|S|-|
+
+|A|B|C|D|E|F|G|H|I|J|K|L|M|<span style="color:green">**N**</span>|O|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|P|P|Q|Q|-|-|R|R|-|<span style="color:red">**S**</span>|<span style="color:red">**S**</span>|-|-|
 
 **O:** Dieses Fahrzeug kann ohne Weiteres bewegt werden.
