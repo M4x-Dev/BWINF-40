@@ -1,45 +1,36 @@
 package models;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class Route {
 
-    public int totalHotels;
-    public long totalTripMinutes;
+    public ArrayList<Hotel> hotels;
 
-    public ArrayList<Hotel> hotels = new ArrayList<>();
+    public Route() {
+        this.hotels = new ArrayList<>();
+    }
 
-    public Route(String filePath) {
-        try {
-            //Benötigte Instanzen zum Lesen der Datei
-            StringBuilder contentBuilder = new StringBuilder();
-            FileInputStream fileStream = new FileInputStream(filePath);
-            BufferedReader streamReader = new BufferedReader(new InputStreamReader(fileStream));
+    public Route(Route route) {
+        this.hotels = new ArrayList<>(route.hotels);
+    }
 
-            String line;
-            while((line = streamReader.readLine()) != null) contentBuilder.append(line).append("\n");
+    public Route appendHotel(Hotel hotel) {
+        hotels.add(hotel);
+        return this;
+    }
 
-            String[] contentLines = contentBuilder.toString().split("\n");
+    public float getLowestHotelRating() {
+        float lowest = 5.0f;
+        for(Hotel hotel : hotels)
+            if(hotel.averageRating < lowest)
+                lowest = hotel.averageRating;
+        return lowest;
+    }
 
-            //Interpretieren der Daten
-            totalHotels = Integer.parseInt(contentLines[0]);
-            totalTripMinutes = Long.parseLong(contentLines[1]);
-
-            for(int i = 0; i < totalHotels; i++) {
-                String hotelLine = contentLines[i + 2];
-                hotels.add(new Hotel(hotelLine));
-            }
-
-            //Schließen der benötigten Ressourcen zum Lesen der Datei
-            streamReader.close();
-            fileStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Something went wrong :/ - " + e.getMessage());
-        }
+    public String asString() {
+        StringBuilder instanceBuilder = new StringBuilder();
+        for(Hotel hotel : hotels) instanceBuilder.append(hotel.averageRating).append(" --> ");
+        return instanceBuilder.substring(0, instanceBuilder.length() - " --> ".length());
     }
 
 }
