@@ -27,9 +27,20 @@ public class Route {
         return lowest;
     }
 
-    public String asString() {
+    public float getAverageHotelRating() {
+        float sum = 0f;
+        for(Hotel hotel : hotels) sum += hotel.averageRating;
+        return sum / hotels.size();
+    }
+
+    public String print() {
         StringBuilder instanceBuilder = new StringBuilder();
-        for(Hotel hotel : hotels) instanceBuilder.append(hotel.averageRating).append(" --> ");
+        for(Hotel hotel : hotels) instanceBuilder.append(hotel.distanceFromStart).append("/").append(hotel.averageRating).append(" --> ");
+        return instanceBuilder.substring(0, instanceBuilder.length() - " --> ".length());
+    }
+    public String printPretty() {
+        StringBuilder instanceBuilder = new StringBuilder();
+        for(Hotel hotel : hotels) instanceBuilder.append(hotel.distanceFromStart).append("/").append(hotel.averageRating).append(" --> ");
         return instanceBuilder.substring(0, instanceBuilder.length() - " --> ".length());
     }
 
