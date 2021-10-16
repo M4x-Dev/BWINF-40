@@ -6,7 +6,7 @@ import models.RoutePlan;
  */
 public class Main {
 
-    public static String INPUT_FILE = "src/main/resources/hotels5.txt";
+    public static String INPUT_FILE = "src/main/resources/hotels1.txt";
     public static String OUTPUT_FILE = "output.txt";
 
     /**

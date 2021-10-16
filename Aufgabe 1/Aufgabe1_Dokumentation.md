@@ -12,7 +12,7 @@ Das Hauptziel des Algorithmuses ist, dass ein gegebenes Fahrzeug den Schiebepark
 
 Das Programm zur Lösung dieses Problemes befindet sich in der Datei "Aufgabe_1.jar". Das Programm kann mit der Befehlsszeile (CMD auf Windows, bzw. Terminal auf MacOS) ausgeführt werden.  
 Dafür navigiert man zuerst in den Ordner der JAR-Datei (hier Aufgabe 1). Anschließend führt man den Befehl "java -jar Aufgabe_1.jar \<Eingabedatei> \<Ausgabedatei>" aus.  
-Die Eingabedateien befindet sich in dem Ordner "src/main/resources/" (Beispiel: "src/main/resources/parkplatz0.txt").  
+Die Eingabedateien befinden sich in dem Ordner "src/main/resources/" (Beispiel: "src/main/resources/parkplatz0.txt").  
 Die Ausgabedatei ist optional. Wenn keine Ausgabedatei angegeben ist, dann wird das Ergebnis als "output.txt" in dem Ordner der JAR-Datei gespeichert.
 
 ## Implementierung
