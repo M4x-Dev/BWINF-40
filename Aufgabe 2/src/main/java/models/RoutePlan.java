@@ -21,6 +21,12 @@ public class RoutePlan {
 
     public ArrayList<Hotel> hotels = new ArrayList<>();
 
+    /**
+     * Konstruktor der RoutePlan-Klasse, welcher die Instanz aus einer Datei erstellt.
+     * Das Auslesen der Dateien erfolgt wie in den Beispielen beschrieben.
+     *
+     * @param filePath Dateipfad der Datei, welche die Route beeinhaltet.
+     */
     public RoutePlan(String filePath) {
         try {
             //Benötigte Instanzen zum Lesen der Datei
