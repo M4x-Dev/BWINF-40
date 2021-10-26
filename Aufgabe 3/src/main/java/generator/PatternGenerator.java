@@ -12,6 +12,9 @@ import java.util.Arrays;
  */
 public abstract class PatternGenerator {
 
+    public static final String CHARACTER_EMPTY = " ";
+    public static final int MAX_ATTEMPTS_RECURSIVE = 10;
+
     public int height; //Höhe des Wortfeldes
     public int width; //Breite des Wortfeldes
     public int wordCount; //Anzahl der Wörter, welche eingebaut werden sollen
@@ -50,14 +53,13 @@ public abstract class PatternGenerator {
         }
     }
 
-    abstract String generatePattern();
+    public abstract String generatePattern();
 
     protected static String formatMatrix(String[][] matrix) {
         StringBuilder matrixBuilder = new StringBuilder();
-        for(int y = 0; y < matrix.length; y++) {
-            for(int x = 0; x < matrix[y].length; x++) {
-                matrix[y][x] = "X";
-                matrixBuilder.append(matrix[y][x]).append(" ");
+        for (String[] strings : matrix) {
+            for (String string : strings) {
+                matrixBuilder.append(string).append(" ");
             }
             matrixBuilder.append("\n");
         }
