@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Diese abstrakte Klasse bildet die Grundlage für den Generator der Wortfelder.
@@ -13,7 +14,10 @@ import java.util.Arrays;
 public abstract class PatternGenerator {
 
     public static final String CHARACTER_EMPTY = " ";
-    public static final int MAX_ATTEMPTS_RECURSIVE = 10;
+    public static final int MAX_ATTEMPTS_RECURSIVE = 3;
+
+    public String[][] pattern; //Wortfeld
+    public HashMap<String, WordPosition> placedWords = new HashMap<>();
 
     public int height; //Höhe des Wortfeldes
     public int width; //Breite des Wortfeldes
@@ -61,9 +65,11 @@ public abstract class PatternGenerator {
             for (String string : strings) {
                 matrixBuilder.append(string).append(" ");
             }
-            matrixBuilder.append("\n");
+            matrixBuilder.append("\n").append(HardPatternGenerator.ANSI_RESET);
         }
         return matrixBuilder.toString();
     }
+
+    protected abstract void calculateEmptySpaces(String empty);
 
 }

@@ -1,4 +1,3 @@
-import generator.EasyPatternGenerator;
 import generator.HardPatternGenerator;
 
 /**
@@ -6,7 +5,7 @@ import generator.HardPatternGenerator;
  */
 public class Main {
 
-    public static String INPUT_FILE = "src/main/resources/worte5.txt";
+    public static String INPUT_FILE = "src/main/resources/worte4.txt";
     public static String OUTPUT_FILE = "output.txt";
 
     /**
@@ -31,7 +30,7 @@ public class Main {
         System.out.println("Größe des Wortfeldes: " + easyGenerator.width + " x " + easyGenerator.height);
         System.out.println("Anzahl der Wörter: " + easyGenerator.wordCount);
         System.out.println("Wortliste:");
-        easyGenerator.words.forEach(word -> System.out.println(word));
+        easyGenerator.words.forEach(System.out::println);
 
         System.out.println();
         System.out.println(easyGenerator.generatePattern());
