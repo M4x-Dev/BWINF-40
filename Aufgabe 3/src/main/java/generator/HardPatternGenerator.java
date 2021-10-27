@@ -167,6 +167,7 @@ public class HardPatternGenerator extends MediumPatternGenerator {
         positionedWords.sort(Comparator.comparingInt(wordA -> wordA.getKey().length()));
         Collections.reverse(positionedWords); //Höchste Chancen bei dem längsten Wort
 
+        boolean matchFound = false;
         for(Map.Entry<String, WordPosition> placedWord : positionedWords) {
             //Überprüfen der Platzierungsmögichkeiten
             boolean lettersInCommon = false;
@@ -205,15 +206,21 @@ public class HardPatternGenerator extends MediumPatternGenerator {
             if(newOrientation.equals(WordPosition.Orientation.DiagonalDown) && (possiblePositionX + word.length() > pattern[possiblePositionY].length || possiblePositionY + word.length() > pattern.length)) continue;
 
             //Platzieren des kreuzenden Wortes
-            return switch (newOrientation) {
+
+            boolean result = switch (newOrientation) {
                 case Horizontal -> placeWordHorizontally(word, possiblePositionX, possiblePositionY, 1);
                 case Vertical -> placeWordVertically(word, possiblePositionX, possiblePositionY, 1);
                 case DiagonalUp -> placeWordDiagonally(word, possiblePositionX, possiblePositionY, 1, 1);
                 case DiagonalDown -> placeWordDiagonally(word, possiblePositionX, possiblePositionY, -1, 1);
             };
+
+            if(result) {
+                matchFound = true;
+                break;
+            }
         }
 
-        return false;
+        return matchFound;
     }
 
     private void fillEmptySpaces(String empty, String replacement) {
