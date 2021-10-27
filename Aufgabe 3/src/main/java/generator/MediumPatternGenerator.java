@@ -8,11 +8,13 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
 
     @Override
     public String generatePattern() {
-        return null;
+        super.generatePattern();
+
+        return formatMatrix(pattern);
     }
 
     @Override
-    protected void calculateEmptySpaces(String empty) {
+    protected void fillEmptySpaces() {
 
     }
 

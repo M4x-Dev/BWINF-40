@@ -43,9 +43,8 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
                     case Vertical:
                         return positionX + crossingIndexA;
                     case Horizontal:
-                        return positionX + (crossingIndexA - crossingIndexB);
                     case DiagonalDown:
-                        return positionX - (crossingIndexA + crossingIndexB);
+                        return positionX + (crossingIndexA - crossingIndexB);
                 }
                 break;
             case DiagonalDown:
@@ -81,7 +80,7 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
                     case DiagonalUp:
                         return positionY + (crossingIndexA + crossingIndexB);
                     case DiagonalDown:
-                        return positionY - (crossingIndexA + crossingIndexB);
+                        return positionY + (crossingIndexA - crossingIndexB);
                 }
                 break;
             case DiagonalUp:
@@ -98,7 +97,7 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
                     case Vertical:
                         return positionY + (crossingIndexA - crossingIndexB);
                     case Horizontal:
-                        return positionY - crossingIndexB;
+                        return positionY + crossingIndexB;
                     case DiagonalUp:
                         return positionY + (crossingIndexA + crossingIndexB);
                 }

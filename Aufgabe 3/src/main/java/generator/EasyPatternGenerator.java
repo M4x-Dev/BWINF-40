@@ -8,13 +8,13 @@ public class EasyPatternGenerator extends PatternGenerator {
 
     @Override
     public String generatePattern() {
-        String[][] pattern = new String[height][width];
-        System.out.println(PatternGenerator.formatMatrix(pattern));
+        super.generatePattern();
+
         return "";
     }
 
     @Override
-    protected void calculateEmptySpaces(String empty) {
+    protected void fillEmptySpaces() {
 
     }
 

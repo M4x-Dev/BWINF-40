@@ -3,9 +3,8 @@ package generator;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Diese abstrakte Klasse bildet die Grundlage für den Generator der Wortfelder.
@@ -13,17 +12,35 @@ import java.util.HashMap;
  */
 public abstract class PatternGenerator {
 
+    public enum DiagonalDirection {
+        Ascending,
+        Descending,
+        Random
+    }
+
     public static final String CHARACTER_EMPTY = " ";
-    public static final int MAX_ATTEMPTS_RECURSIVE = 3;
 
     public String[][] pattern; //Wortfeld
-    public HashMap<String, WordPosition> placedWords = new HashMap<>();
+    public HashMap<String, WordPosition> placedWords = new HashMap<>(); //Bereits platzierte Wörter in der Wortliste
+    public HashMap<Integer, Integer> closedPositions = new HashMap<>(); //Bereits belegte Positionen in dem Wortfeld, welche nicht mehr betrachtet werden sollen.
 
     public int height; //Höhe des Wortfeldes
     public int width; //Breite des Wortfeldes
     public int wordCount; //Anzahl der Wörter, welche eingebaut werden sollen
     public final ArrayList<String> words = new ArrayList<>(); //Wortliste, welche verwendet werden soll
+    public final Deque<String> wordQueue = new ConcurrentLinkedDeque<>(); //Wortliste, welche noch zur Verfügung steht
 
+    public final Random instanceRandom = new Random();
+    public final PositionGenerator xGenerator = new PositionGenerator(instanceRandom); //Benutzerdefinierter Zufallsgenerator für alle X-Koordinaten
+    public final PositionGenerator yGenerator = new PositionGenerator(instanceRandom); //Benutzerdefinierter Zufallsgenerator für alle Y-Koorindaten
+
+    /**
+     * Konstruktor der Generator-Klasse.
+     * Dieser Konstruktor liest die Eingabedatei und somit die Wortliste und die Feldgröße ein.
+     * Die eingelesenen Daten werden in den Variablen der Klasse gespeichert.
+     *
+     * @param filePath Dateipfad der Eingabedatei (Wortliste).
+     */
     public PatternGenerator(String filePath) {
         try {
             //Benötigte Instanzen zum Lesen der Datei
@@ -49,6 +66,12 @@ public abstract class PatternGenerator {
             //Einlesen der Wortliste
             words.addAll(Arrays.asList(contentLines).subList(2, wordCount + 2));
 
+            //Sortieren der Wortliste
+            Collections.sort(words);
+            Collections.reverse(words);
+
+            wordQueue.addAll(words);
+
             //Schließen der benötigten Ressourcen zum Lesen der Datei
             streamReader.close();
             fileStream.close();
@@ -57,19 +80,75 @@ public abstract class PatternGenerator {
         }
     }
 
-    public abstract String generatePattern();
+    /**
+     * Hauptfunktion der Generator-Klasse, welche das Wortfeld generiert.
+     * Diese Funktion generiert ein Wortfeld eines bestimmten Schwierigkeitsgrades mithilfe der angegebenen Parameter.
+     *
+     * Die Basisimplementierung dieser Funktion initialisiert die benötigten Variablen des Generators.
+     *
+     * @return Gibt das generierte Wortfeld zurück.
+     */
+    public String generatePattern() {
+        pattern = new String[height][width];
 
+        placedWords.clear();
+        closedPositions.clear();
+
+        prepareEmptySpaces();
+
+        return "";
+    }
+
+    /**
+     * Methode, welche alle Felder des Wortfeldes mit dem Blankzeichen auffüllt.
+     * Diese Methode wird verwendet, damit kein Feld des Wortfeldes den Wert "null" aufweist.
+     */
+    protected void prepareEmptySpaces() {
+        for(int y = 0; y < pattern.length; y++) {
+            for(int x = 0; x < pattern[y].length; x++) {
+                if(pattern[y][x] == null)
+                    pattern[y][x] = PatternGenerator.CHARACTER_EMPTY;
+            }
+        }
+    }
+
+    /**
+     * Funktion, welche das Wortfeld, welches als zweidimensionales Array vorliegt, in einen String umwandeln.
+     * Dafür werden all Zeilen und Spalten aneinandergehängt, sodass das Feld in der Console ausgegebenen werden kann.
+     *
+     * @param matrix Matrix, welche konvertiert und ausgegeben werden soll.
+     *
+     * @return Gibt die formatierte Matrix zurück.
+     */
     protected static String formatMatrix(String[][] matrix) {
         StringBuilder matrixBuilder = new StringBuilder();
         for (String[] strings : matrix) {
             for (String string : strings) {
                 matrixBuilder.append(string).append(" ");
             }
-            matrixBuilder.append("\n").append(HardPatternGenerator.ANSI_RESET);
+            matrixBuilder.append("\n");
         }
         return matrixBuilder.toString();
     }
 
-    protected abstract void calculateEmptySpaces(String empty);
+    /**
+     * Abstrakte Methode, welche die übrigen Felder des Wortfeldes auffüllen soll.
+     */
+    protected abstract void fillEmptySpaces();
+
+    /**
+     * Methode, welche die Koorindaten eines neuen Wortes in zwei HashMaps hinzufügt.
+     * Die eine HashMap beeinhaltet alle Positionen, welche bereits belegt sind.
+     * Damit wird der Algorithmus insofern optimiert, sodass belegte Felder, wenn genügend Platz vorhanden ist, nicht mehr betrachtet werden.
+     * Die Koordinaten des Wortes werden dazu in eine Ausnahmeliste des Zufallsgenerators hinzugefügt, sodass diese Zahlen nicht mehr generiert werden.
+     *
+     * @param x X-Koorindate des Wortes, welches dem Feld hinzugefügt wurde.
+     * @param y Y-Koordinate des Wrotes, welches dem Feld hinzugefügt wurde.
+     */
+    public void addClosedCoordinate(int x, int y) {
+        closedPositions.put(x, y);
+        xGenerator.addExclusion(x);
+        yGenerator.addExclusion(y);
+    }
 
 }
