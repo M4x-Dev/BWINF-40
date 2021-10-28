@@ -19,20 +19,23 @@ public abstract class PatternGenerator {
     }
 
     public static final String CHARACTER_EMPTY = " ";
+    public static final int COORDINATE_GENERATE = -1;
 
-    public String[][] pattern; //Wortfeld
-    public HashMap<String, WordPosition> placedWords = new HashMap<>(); //Bereits platzierte Wörter in der Wortliste
-    public HashMap<Integer, Integer> closedPositions = new HashMap<>(); //Bereits belegte Positionen in dem Wortfeld, welche nicht mehr betrachtet werden sollen.
+    protected String[][] pattern; //Wortfeld
+    protected HashMap<String, WordPosition> placedWords = new HashMap<>(); //Bereits platzierte Wörter in der Wortliste
+    protected HashMap<Integer, Integer> closedPositions = new HashMap<>(); //Bereits belegte Positionen in dem Wortfeld, welche nicht mehr betrachtet werden sollen.
 
     public int height; //Höhe des Wortfeldes
     public int width; //Breite des Wortfeldes
     public int wordCount; //Anzahl der Wörter, welche eingebaut werden sollen
-    public final ArrayList<String> words = new ArrayList<>(); //Wortliste, welche verwendet werden soll
-    public final Deque<String> wordQueue = new ConcurrentLinkedDeque<>(); //Wortliste, welche noch zur Verfügung steht
+    protected boolean randomCrossingEnabled = false; //Dürfen sich Wörter zufällig überschneiden?
 
-    public final Random instanceRandom = new Random();
-    public final PositionGenerator xGenerator = new PositionGenerator(instanceRandom); //Benutzerdefinierter Zufallsgenerator für alle X-Koordinaten
-    public final PositionGenerator yGenerator = new PositionGenerator(instanceRandom); //Benutzerdefinierter Zufallsgenerator für alle Y-Koorindaten
+    public final ArrayList<String> words = new ArrayList<>(); //Wortliste, welche verwendet werden soll
+    protected final Deque<String> wordQueue = new ConcurrentLinkedDeque<>(); //Wortliste, welche noch zur Verfügung steht
+
+    protected final Random instanceRandom = new Random();
+    protected final PositionGenerator xGenerator = new PositionGenerator(instanceRandom); //Benutzerdefinierter Zufallsgenerator für alle X-Koordinaten
+    protected final PositionGenerator yGenerator = new PositionGenerator(instanceRandom); //Benutzerdefinierter Zufallsgenerator für alle Y-Koorindaten
 
     /**
      * Konstruktor der Generator-Klasse.
@@ -85,6 +88,9 @@ public abstract class PatternGenerator {
      * Diese Funktion generiert ein Wortfeld eines bestimmten Schwierigkeitsgrades mithilfe der angegebenen Parameter.
      *
      * Die Basisimplementierung dieser Funktion initialisiert die benötigten Variablen des Generators.
+     * Dazu versucht der Algorithmus alle Wörter der Liste abzuarbeiten und auf dem Feld zu platzieren.
+     * Diese geschieht mit einer Queue, welche die Wörter nach der Größe geordnet (größte zuerst) hinzufügt.
+     * Wenn ein Wort nicht hinzugefügt werden kann, wird es der Queue wieder hinzugefügt und später erneut abgearbeitet.
      *
      * @return Gibt das generierte Wortfeld zurück.
      */
@@ -96,7 +102,54 @@ public abstract class PatternGenerator {
 
         prepareEmptySpaces();
 
-        return "";
+        while(wordQueue.peek() != null) {
+            String word = wordQueue.getFirst();
+            if(!placeWord(word)) enqueueRemoval(word);
+            else wordQueue.removeFirst();
+        }
+
+        fillEmptySpaces();
+        return formatMatrix(pattern);
+    }
+
+    protected abstract boolean placeWord(String word);
+
+    /**
+     * Methode, welche ein Wort aus dem Wortfeld entfernt und dieses wieder in die Warteschlange hinzufügt.
+     * Dazu lädt die Methode die Position und die Ausrichtung des Wortes, welches entfernt werden soll, aus einer HashMap.
+     * Abhängig von der Ausrichtung und Position des Wortes werden alle Felder des Wortes wieder in das Blankzeichen umgewandelt.
+     *
+     * @param removeWord Wort, welches aus dem Feld entfernt werden soll.
+     */
+    protected void enqueueRemoval(String removeWord) {
+        //Entfernen des Wortes vom Board
+        if(placedWords.containsKey(removeWord)) {
+            WordPosition removePosition = placedWords.remove(removeWord);
+            closedPositions.remove(removePosition.positionX(), removePosition.positionY());
+
+            //Leeren der Stellen des Wortes
+            switch(removePosition.orientation()) {
+                case Horizontal:
+                    for(int i = 0; i < removeWord.length(); i++)
+                        pattern[removePosition.positionY()][removePosition.positionX() + i] = CHARACTER_EMPTY;
+                    break;
+                case Vertical:
+                    for(int i = 0; i < removeWord.length(); i++)
+                        pattern[removePosition.positionY() + i][removePosition.positionX()] = CHARACTER_EMPTY;
+                    break;
+                case DiagonalUp:
+                    for(int i = 0; i < removeWord.length(); i++)
+                        pattern[removePosition.positionY() - i][removePosition.positionX() + i] = CHARACTER_EMPTY;
+                    break;
+                case DiagonalDown:
+                    for(int i = 0; i < removeWord.length(); i++)
+                        pattern[removePosition.positionY() + i][removePosition.positionX() + i] = CHARACTER_EMPTY;
+                    break;
+            }
+
+            //Wort wird der Queue wieder hinzgefügt, damit es erneut platziert werden kann
+            wordQueue.addFirst(removeWord);
+        }
     }
 
     /**

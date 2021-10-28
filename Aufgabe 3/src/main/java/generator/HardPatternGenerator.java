@@ -5,8 +5,8 @@ import java.util.*;
 /**
  * Diese Klasse generiert Wortfelder mit dem höchsten Schwierigkeitsgrad.
  * Dabei ist dieser Generator von dem der mittleren Schwierigkeit abgeleitet und baut somit darauf auf.
- * <br>Merkmale für ein Wortfeld des höchsten Schwierigkeitsgrades (<b>SCHWER</b>)
- * <br>a. Wörter können horizontal, vertikal und diagonal (absteigen/aufsteigend) platziert werden
+ * <br>Merkmale für ein Wortfeld des höchsten Schwierigkeitsgrades (<b>SCHWER</b>):
+ * <br>a. Wörter können horizontal, vertikal und diagonal (absteigend/aufsteigend) platziert werden
  * <br>b. Wörter können sich unbegrenzt kreuzen
  * <br>c. Leerstellen werden mit Fragmenten der Wörter aus der Wortliste aufgefüllt
  */
@@ -24,64 +24,15 @@ public class HardPatternGenerator extends MediumPatternGenerator {
 
     /**
      * Hauptfunktion der Generator-Klasse, welche das Wortfeld generiert.
-     * Diese Funktion generiert ein Wortfeld des übergeordneten Schwierigkeitsgrades mithilfe der gegebenen Parameter.
+     * Diese Funktion generiert ein Wortfeld des Schwierigkeitsgrades "Schwer" mithilfe der angegebenen Parameter.
+     * Diese Funktion ruft die Super-Implementierung der Funktion auf.
      *
-     * Diese Funktion durchläuft eine Queue (Warteschlange) an Wörtern, welche dem Feld hinzugefügt werden sollen.
-     * Wenn ein Wort dem Feld nicht hinzugefügt werden kann, dann wird es der Warteschlange wieder hinzugefügt und zu einem späteren Zeitpunkt erneut abgearbeitet.
-     *
-     * Sobald die Queue abgearbeitet ist, werden all verbleibenden Felder mit Fragmenten der Wörter der Wortliste aufgefüllt.
-     *
-     * @return Gibt das fertige Wortfeld des Schwierigkeitsgrades <b>"SCHWER"</b> zurück.
+     * @return Gibt das generierte Wortfeld zurück.
      */
     @Override
     public String generatePattern() {
-        super.generatePattern();
-
-        while(wordQueue.peek() != null) {
-            String word = wordQueue.getFirst();
-            if(!placeWordRandomly(word)) enqueueRemoval(word);
-            else wordQueue.removeFirst();
-        }
-
-        this.fillEmptySpaces();
-        return formatMatrix(pattern);
-    }
-
-    /**
-     * Methode, welche ein Wort aus dem Wortfeld entfernt und dieses wieder in die Warteschlange hinzufügt.
-     * Dazu lädt die Methode die Position und die Ausrichtung des Wortes, welches entfernt werden soll, aus einer HashMap.
-     * Abhängig von der Ausrichtung und Position des Wortes werden alle Felder des Wortes wieder in das Blankzeichen umgewandelt.
-     *
-     * @param removeWord Wort, welches aus dem Feld entfernt werden soll.
-     */
-    private void enqueueRemoval(String removeWord) {
-        //Entfernen des Wortes vom Board
-        if(placedWords.containsKey(removeWord)) {
-            WordPosition removePosition = placedWords.remove(removeWord);
-
-            //Leeren der Stellen des Wortes
-            switch(removePosition.orientation()) {
-                case Horizontal:
-                    for(int i = 0; i < removeWord.length(); i++)
-                        pattern[removePosition.positionY()][removePosition.positionX() + i] = CHARACTER_EMPTY;
-                    break;
-                case Vertical:
-                    for(int i = 0; i < removeWord.length(); i++)
-                        pattern[removePosition.positionY() + i][removePosition.positionX()] = CHARACTER_EMPTY;
-                    break;
-                case DiagonalUp:
-                    for(int i = 0; i < removeWord.length(); i++)
-                        pattern[removePosition.positionY() - i][removePosition.positionX() + i] = CHARACTER_EMPTY;
-                    break;
-                case DiagonalDown:
-                    for(int i = 0; i < removeWord.length(); i++)
-                        pattern[removePosition.positionY() + i][removePosition.positionX() + i] = CHARACTER_EMPTY;
-                    break;
-            }
-
-            //Wort wird der Queue wieder hinzgefügt, damit es erneut platziert werden kann
-            wordQueue.addFirst(removeWord);
-        }
+        randomCrossingEnabled = true;
+        return super.generatePattern();
     }
 
     /**
@@ -90,34 +41,20 @@ public class HardPatternGenerator extends MediumPatternGenerator {
      *
      * <br><b>Möglichkeit 1: </b> Horizontale Platzierung auf dem Wortfeld
      * <br><b>Möglichkeit 2: </b> Vertikale Platzierung auf dem Wortfeld
-     * <br><b>Möglichkeit 3: </b> Diagonale Platzierung auf dem Wortfeld (aufsteigend oder absteigend)
+     * <br><b>Möglichkeit 3: </b> Diagonale Platzierung auf dem Wortfeld (aufsteigend oder absteigend); mit Überschneidung
      *
      * @param word Wort, welches auf dem Feld platziert werden soll.
      *
      * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
      */
-    private boolean placeWordRandomly(String word) {
-        int placement = instanceRandom.nextInt(3);
-
-        switch(placement) {
-            //Horizontale Positionierung des Wortes
-            case 0 -> {
-                if(!placeWordHorizontally(word, -1, -1, true))
-                    return false;
-            }
-            //Vertikale Positionierung des Wortes
-            case 1 -> {
-                if(!placeWordVertically(word, -1, -1, true))
-                    return false;
-            }
-            //Diagonale Positionierung des Wortes (aufsteigend/absteigend)
-            case 2 -> {
-                if(!placeWordDiagonally(word, -1, -1, DiagonalDirection.Random, true))
-                    return false;
-            }
-        }
-
-        return true;
+    @Override
+    protected boolean placeWord(String word) {
+        return switch(instanceRandom.nextInt(3)) {
+            case 0 -> placeWordHorizontally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, true);
+            case 1 -> placeWordVertically(word, COORDINATE_GENERATE, COORDINATE_GENERATE, true);
+            case 2 -> placeWordDiagonally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, DiagonalDirection.Random, true);
+            default -> false;
+        };
     }
 
     /**
@@ -131,27 +68,11 @@ public class HardPatternGenerator extends MediumPatternGenerator {
      *
      * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
      */
-    private boolean placeWordHorizontally(String word, int optionalX, int optionalY, boolean crossingAllowed) {
-        //Initialisieren der Koordinaten
-        int positionX = optionalX;
-        int positionY = optionalY;
-
-        //Berechnen der Koordinaten
-        if(positionY == -1) positionY = yGenerator.generate(pattern.length);
-        if(positionX == -1) positionX = pattern[positionY].length - word.length() != 0 ? xGenerator.generate(pattern[positionY].length - word.length()) : 0;
-
-        //Überprüfen der Position, in welcher das Wort platziert werden soll
-        for(int i = 0; i < word.length(); i++) {
-            if(!pattern[positionY][positionX + i].equals(CHARACTER_EMPTY) && !pattern[positionY][positionX + i].equals(String.valueOf(word.charAt(i)))) {
-                return crossingAllowed && placeWordCrossing(word);
-            }
-        }
-
-        //Platzieren des Wortes auf dem Board
-        for(int x = 0; x < word.length(); x++) pattern[positionY][positionX + x] = String.valueOf(word.charAt(x));
-        placedWords.put(word, new WordPosition(positionX, positionY, WordPosition.Orientation.Horizontal));
-        addClosedCoordinate(positionX, positionY);
-        return true;
+    @Override
+    protected boolean placeWordHorizontally(String word, int optionalX, int optionalY, boolean crossingAllowed) {
+        if(!super.placeWordHorizontally(word, optionalX, optionalY, crossingAllowed))
+            return crossingAllowed && placeWordCrossing(word);
+        else return true;
     }
 
     /**
@@ -165,27 +86,11 @@ public class HardPatternGenerator extends MediumPatternGenerator {
      *
      * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
      */
-    private boolean placeWordVertically(String word, int optionalX, int optionalY, boolean crossingAllowed) {
-        //Initialisieren der Koordindaten
-        int positionX = optionalX;
-        int positionY = optionalY;
-
-        //Berechnen der Koordinaten
-        if(positionY == -1) positionY = pattern.length - word.length() != 0 ? yGenerator.generate(pattern.length - word.length()) : 0;
-        if(positionX == -1) positionX = xGenerator.generate(pattern[positionY].length);
-
-        //Überprüfen der Position, in welcher das Wort platziert werden soll
-        for(int i = 0; i < word.length(); i++) {
-            if(!pattern[positionY + i][positionX].equals(CHARACTER_EMPTY) && !Objects.equals(pattern[positionY + i][positionX], String.valueOf(word.charAt(i)))) {
-                return crossingAllowed && placeWordCrossing(word);
-            }
-        }
-
-        //Platzieren des Wortes auf dem Board
-        for(int y = 0; y < word.length(); y++) pattern[positionY + y][positionX] = String.valueOf(word.charAt(y));
-        placedWords.put(word, new WordPosition(positionX, positionY, WordPosition.Orientation.Vertical));
-        addClosedCoordinate(positionX, positionY);
-        return true;
+    @Override
+    protected boolean placeWordVertically(String word, int optionalX, int optionalY, boolean crossingAllowed) {
+        if(!super.placeWordVertically(word, optionalX, optionalY, crossingAllowed))
+            return crossingAllowed && placeWordCrossing(word);
+        else return true;
     }
 
     /**
@@ -201,51 +106,25 @@ public class HardPatternGenerator extends MediumPatternGenerator {
      *
      * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
      */
-    private boolean placeWordDiagonally(String word, int optionalX, int optionalY, DiagonalDirection orientation, boolean crossingAllowed) {
-        //Initialisieren der Koordinaten und Ausrichtung
-        int positionX = optionalX;
-        int positionY = optionalY;
-        boolean movingUp = orientation != DiagonalDirection.Descending && (orientation == DiagonalDirection.Ascending || instanceRandom.nextBoolean());
-
-        //Berechnen der Koordinaten
-        if(movingUp) {
-            //Berechnen der Koordinaten für die Richtung: diagonal aufsteigend
-            if(positionY == -1) positionY = pattern.length - word.length() != 0 ? yGenerator.generate(pattern.length - word.length()) + word.length() - 1 : pattern.length - 1;
-            if(positionX == -1) positionX = pattern[positionY].length - word.length() != 0 ? xGenerator.generate(pattern[positionY].length - word.length()) : 0;
-
-            //Überprüfen der Position auf dem Wortfeld
-            for(int i = 0; i < word.length(); i++) {
-                if((positionX % 2 == 0 || positionY % 2 == 0) || (!pattern[positionY - i][positionX + i].equals(CHARACTER_EMPTY) && !pattern[positionY - i][positionX + i].equals(String.valueOf(word.charAt(i))))) {
-                    return crossingAllowed && placeWordCrossing(word);
-                }
-            }
-
-            //Platzieren des Wortes auf dem Wortfeld
-            for(int i = 0; i < word.length(); i++) pattern[positionY - i][positionX + i] = String.valueOf(word.charAt(i));
-            placedWords.put(word, new WordPosition(positionX, positionY, WordPosition.Orientation.DiagonalUp));
-        } else {
-            //Berechnen der Koordinaten für die Richtung: diagonal absteigend
-            if(positionY == -1) positionY = pattern.length - word.length() != 0 ? yGenerator.generate(pattern.length - word.length()) : 0;
-            if(positionX == -1) positionX = pattern[positionY].length - word.length() != 0 ? xGenerator.generate(pattern[positionY].length - word.length()) : 0;
-
-            //Überprüfen der Position auf dem Wortfeld
-            for(int i = 0; i < word.length(); i++) {
-                if((positionX % 2 == 0 || positionY % 2 == 0) || (!pattern[positionY + i][positionX + i].equals(CHARACTER_EMPTY) && !pattern[positionY + i][positionX + i].equals(String.valueOf(word.charAt(i))))) {
-                    return crossingAllowed && placeWordCrossing(word);
-                }
-            }
-
-            //Platzieren des Wortes auf dem Wortfeld
-            for(int i = 0; i < word.length(); i++) pattern[positionY + i][positionX + i] = String.valueOf(word.charAt(i));
-            placedWords.put(word, new WordPosition(positionX, positionY, WordPosition.Orientation.DiagonalDown));
-        }
-
-        //Hinzufügen der Koordinate zu den belegten Koordinaten
-        addClosedCoordinate(positionX, positionY);
-        return true;
+    protected boolean placeWordDiagonally(String word, int optionalX, int optionalY, DiagonalDirection orientation, boolean crossingAllowed) {
+        if(!super.placeWordDiagonally(word, optionalX, optionalY, orientation, crossingAllowed))
+            return crossingAllowed && placeWordCrossing(word);
+        else return true;
     }
 
-    private boolean placeWordCrossing(String word) {
+    /**
+     * Funktion, welche ein Wort überschneidend über einem anderen Wort platzieren soll.
+     * Dazu sucht die Funktion aus der Wortliste ein Wort heraus, welches sich mit dem gegebenen Wort überschneidet.
+     * Anschließend wird die Ausrichtung des Wortes zufällig generiert und der Schnittpunkt wird ausgerechnet.
+     * Danach wird das Wort mithilfe der Funktionen {@link #placeWordHorizontally}, {@link #placeWordVertically}, {@link #placeWordDiagonally} dem Feld hinzugefügt.
+     * Falls das Wort nicht mehr auf das Wortfeld passen sollte, dann wird die Schleife fortgesetzt, bis ein passendes Wort gefunden werden konnte.
+     * Wenn am Ende der Schleife kein Wort gefunden wurde, welches sich überschneidet, dann wird false zurückgegebenen.
+     *
+     * @param word Word, welches überschneidend auf dem Wortfeld platziert werden soll.
+     *
+     * @return Gibt zurück, ob das Wort auf dem Wortfeld platziert werden konnte.
+     */
+    protected boolean placeWordCrossing(String word) {
         //Überschneidung von Wörtern
         ArrayList<Map.Entry<String, WordPosition>> positionedWords = new ArrayList<>(placedWords.entrySet().stream().toList());
         positionedWords.sort(Comparator.comparingInt(wordA -> wordA.getKey().length()));
@@ -320,10 +199,8 @@ public class HardPatternGenerator extends MediumPatternGenerator {
      */
     @Override
     protected void fillEmptySpaces() {
-        Random instanceRandom = new Random();
-        ArrayList<String> letterSet = new ArrayList<>();
-
         //Sammeln aller Buchstaben, welche in den Wörtern aus der Wortliste enthalten sind
+        ArrayList<String> letterSet = new ArrayList<>();
         for(String word : words) {
             for(int i = 0; i < word.length(); i++) {
                 if(!letterSet.contains(String.valueOf(word.charAt(i))))
@@ -379,7 +256,7 @@ public class HardPatternGenerator extends MediumPatternGenerator {
         for(int y = 0; y < pattern.length; y++) {
             for(int x = 0; x < pattern[y].length; x++) {
                 if(pattern[y][x].equals(PatternGenerator.CHARACTER_EMPTY))
-                    pattern[y][x] = letterSet.get(instanceRandom.nextInt(letterSet.size())); //String.valueOf((char)(instanceRandom.nextInt(26) + 'a')).toUpperCase();
+                    pattern[y][x] = letterSet.get(instanceRandom.nextInt(letterSet.size()));
             }
         }
     }

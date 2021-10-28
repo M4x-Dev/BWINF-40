@@ -1,4 +1,6 @@
+import generator.EasyPatternGenerator;
 import generator.HardPatternGenerator;
+import generator.MediumPatternGenerator;
 
 /**
  * Hauptklasse des Programmes
@@ -24,16 +26,35 @@ public class Main {
         System.out.println("Wortliste " + INPUT_FILE + " wird geladen...");
 
         //Ausgeben der Details über die eingelesenen Anweisungen
-        HardPatternGenerator easyGenerator = new HardPatternGenerator(INPUT_FILE);
+        EasyPatternGenerator easyGenerator = new EasyPatternGenerator(INPUT_FILE);
         System.out.println();
         System.out.println("Wortliste erfolgreich geladen");
         System.out.println("Größe des Wortfeldes: " + easyGenerator.width + " x " + easyGenerator.height);
         System.out.println("Anzahl der Wörter: " + easyGenerator.wordCount);
-        System.out.println("Wortliste:");
-        easyGenerator.words.forEach(System.out::println);
-
+        System.out.println();
+        System.out.println("--- Schwierigkeitsgrad: LEICHT ---");
         System.out.println();
         System.out.println(easyGenerator.generatePattern());
+
+        MediumPatternGenerator mediumGenerator = new MediumPatternGenerator(INPUT_FILE);
+        System.out.println();
+        System.out.println("Wortliste erfolgreich geladen");
+        System.out.println("Größe des Wortfeldes: " + mediumGenerator.width + " x " + mediumGenerator.height);
+        System.out.println("Anzahl der Wörter: " + mediumGenerator.wordCount);
+        System.out.println();
+        System.out.println("--- Schwierigkeitsgrad: MITTEL ---");
+        System.out.println();
+        System.out.println(mediumGenerator.generatePattern());
+
+        HardPatternGenerator hardGenerator = new HardPatternGenerator(INPUT_FILE);
+        System.out.println();
+        System.out.println("Wortliste erfolgreich geladen");
+        System.out.println("Größe des Wortfeldes: " + hardGenerator.width + " x " + hardGenerator.height);
+        System.out.println("Anzahl der Wörter: " + hardGenerator.wordCount);
+        System.out.println();
+        System.out.println("--- Schwierigkeitsgrad: SCHWER ---");
+        System.out.println();
+        System.out.println(hardGenerator.generatePattern());
     }
 
 }
