@@ -49,12 +49,14 @@ public class HardPatternGenerator extends MediumPatternGenerator {
      */
     @Override
     protected boolean placeWord(String word) {
-        return switch(instanceRandom.nextInt(3)) {
+        return super.placeWord(word);
+
+        /*return switch(instanceRandom.nextInt(3)) {
             case 0 -> placeWordHorizontally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, true);
             case 1 -> placeWordVertically(word, COORDINATE_GENERATE, COORDINATE_GENERATE, true);
             case 2 -> placeWordDiagonally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, DiagonalDirection.Random, true);
             default -> false;
-        };
+        };*/
     }
 
     /**

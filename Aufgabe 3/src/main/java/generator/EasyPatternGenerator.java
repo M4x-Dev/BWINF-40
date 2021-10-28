@@ -44,11 +44,72 @@ public class EasyPatternGenerator extends PatternGenerator {
      */
     @Override
     protected boolean placeWord(String word) {
-        return switch(instanceRandom.nextInt(2)) {
-            case 0 -> placeWordHorizontally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, true);
-            case 1 -> placeWordVertically(word, COORDINATE_GENERATE, COORDINATE_GENERATE, true);
-            default -> false;
-        };
+        int maxAttempts = 10;
+
+        switch(instanceRandom.nextInt(2)) {
+            case 0:
+                for(int i = 0; i <= maxAttempts; i++) {
+                    int[] position = getPositionForWord(word, WordPosition.Orientation.Horizontal);
+                    if(placeWordHorizontally(word, position[0], position[1], false))
+                        return true;
+                }
+                return false;
+            case 1:
+                for(int i = 0; i <= maxAttempts; i++) {
+                    int[] position = getPositionForWord(word, WordPosition.Orientation.Vertical);
+                    if(placeWordVertically(word, position[0], position[1], false))
+                        return true;
+                }
+                return false;
+            default: return false;
+        }
+    }
+
+    public int[] getPositionForWord(String word, WordPosition.Orientation orientation) {
+        switch(orientation) {
+            case Horizontal:
+                int hx = instanceRandom.nextInt(width - word.length());
+
+                int[][] verticalSections = new int[3][2];
+                int verticalSectionIndex = 0;
+
+                verticalSections[0][0] = 0;
+                verticalSections[0][1] = height / 3;
+                verticalSections[1][0] = height / 3;
+                verticalSections[1][1] = (height / 3) * 2;
+                verticalSections[2][0] = (height / 3) * 2;
+                verticalSections[2][1] = height;
+
+                int verticalSectionSelection = instanceRandom.nextInt(100);
+                if(verticalSectionSelection < 40) verticalSectionIndex = 0;
+                else if(verticalSectionSelection < 60) verticalSectionIndex = 1;
+                else verticalSectionIndex = 2;
+
+                int hy = instanceRandom.nextInt(verticalSections[verticalSectionIndex][1] - verticalSections[verticalSectionIndex][0]) + verticalSections[verticalSectionIndex][0];
+
+                return new int[] { hx, hy };
+            case Vertical:
+                int vy = instanceRandom.nextInt(height - word.length());
+                int horizontalSectionIndex = 0;
+
+                int[][] horizontalSections = new int[3][2];
+                horizontalSections[0][0] = 0;
+                horizontalSections[0][1] = width / 3;
+                horizontalSections[1][0] = width / 3;
+                horizontalSections[1][1] = (width / 3) * 2;
+                horizontalSections[2][0] = (width / 3) * 2;
+                horizontalSections[2][1] = width;
+
+                int horizontalSectionSelection = instanceRandom.nextInt(100);
+                if(horizontalSectionSelection < 40) horizontalSectionIndex = 0;
+                else if(horizontalSectionSelection < 60) horizontalSectionIndex = 1;
+                else horizontalSectionIndex = 2;
+
+                int vx = instanceRandom.nextInt(horizontalSections[horizontalSectionIndex][1] - horizontalSections[horizontalSectionIndex][0]) + horizontalSections[horizontalSectionIndex][0];
+
+                return new int[] { vx, vy };
+            default: return new int[] { -1, -1 };
+        }
     }
 
     /**

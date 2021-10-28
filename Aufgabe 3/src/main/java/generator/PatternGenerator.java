@@ -109,46 +109,11 @@ public abstract class PatternGenerator {
                 return generatePattern();
             }
 
-            if(placeWord(wordQueue.peekFirst())) {
-                System.out.println("Adding " + wordQueue.peekFirst());
-                wordQueue.removeFirst();
-            }
-            //else if(placedWords.size() > 0) undoPlacement();
-            System.out.println(formatMatrix(pattern));
+            if(placeWord(wordQueue.peekFirst())) wordQueue.removeFirst();
         }
 
         fillEmptySpaces();
         return formatMatrix(pattern);
-    }
-
-    protected void undoPlacement() {
-        String previousWord = new ArrayList<>(placedWords.keySet()).get(placedWords.size() - 1);
-        WordPosition previousWordPosition = placedWords.get(previousWord);
-
-        System.out.println("Removing " + previousWord);
-
-        switch(previousWordPosition.orientation()) {
-            case Horizontal:
-                for(int i = 0; i < previousWord.length(); i++)
-                    pattern[previousWordPosition.positionY()][previousWordPosition.positionX() + i] = CHARACTER_EMPTY;
-                break;
-            case Vertical:
-                for(int i = 0; i < previousWord.length(); i++)
-                    pattern[previousWordPosition.positionY() + i][previousWordPosition.positionX()] = CHARACTER_EMPTY;
-                break;
-            case DiagonalUp:
-                for(int i = 0; i < previousWord.length(); i++)
-                    pattern[previousWordPosition.positionY() - i][previousWordPosition.positionX() + i] = CHARACTER_EMPTY;
-                break;
-            case DiagonalDown:
-                for(int i = 0; i < previousWord.length(); i++)
-                    pattern[previousWordPosition.positionY() + i][previousWordPosition.positionX() + i] = CHARACTER_EMPTY;
-                break;
-        }
-
-        removeClosedCoorindate(previousWordPosition.positionX(), previousWordPosition.positionY());
-        placedWords.remove(previousWord);
-        wordQueue.addLast(previousWord);
     }
 
     /**
@@ -210,21 +175,6 @@ public abstract class PatternGenerator {
         closedPositions.put(x, y);
         xGenerator.addExclusion(x);
         yGenerator.addExclusion(y);
-    }
-
-    /**
-     * Methode, welche die Koordinaten eines existierenden Wortes aus zwei HashMaps entfernt.
-     * Die eine HashMap beeinhaltet alle Positionen, welche bereits belegt sind.
-     * Damit wird der Algorithmus insofern optimiert, sodass belegte Felder, wenn genügend Platz vorhanden ist, nicht mehr betrachtet werden.
-     * Die Koordinaten des Wortes werden außerdem aus der Ausnahmeliste des Zufallsgenerators entfernt, sodass diese Zahlen wieder generiert werden können.
-     *
-     * @param x X-Koordinate des Wortes, welches aus dem Feld entfernt wurde.
-     * @param y Y-Koordinate des Wortes, welches aus dem Feld entfernt wurde.
-     */
-    public void removeClosedCoorindate(int x, int y) {
-        closedPositions.remove(x, y);
-        xGenerator.removeExclusion(x);
-        yGenerator.removeExclusion(y);
     }
 
 }

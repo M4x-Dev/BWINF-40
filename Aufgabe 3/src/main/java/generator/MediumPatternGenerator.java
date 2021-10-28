@@ -49,12 +49,38 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
      */
     @Override
     protected boolean placeWord(String word) {
-        return switch(instanceRandom.nextInt(3)) {
+        int maxAttempts = 10;
+
+        switch(instanceRandom.nextInt(3)) {
+            case 0:
+                for(int i = 0; i <= maxAttempts; i++) {
+                    int[] position = getPositionForWord(word, WordPosition.Orientation.Horizontal);
+                    if(placeWordHorizontally(word, position[0], position[1], true))
+                        return true;
+                }
+                return false;
+            case 1:
+                for(int i = 0; i <= maxAttempts; i++) {
+                    int[] position = getPositionForWord(word, WordPosition.Orientation.Vertical);
+                    if(placeWordVertically(word, position[0], position[1], true))
+                        return true;
+                }
+                return false;
+            case 2:
+                for(int i = 0; i <= maxAttempts; i++) {
+                    if(placeWordDiagonally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, DiagonalDirection.Random, true))
+                        return true;
+                }
+                return false;
+            default: return false;
+        }
+
+        /*return switch(instanceRandom.nextInt(3)) {
             case 0 -> placeWordHorizontally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, false);
             case 1 -> placeWordVertically(word, COORDINATE_GENERATE, COORDINATE_GENERATE, false);
             case 2 -> placeWordDiagonally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, DiagonalDirection.Random, false);
             default -> false;
-        };
+        };*/
     }
 
     /**
