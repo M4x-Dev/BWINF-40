@@ -14,7 +14,7 @@ Beim einfachsten Schwierigkeitsgrad des Algorithmuses können Wörter nur horizo
 
 ### Schwierigkeitsgrad **MITTEL**
 
-Bei diesem Schwierigkeitsgrad des Algorithmuses können Wörter sowohl horizontal, als auch vertikal und diagonal (auch überschneidend) platziert werden. Die übrigen Stellen werden hierbei nur mit zufälligen Buchstaben aufgefüllt, welche in den Wörtern der Wortliste enthalten sind (können auch alle sein).
+Bei diesem Schwierigkeitsgrad des Algorithmuses können Wörter sowohl horizontal, als auch vertikal und diagonal (nicht überschneidend) platziert werden. Die übrigen Stellen werden hierbei nur mit zufälligen Buchstaben aufgefüllt, welche in den Wörtern der Wortliste enthalten sind (können auch alle sein).
 
 ### Schwierigkeitsgrad **SCHWER**
 
