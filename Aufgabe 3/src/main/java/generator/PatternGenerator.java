@@ -69,12 +69,6 @@ public abstract class PatternGenerator {
             //Einlesen der Wortliste
             words.addAll(Arrays.asList(contentLines).subList(2, wordCount + 2));
 
-            //Sortieren der Wortliste
-            Collections.sort(words);
-            Collections.reverse(words);
-
-            wordQueue.addAll(words);
-
             //Schließen der benötigten Ressourcen zum Lesen der Datei
             streamReader.close();
             fileStream.close();
@@ -95,7 +89,13 @@ public abstract class PatternGenerator {
      * @return Gibt das generierte Wortfeld zurück.
      */
     public String generatePattern() {
+        int placementAttempts = 0;
         pattern = new String[height][width];
+
+        Collections.sort(words);
+        Collections.reverse(words);
+
+        wordQueue.addAll(words);
 
         placedWords.clear();
         closedPositions.clear();
@@ -103,54 +103,62 @@ public abstract class PatternGenerator {
         prepareEmptySpaces();
 
         while(wordQueue.peek() != null) {
-            String word = wordQueue.getFirst();
-            if(!placeWord(word)) enqueueRemoval(word);
-            else wordQueue.removeFirst();
+            placementAttempts++;
+            if(placementAttempts > wordCount * 3) {
+                System.err.println("Failed to fit all words on the board. Restarting...");
+                return generatePattern();
+            }
+
+            if(placeWord(wordQueue.peekFirst())) {
+                System.out.println("Adding " + wordQueue.peekFirst());
+                wordQueue.removeFirst();
+            }
+            //else if(placedWords.size() > 0) undoPlacement();
+            System.out.println(formatMatrix(pattern));
         }
 
         fillEmptySpaces();
         return formatMatrix(pattern);
     }
 
-    protected abstract boolean placeWord(String word);
+    protected void undoPlacement() {
+        String previousWord = new ArrayList<>(placedWords.keySet()).get(placedWords.size() - 1);
+        WordPosition previousWordPosition = placedWords.get(previousWord);
+
+        System.out.println("Removing " + previousWord);
+
+        switch(previousWordPosition.orientation()) {
+            case Horizontal:
+                for(int i = 0; i < previousWord.length(); i++)
+                    pattern[previousWordPosition.positionY()][previousWordPosition.positionX() + i] = CHARACTER_EMPTY;
+                break;
+            case Vertical:
+                for(int i = 0; i < previousWord.length(); i++)
+                    pattern[previousWordPosition.positionY() + i][previousWordPosition.positionX()] = CHARACTER_EMPTY;
+                break;
+            case DiagonalUp:
+                for(int i = 0; i < previousWord.length(); i++)
+                    pattern[previousWordPosition.positionY() - i][previousWordPosition.positionX() + i] = CHARACTER_EMPTY;
+                break;
+            case DiagonalDown:
+                for(int i = 0; i < previousWord.length(); i++)
+                    pattern[previousWordPosition.positionY() + i][previousWordPosition.positionX() + i] = CHARACTER_EMPTY;
+                break;
+        }
+
+        removeClosedCoorindate(previousWordPosition.positionX(), previousWordPosition.positionY());
+        placedWords.remove(previousWord);
+        wordQueue.addLast(previousWord);
+    }
 
     /**
-     * Methode, welche ein Wort aus dem Wortfeld entfernt und dieses wieder in die Warteschlange hinzufügt.
-     * Dazu lädt die Methode die Position und die Ausrichtung des Wortes, welches entfernt werden soll, aus einer HashMap.
-     * Abhängig von der Ausrichtung und Position des Wortes werden alle Felder des Wortes wieder in das Blankzeichen umgewandelt.
+     * Funktion, welche ein bestimmtes Wort auf dem Wortfeld platzieren soll.
      *
-     * @param removeWord Wort, welches aus dem Feld entfernt werden soll.
+     * @param word Wort, welches auf dem Feld platziert werden soll.
+     *
+     * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
      */
-    protected void enqueueRemoval(String removeWord) {
-        //Entfernen des Wortes vom Board
-        if(placedWords.containsKey(removeWord)) {
-            WordPosition removePosition = placedWords.remove(removeWord);
-            closedPositions.remove(removePosition.positionX(), removePosition.positionY());
-
-            //Leeren der Stellen des Wortes
-            switch(removePosition.orientation()) {
-                case Horizontal:
-                    for(int i = 0; i < removeWord.length(); i++)
-                        pattern[removePosition.positionY()][removePosition.positionX() + i] = CHARACTER_EMPTY;
-                    break;
-                case Vertical:
-                    for(int i = 0; i < removeWord.length(); i++)
-                        pattern[removePosition.positionY() + i][removePosition.positionX()] = CHARACTER_EMPTY;
-                    break;
-                case DiagonalUp:
-                    for(int i = 0; i < removeWord.length(); i++)
-                        pattern[removePosition.positionY() - i][removePosition.positionX() + i] = CHARACTER_EMPTY;
-                    break;
-                case DiagonalDown:
-                    for(int i = 0; i < removeWord.length(); i++)
-                        pattern[removePosition.positionY() + i][removePosition.positionX() + i] = CHARACTER_EMPTY;
-                    break;
-            }
-
-            //Wort wird der Queue wieder hinzgefügt, damit es erneut platziert werden kann
-            wordQueue.addFirst(removeWord);
-        }
-    }
+    protected abstract boolean placeWord(String word);
 
     /**
      * Methode, welche alle Felder des Wortfeldes mit dem Blankzeichen auffüllt.
@@ -196,12 +204,27 @@ public abstract class PatternGenerator {
      * Die Koordinaten des Wortes werden dazu in eine Ausnahmeliste des Zufallsgenerators hinzugefügt, sodass diese Zahlen nicht mehr generiert werden.
      *
      * @param x X-Koorindate des Wortes, welches dem Feld hinzugefügt wurde.
-     * @param y Y-Koordinate des Wrotes, welches dem Feld hinzugefügt wurde.
+     * @param y Y-Koordinate des Wortes, welches dem Feld hinzugefügt wurde.
      */
     public void addClosedCoordinate(int x, int y) {
         closedPositions.put(x, y);
         xGenerator.addExclusion(x);
         yGenerator.addExclusion(y);
+    }
+
+    /**
+     * Methode, welche die Koordinaten eines existierenden Wortes aus zwei HashMaps entfernt.
+     * Die eine HashMap beeinhaltet alle Positionen, welche bereits belegt sind.
+     * Damit wird der Algorithmus insofern optimiert, sodass belegte Felder, wenn genügend Platz vorhanden ist, nicht mehr betrachtet werden.
+     * Die Koordinaten des Wortes werden außerdem aus der Ausnahmeliste des Zufallsgenerators entfernt, sodass diese Zahlen wieder generiert werden können.
+     *
+     * @param x X-Koordinate des Wortes, welches aus dem Feld entfernt wurde.
+     * @param y Y-Koordinate des Wortes, welches aus dem Feld entfernt wurde.
+     */
+    public void removeClosedCoorindate(int x, int y) {
+        closedPositions.remove(x, y);
+        xGenerator.removeExclusion(x);
+        yGenerator.removeExclusion(y);
     }
 
 }

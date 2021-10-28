@@ -12,6 +12,12 @@ import java.util.ArrayList;
  */
 public class MediumPatternGenerator extends EasyPatternGenerator {
 
+    /**
+     * Konstruktor der Generator-Klasse.
+     * Dieser Konstruktor ruft nur den Super-Konstruktor {@link EasyPatternGenerator} dieser Klasse auf.
+     *
+     * @param filePath Dateipfad der Eingabedatei (Wortliste).
+     */
     public MediumPatternGenerator(String filePath) {
         super(filePath);
     }
@@ -51,6 +57,19 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
         };
     }
 
+    /**
+     * Funktion, welche ein Wort in diagonaler Ausrichtung auf dem Feld platziert.
+     * Dabei wird die Position des Wortes zufällig generiert, wenn diese nicht gegeben ist (-1).
+     * Außerdem wird die Ausrichtung des Wortes (diagonal aufsteigend/absteigend) zufällig generiert, wenn diese nicht gegeben ist ({@link DiagonalDirection}).
+     *
+     * @param word Wort, welches auf dem Feld platziert werden soll.
+     * @param optionalX X-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
+     * @param optionalY Y-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
+     * @param orientation Ausrichtung des Wortes: Diagonal aufsteigend oder absteigend (kann auch zufällig generiert werden).
+     * @param crossingAllowed Legt fest, ob eine Überschreitung von Wörtern erlaubt sein soll, wenn dieses nicht ohne Weiteres platziert werden kann.
+     *
+     * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
+     */
     protected boolean placeWordDiagonally(String word, int optionalX, int optionalY, DiagonalDirection orientation, boolean crossingAllowed) {
         //Initialisieren der Koordinaten und Ausrichtung
         int positionX = optionalX;
@@ -119,5 +138,4 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
             }
         }
     }
-
 }

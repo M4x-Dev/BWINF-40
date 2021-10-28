@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Klasse, welche die Positionierung eines Wortes innerhalb des Wortfeldes definiert.
+ * Dazu zählt die Position des Wortes (X-Koorindate, Y-Koorindate) und die Ausrichtung (Horizontal, Vertikal, Diagonal).
+ */
 public record WordPosition(int positionX, int positionY, generator.WordPosition.Orientation orientation) {
 
     public enum Orientation {
@@ -13,12 +17,31 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
         DiagonalDown
     }
 
+    /**
+     * Statische Funktion, welche eine zufällige Ausrichtung mit einer Ausnahme generiert.
+     * Diese Funktion wird verwendet, wenn sich zwei Wörter schneiden sollen.
+     * Damit sich zwei Wörter schneiden können, dürfen diese nicht die gleiche Ausrichtung haben.
+     *
+     * @param exclude Ausrichtung, welche nicht generiert werden soll.
+     *
+     * @return Gibt die zufällige Ausrichtung zurück.
+     */
     public static Orientation randomOrientation(Orientation exclude) {
         ArrayList<Orientation> possibleOrientations = new ArrayList<>(List.of(Orientation.values()));
         possibleOrientations.remove(exclude);
         return possibleOrientations.get(new Random().nextInt(possibleOrientations.size()));
     }
 
+    /**
+     * Funktion, welche die X-Koordinate eines Wortes berechnet, welches ein anderes schneiden soll.
+     * Dazu wird der Schnittpunkt (crosingIndexA, crossingIndexB) und die Ausrichtung des ursprünglichen Wortes verwendet.
+     *
+     * @param crossingIndexA Schneidender Buchstabe des ersten Wortes.
+     * @param crossingIndexB Schneidender Buchttabe des zweiten Wortes.
+     * @param crossOrientation Ausrichtung des überschneidenden Wortes.
+     *
+     * @return Gibt die X-Koorindate des schneidenden Wortes zurück.
+     */
     public int crossWordX(int crossingIndexA, int crossingIndexB, Orientation crossOrientation) {
         switch(orientation()) {
             case Horizontal:
@@ -62,6 +85,16 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
         return positionX;
     }
 
+    /**
+     * Funktion, welche die Y-Koordinate eines Wortes berechnet, welches ein anderes schneiden soll.
+     * Dazu wird der Schnittpunkt (crosingIndexA, crossingIndexB) und die Ausrichtung des ursprünglichen Wortes verwendet.
+     *
+     * @param crossingIndexA Schneidender Buchstabe des ersten Wortes.
+     * @param crossingIndexB Schneidender Buchttabe des zweiten Wortes.
+     * @param crossOrientation Ausrichtung des überschneidenden Wortes.
+     *
+     * @return Gibt die Y-Koorindate des schneidenden Wortes zurück.
+     */
     public int crossWordY(int crossingIndexA, int crossingIndexB, Orientation crossOrientation) {
         switch(orientation()) {
             case Horizontal:
