@@ -10,7 +10,7 @@ public class Main {
     public static String INPUT_FILE = "src/main/resources/worte4.txt";
     public static String OUTPUT_FILE = "output.txt";
 
-    public static String OUTPUT_MODE = "all";
+    public static String OUTPUT_MODE = "hard";
 
     public static final String ARGS_OUTPUT_MODE_ALL = "all";
     public static final String ARGS_OUTPUT_MODE_EASY = "easy";

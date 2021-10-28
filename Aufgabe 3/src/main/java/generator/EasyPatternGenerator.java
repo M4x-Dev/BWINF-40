@@ -65,49 +65,92 @@ public class EasyPatternGenerator extends PatternGenerator {
         }
     }
 
+    /**
+     * Diese Funktion generiert eine Position für ein bestimmtes Wort einer bestimmten Ausrichtung.
+     * Dabei ist die Position jedoch nicht vollständig zufällig, sondern durch verschiedene Wahrscheinlichkeiten gekennzeichnet.
+     * Diese Funktion wird verwendet, da es möglich ist, dass der Algorithmus keine Lösung findet, wenn sich die Wörter nicht kreuzen dürfen (Schwierigkeit "LEICHT").
+     * <br>Bei horizontaler Ausrichtung:
+     * Wenn das Wort horizontal positioniert werden soll, dann ist die X-Koorindate des Wortes zufällig gewählt, da sie für die weitere Verteilung keine Rolle spielt.
+     * Die Y-Koorindate wird hier jedoch so berechnet, dass die Wahrscheinlichkeit, dass das Wort in der Mitte des Feldes positioniert wird am geringsten ist.
+     * Dafür wird das Wortfeld in drei gleich große Bereiche eingeteilt, welche die Wahrscheinlichkeiten: 40 % (oben), 20 % (mitte) und 40 % (unten) haben.
+     * Damit werden horizontal positionierte Wörter also oft oben/unten in dem Feld platziert, sodass noch genug Platz für die vertikal ausgerichteten Wörter bleibt.
+     * <br>Bei vertikaler Ausrichtung:
+     * Wenn das Wort vertikal positioniert werden soll, dann ist die Y-Koorindate des Wortes zufällig gewählt, da sie für die weitere Verteilung keine Rolle spielt.
+     * Die X-Koordinate wird hier jedoch so berechnet, dass die Wahrscheinlichkeit, am äußeren Rand des Feldes zu landen, am höchsten ist.
+     * Dafür wird das Wortfeld erneut in drei gleich große Bereiche mit den folgenden Wahrscheinlichkeiten eingeteilt: 40 % (links), 20 % (mitte) und 40 % (rechts).
+     * Damit werden vertikal positionierte Wörter also oft am Rand des Feldes positioniert, sodass noch genug Platz für die horizontal ausgerichteten Wörter bleibt.
+     *
+     * @param word Wort, welches auf dem Feld platziert werden soll.
+     * @param orientation Ausrichtung des Wortes, welches auf dem Feld platziert werden soll.
+     *
+     * @return Gibt die generierte Position (X- und Y-Koordinate des Wortes zurück).
+     */
     public int[] getPositionForWord(String word, WordPosition.Orientation orientation) {
         switch(orientation) {
             case Horizontal:
+                //X-Koorindate wird zufällig generiert
                 int hx = instanceRandom.nextInt(width - word.length());
 
                 int[][] verticalSections = new int[3][2];
                 int verticalSectionIndex = 0;
 
+                //Einteilung des Feldes in drei gleich große Bereiche
+                //Erstes Drittel des Feldes
                 verticalSections[0][0] = 0;
                 verticalSections[0][1] = height / 3;
+
+                //Zweites Drittel des Feldes
                 verticalSections[1][0] = height / 3;
                 verticalSections[1][1] = (height / 3) * 2;
+
+                //Letztes Drittel des Feldes
                 verticalSections[2][0] = (height / 3) * 2;
                 verticalSections[2][1] = height;
 
+                //Zufällige Auswahl des Bereiches nach den verschiedenen Wahrscheinlichkeiten
                 int verticalSectionSelection = instanceRandom.nextInt(100);
-                if(verticalSectionSelection < 40) verticalSectionIndex = 0;
-                else if(verticalSectionSelection < 60) verticalSectionIndex = 1;
-                else verticalSectionIndex = 2;
+                if(verticalSectionSelection < 40) verticalSectionIndex = 0; //Erstes Drittel (40 %)
+                else if(verticalSectionSelection < 60) verticalSectionIndex = 1; //Zweites Drittel (20 %)
+                else verticalSectionIndex = 2; //Letztes Drittel (40 %)
 
-                int hy = instanceRandom.nextInt(verticalSections[verticalSectionIndex][1] - verticalSections[verticalSectionIndex][0]) + verticalSections[verticalSectionIndex][0];
+                //Auswahl einer zufälligen Koorindate innerhalb des ausgewählten Bereiches
+                int hy = yGenerator.generate(verticalSections[verticalSectionIndex][1] - verticalSections[verticalSectionIndex][0]) + verticalSections[verticalSectionIndex][0];
 
+                //Rückgabe der berechneten Koordinaten
                 return new int[] { hx, hy };
             case Vertical:
+                //Y-Koorindate wird zufällig generiert
                 int vy = instanceRandom.nextInt(height - word.length());
-                int horizontalSectionIndex = 0;
 
                 int[][] horizontalSections = new int[3][2];
+                int horizontalSectionIndex = 0;
+
+                //Einteilung des Feldes in drei gleich große Bereiche
+                //Erstes Drittel des Feldes
                 horizontalSections[0][0] = 0;
                 horizontalSections[0][1] = width / 3;
+
+                //Zweites Drittel des Feldes
                 horizontalSections[1][0] = width / 3;
                 horizontalSections[1][1] = (width / 3) * 2;
+
+                //Letztes Drittel des Feldes
                 horizontalSections[2][0] = (width / 3) * 2;
                 horizontalSections[2][1] = width;
 
+                //Zufällige Auswahl des Bereiches nach den verschiedenen Wahrscheinlichkeiten
                 int horizontalSectionSelection = instanceRandom.nextInt(100);
-                if(horizontalSectionSelection < 40) horizontalSectionIndex = 0;
-                else if(horizontalSectionSelection < 60) horizontalSectionIndex = 1;
-                else horizontalSectionIndex = 2;
+                if(horizontalSectionSelection < 40) horizontalSectionIndex = 0; //Erstes Drittel (40 %)
+                else if(horizontalSectionSelection < 60) horizontalSectionIndex = 1; //Zweites Drittel (20 %)
+                else horizontalSectionIndex = 2; //Letztes Drittel (40 %)
 
-                int vx = instanceRandom.nextInt(horizontalSections[horizontalSectionIndex][1] - horizontalSections[horizontalSectionIndex][0]) + horizontalSections[horizontalSectionIndex][0];
+                //Auswahl einer zufälligen Koordinate innerhalb des ausgewählten Bereiches
+                int vx = xGenerator.generate(horizontalSections[horizontalSectionIndex][1] - horizontalSections[horizontalSectionIndex][0]) + horizontalSections[horizontalSectionIndex][0];
 
+                //Rückgabe der berechneten Koordinaten
                 return new int[] { vx, vy };
+
+            //Falls die Funktion mit einer anderen Ausrichtung aufgerufen wird, soll die Koorindate vollständig zufällig generiert werden (diagonal)
             default: return new int[] { -1, -1 };
         }
     }
@@ -190,7 +233,7 @@ public class EasyPatternGenerator extends PatternGenerator {
         for(int y = 0; y < pattern.length; y++) {
             for(int x = 0; x < pattern[y].length; x++) {
                 if(pattern[y][x].equals(CHARACTER_EMPTY))
-                    pattern[y][x] = String.valueOf((char)(instanceRandom.nextInt(26) + 'a')).toUpperCase();
+                    pattern[y][x] = getRandomChar();
             }
         }
     }

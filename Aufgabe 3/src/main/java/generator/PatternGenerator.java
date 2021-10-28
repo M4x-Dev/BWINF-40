@@ -112,6 +112,8 @@ public abstract class PatternGenerator {
             if(placeWord(wordQueue.peekFirst())) wordQueue.removeFirst();
         }
 
+        System.out.println(formatMatrix(pattern));
+
         fillEmptySpaces();
         return formatMatrix(pattern);
     }
@@ -171,10 +173,19 @@ public abstract class PatternGenerator {
      * @param x X-Koorindate des Wortes, welches dem Feld hinzugefügt wurde.
      * @param y Y-Koordinate des Wortes, welches dem Feld hinzugefügt wurde.
      */
-    public void addClosedCoordinate(int x, int y) {
+    protected void addClosedCoordinate(int x, int y) {
         closedPositions.put(x, y);
         xGenerator.addExclusion(x);
         yGenerator.addExclusion(y);
+    }
+
+    /**
+     * Funktion, welche einen zufälligen Buchstaben aus dem Alphabet zurückgibt.
+     *
+     * @return Gibt einen zufälligen Buchstaben zurück.
+     */
+    protected String getRandomChar() {
+        return String.valueOf((char)(instanceRandom.nextInt(26) + 'a')).toUpperCase();
     }
 
 }

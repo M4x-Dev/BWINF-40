@@ -1,6 +1,8 @@
 package generator;
 
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Diese Klasse generiert Wortfeld mit dem mittleren Schwierigkeitsgrad.
@@ -11,6 +13,11 @@ import java.util.ArrayList;
  * <br>c. Leerstellen werden mit zufälligen Buchstaben aus der Wortliste aufgefüllt
  */
 public class MediumPatternGenerator extends EasyPatternGenerator {
+
+    protected static final int FILL_MAX_RECURSIONS = 5;
+    protected static final int FILL_CHECK_RADIUS = 3;
+
+    protected final ArrayList<Point> filledPoints = new ArrayList<>();
 
     /**
      * Konstruktor der Generator-Klasse.
@@ -32,6 +39,7 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
     @Override
     public String generatePattern() {
         randomCrossingEnabled = true;
+        filledPoints.clear();
         return super.generatePattern();
     }
 
@@ -74,13 +82,6 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
                 return false;
             default: return false;
         }
-
-        /*return switch(instanceRandom.nextInt(3)) {
-            case 0 -> placeWordHorizontally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, false);
-            case 1 -> placeWordVertically(word, COORDINATE_GENERATE, COORDINATE_GENERATE, false);
-            case 2 -> placeWordDiagonally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, DiagonalDirection.Random, false);
-            default -> false;
-        };*/
     }
 
     /**
@@ -141,7 +142,7 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
     }
 
     /**
-     * Method, welche die übrigen Felder des Wortfeldes auffüllt, sodass keine Lücken erhalten bleiben.
+     * Methode, welche die übrigen Felder des Wortfeldes auffüllt, sodass keine Lücken erhalten bleiben.
      * Dazu sammelt die funktion zuerst alle Buchstaben, welche in den Wörtern aus der Wortliste enthalten sind.
      * Anschließend werden alle Lücken mit zufälligen Buchstaben aus dieser Liste gefüllt.
      */
@@ -157,11 +158,82 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
         }
 
         //Auffüllen der Leerstellen mit zufälligen Buchstaben aus der Liste
-        for(int y = 0; y < pattern.length; y++) {
-            for(int x = 0; x < pattern[y].length; x++) {
-                if(pattern[y][x].equals(CHARACTER_EMPTY))
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
+                if(Objects.equals(pattern[y][x], CHARACTER_EMPTY)) {
+                    //Hinzufügen des Buchstabens zum Wortfeld
                     pattern[y][x] = letterSet.get(instanceRandom.nextInt(letterSet.size()));
+
+                    //Speichern des Punktes zur späteren Überprüfung der Auffüllung
+                    filledPoints.add(new Point(x, y));
+                }
+            }
+        }
+
+        //Überprüfung der automatischen Auffüllung
+        checkFilledSpaces(letterSet);
+    }
+
+    protected void checkFilledSpaces(ArrayList<String> letterSet) {
+        //Überprüfen der platzierten Buchstaben, sodass nicht durch Zufall doppelte Wörter entstehen
+        //Diese Überprüfung wird mehrfach durchgeführt, sodass so viele Fehler wie möglich ausgeschlossen werden können
+        for(int n = 0; n <= FILL_MAX_RECURSIONS; n++) {
+            int currentX = 0, currentY = 0;
+            int deltaX = 0, deltaY = -1;
+
+            int rows = height;
+            int cols = width;
+
+            for(int i = 0; i < Math.pow(Math.max(rows, cols), 2); i++) {
+                if(currentX > -rows / 2 && currentX <= rows / 2 && currentY > -cols / 2 && currentY <= cols / 2) {
+                    //Auffüllen der Buchstaben
+                    int actualX = (int)Math.ceil((width / 2.0) + (double)currentX);
+                    int actualY = (int)Math.ceil((height / 2.0) + (double)currentY);
+
+                    if(actualX > 0 && actualX < width && actualY > 0 && actualY < height) {
+                        //Überprüfen der Buchstaben
+                        checkFilledPosition(actualX, actualY, letterSet);
+                    }
+                }
+
+                if((currentX == currentY) || (currentX == -currentY && currentX < 0) || (currentX == 1 - currentY && currentX > 0)) {
+                    int copy = deltaX;
+                    deltaX = -deltaY;
+                    deltaY = copy;
+                }
+
+                currentX = currentX + deltaX;
+                currentY = currentY + deltaY;
+            }
+
+            for(int x = 0; x < width; x++) {
+                checkFilledPosition(x, 0, letterSet);
+                checkFilledPosition(x, 1, letterSet);
+                checkFilledPosition(x, height - 1, letterSet);
+                checkFilledPosition(x, height - 2, letterSet);
             }
         }
     }
+
+    protected void checkFilledPosition(int posX, int posY, ArrayList<String> fullLetterSet) {
+        //Überprüfen und Auffüllen der Buchstaben
+        ArrayList<String> reducedLetterSet = new ArrayList<>(fullLetterSet);
+
+        //Überprüfen aller Positionen im Umkreis von 5 Einheiten
+        for(int x = -FILL_CHECK_RADIUS; x <= FILL_CHECK_RADIUS; x++) {
+            for(int y = -FILL_CHECK_RADIUS; y <= FILL_CHECK_RADIUS; y++) {
+                int checkX = posX + x;
+                int checkY = posY + y;
+
+                //Entfernen der Buchstaben aus dem Umfeld aus der Liste der verfügbaren Buchstaben
+                if(checkX >= 0 && checkX < width && checkY >= 0 && checkY < height && pattern[checkY][checkX] != null)
+                    reducedLetterSet.remove(pattern[checkY][checkX]);
+            }
+        }
+
+        //Platzieren des neuen Buchstabens innerhalb des Feldes
+        if(filledPoints.contains(new Point(posX, posY)))
+            pattern[posY][posX] = reducedLetterSet.size() > 1 ? reducedLetterSet.get(instanceRandom.nextInt(reducedLetterSet.size() - 1)) : getRandomChar();
+    }
+
 }

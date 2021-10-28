@@ -1,5 +1,6 @@
 package generator;
 
+import java.awt.*;
 import java.util.*;
 
 /**
@@ -50,13 +51,6 @@ public class HardPatternGenerator extends MediumPatternGenerator {
     @Override
     protected boolean placeWord(String word) {
         return super.placeWord(word);
-
-        /*return switch(instanceRandom.nextInt(3)) {
-            case 0 -> placeWordHorizontally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, true);
-            case 1 -> placeWordVertically(word, COORDINATE_GENERATE, COORDINATE_GENERATE, true);
-            case 2 -> placeWordDiagonally(word, COORDINATE_GENERATE, COORDINATE_GENERATE, DiagonalDirection.Random, true);
-            default -> false;
-        };*/
     }
 
     /**
@@ -249,7 +243,10 @@ public class HardPatternGenerator extends MediumPatternGenerator {
                     String wordFragment = wordInstance.substring(instanceRandom.nextInt(wordInstance.length() - (value - key)));
 
                     //Hinzufügen des Fragmentes in das Wortfeld
-                    for (int i = key; i <= value; i++) pattern[y][i] = String.valueOf(wordFragment.charAt(i - key));
+                    for (int i = key; i <= value; i++) {
+                        pattern[y][i] = String.valueOf(wordFragment.charAt(i - key));
+                        filledPoints.add(new Point(i, y));
+                    }
                 }
             }
         }
@@ -257,10 +254,14 @@ public class HardPatternGenerator extends MediumPatternGenerator {
         //Auffüllen der übrigen Buchstaben mit zufälligen Buchstaben aus der Wortliste
         for(int y = 0; y < pattern.length; y++) {
             for(int x = 0; x < pattern[y].length; x++) {
-                if(pattern[y][x].equals(PatternGenerator.CHARACTER_EMPTY))
+                if(pattern[y][x].equals(PatternGenerator.CHARACTER_EMPTY)) {
                     pattern[y][x] = letterSet.get(instanceRandom.nextInt(letterSet.size()));
+                    filledPoints.add(new Point(x, y));
+                }
             }
         }
-    }
 
+        //Überprüfung der platzierten Buchstaben
+        checkFilledSpaces(letterSet);
+    }
 }
