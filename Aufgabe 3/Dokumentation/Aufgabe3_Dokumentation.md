@@ -18,11 +18,11 @@ Bei diesem Schwierigkeitsgrad des Algorithmuses können Wörter sowohl horizonta
 
 ### Schwierigkeitsgrad **SCHWER**
 
-Beim letzten Schwierigkeitsgrad des Algorithmuses können Wörter horizontal, vertikal und diagonal platziert werden und können sich dabei auch überschneiden. Außerdem werden die Leerstellen mit Fragment der Wörter der Wortliste aufgefüllt (keine zufälligen Buchstaben).
+Beim letzten Schwierigkeitsgrad des Algorithmuses können Wörter horizontal, vertikal und diagonal platziert werden und können sich dabei auch überschneiden. Außerdem werden die Leerstellen mit Fragmenten der Wörter der Wortliste aufgefüllt (keine zufälligen Buchstaben).
 
 ## Verwendung des Programmes
 
-Das Programm zur Lösung dieses Problemes befindet sich in der Datei "Aufgabe_3.jar". Das Programm kann mit der Befehlszeile (CMD auf Windows bzw. Temrinal auf MacOS) aufgeführt werden.
+Das Programm zur Lösung dieses Problemes befindet sich in der Datei "Aufgabe_3.jar". Das Programm kann mit der Befehlszeile (CMD auf Windows bzw. Terminal auf MacOS) aufgeführt werden.
 Dafür navigiert man zuerst in den Ordner der JAR-Datei (hier Aufgabe 3). Anschließend führt man den Befehl "java -jar "Aufgabe_3.jar \<Eingabedatei> \<Ausgabedatei>" aus.
 Die Ausgabedatei ist optional. Wenn keine Ausgabedatei angegeben ist, dann wird das Ergebnis als "output.txt" in dem Ordner der JAR-Datei gespeichert.
 
@@ -96,13 +96,13 @@ Die while-Schleife läuft dann, solange sich Elemente (Wörter) in der Queue bef
 
 Der Algorithmus wählt also immer das erste Wort aus der Queue und versucht dieses über die Funktion #placeWord dem Feld hinzuzufügen. Diese Funktion wird durch die verschiedenen Klassen der verschiedenen Schwierigkeitsgrade implementiert und gibt einen boolean zurück, welcher angibt, ob das Wort erfolgreich hinzugefügt werden konnte. Wenn der Vorgang erfolgreich war, wird das Wort aus der Queue entfernt und das nächste Wort in der Warteschlange wird bearbeitet. Wenn das Wort nicht hinzugefügt werden konnte, dann verbleibt es in der Queue und wird anschließend erneut abgearbeitet.
 
-Wenn alle Wörter dem Wortfeld hinzugefügt werden konnte, füllt der Algorithmus alle verbleibenden leeren Felder auf. Wie diese aufgefüllt werden hängt jedoch vom Schwierigkeitsgrad ab und wird folglich von den einzelnen Generatorklassen implementiert.
+Wenn alle Wörter dem Wortfeld hinzugefügt werden konnten, füllt der Algorithmus alle verbleibenden leeren Felder auf. Wie diese aufgefüllt werden hängt jedoch vom Schwierigkeitsgrad ab und wird folglich von den einzelnen Generatorklassen implementiert.
 
 Zum Schluss formatiert der Algorithmus das Wortfeld von einem zweidimensionalen Array in einen String und gibt diesen zurück, sodass dieser ausgegebenen werden kann.
 
 ### Schwierigkeitsgrad: Leicht
 
-Die Klasse "EasyPatternGenerator" bildet die Grundlage für das Generieren eines Wortfeldes, da alle Klassen der höheren Schwierigkeitsklasse von dieser ableiten. Der Algorithmus zur Generierung eines solchen Feldes ist für diesen Schwierigkeitsgrad wie folgt aufgebaut:  
+Die Klasse "EasyPatternGenerator" bildet die Grundlage für das Generieren eines Wortfeldes, da alle Klassen der höheren Schwierigkeitsgrade von dieser ableiten. Der Algorithmus zur Generierung eines solchen Feldes ist für diesen Schwierigkeitsgrad wie folgt aufgebaut:  
 **1.** Die Orientierung des Wortes wird zufällig generiert (Horizontal oder Vertikal)  
 **2.** Die Position des Wortes wird mithilfe eines weiteren Zufallsgenerators und einer bestimmten Gewichtung generiert  
 **3.** Das Wort wird an der generierten Position hinzugefügt  
@@ -140,19 +140,19 @@ switch(instanceRandom.nextInt(2)) {
 }
 ```
 
-Beim ersten Schwierigkeitsgrad ergibt sich das Problem, dass unter Umständen nicht immer alle Wörter direkt auf das Wortfeld passen, wenn diese vollständig zufällig platziert werden. Daher gibt es bei diesem Schwierigkeitsgrad bestimmte Bereiche, in den die Wörter besonders häufig vorkommen.
+Beim ersten Schwierigkeitsgrad ergibt sich das Problem, dass unter Umständen nicht immer alle Wörter direkt auf das Wortfeld passen, wenn diese vollständig zufällig platziert werden. Dieses Problem entsteht dadurch, dass Wörter nicht diagonal und auch nicht überschneidend platziert werden dürfen. Daher gibt es bei diesem Schwierigkeitsgrad bestimmte Bereiche, in den die Wörter besonders häufig vorkommen.
 
 **Bei horizontaler Ausrichtung**
 
-Wenn das Wort horizontal ausgerichtet werden soll, dann ist die Wahrscheinlichkeit, dass die Wörter am Rand des Wortfeldes auftauchen höher, als in der Mitte. Dabei spielt die X-Koorindate des Wortes keine Rolle und wird zufällig generiert.  
-Die Y-Koorindate wird hier jedoch nach einer bestimmten Wahrscheinlichkeit generiert. Diese Verteilung wurde gewählt, um möglichst viel Platz für die anderen Wörter zu ermöglichen (vertikal bzw. hauptsächlich für diagonal).
+Wenn das Wort horizontal ausgerichtet werden soll, dann ist die Wahrscheinlichkeit, dass die Wörter am Rand des Wortfeldes auftauchen höher, als in der Mitte. Dabei spielt die X-Koordinate des Wortes keine Rolle und wird zufällig generiert.  
+Die Y-Koordinate wird hier jedoch nach einer bestimmten Wahrscheinlichkeit generiert. Diese Verteilung wurde gewählt, um möglichst viel Platz für die anderen Wörter zu ermöglichen (vertikal bzw. hauptsächlich für diagonal).
 Dazu teilt der Algorithmus das Wortfeld in drei gleich große Bereiche auf, welche jeweils die Wahrscheinlichkeiten 40 %, 20 % und 40 % haben.  
 Nachdem der Algorithmus einen bestimmten Bereich anhand der Wahrscheinlichkeiten gewählt hat, wird die genaue Position des Wortes innerhalb dieses Bereiches zufällig generiert. Diese Position wird dann zum Schluss zurückgegeben.
 
 ![Wahrscheinlichkeit bei horizontaler Ausrichtung](./probability_horizontal.png)
 
 ```java
-//X-Koorindate wird zufällig generiert
+//X-Koordinate wird zufällig generiert
 int hx = instanceRandom.nextInt(width - word.length());
 
 int[][] verticalSections = new int[3][2];
@@ -181,7 +181,7 @@ else if(verticalSectionSelection < 60) verticalSectionIndex = 1;
 //Letztes Drittel (40 %)
 else verticalSectionIndex = 2;
 
-//Auswahl einer zufälligen Koorindate innerhalb des ausgewählten Bereiches
+//Auswahl einer zufälligen Koordinate innerhalb des ausgewählten Bereiches
 int hy = yGenerator.generate(verticalSections[verticalSectionIndex][1] - verticalSections[verticalSectionIndex][0]) + verticalSections[verticalSectionIndex][0];
 
 //Rückgabe der berechneten Koordinaten
@@ -190,15 +190,15 @@ return new int[] { hx, hy };
 
 **Bei vertikaler Ausrichtung**
 
-Wenn das Wort vertikal ausgerichtet werden soll, dann ist die Wahrscheinlichkeit, dass die Wörter am Rand des Wortfeldes auftauchen höher, als in der Mitte. Dabei spielt die Y-Koorindate des Wortes keine Rolle und wird zufällig generiert.  
-Die X-Koorindate wird hier jedoch nach einer bestimmten Wahrscheinlichkeit generiert. Diese Verteilung wurde gewählt, um möglichst viel Platz für die anderen Wörter zu ermöglichen (horizontal bzw. hauptsächlich diagonal).  
+Wenn das Wort vertikal ausgerichtet werden soll, dann ist die Wahrscheinlichkeit, dass die Wörter am Rand des Wortfeldes auftauchen höher, als in der Mitte. Dabei spielt die Y-Koordinate des Wortes keine Rolle und wird zufällig generiert.  
+Die X-Koordinate wird hier jedoch nach einer bestimmten Wahrscheinlichkeit generiert. Diese Verteilung wurde gewählt, um möglichst viel Platz für die anderen Wörter zu ermöglichen (horizontal bzw. hauptsächlich diagonal).  
 Dazu teilt der Algorithmus das Wortfeld in drei gleich große Bereiche auf, welche jeweils die Wahrscheinlichkeiten 40 %, 20% und 40 % haben.  
 Nachdem der Algorithmus einen bestimmten Bereich anhand der Wahrscheinlichkeiten gewählt hat, wird die genaue Position des Wortes innerhalb dieses Bereiches zufällig generiert. Diese Position wird dann zum Schluss zurückgegeben.
 
 ![Wahrscheinlichkeit bei vertikaler Ausrichtung](./probability_vertical.png)
 
 ```java
-//Y-Koorindate wird zufällig generiert
+//Y-Koordinate wird zufällig generiert
 int vy = instanceRandom.nextInt(height - word.length());
 
 int[][] horizontalSections = new int[3][2];
@@ -350,7 +350,7 @@ placedWords.put(word, new WordPosition(positionX, positionY, WordPosition.Orient
 
 #### **Auffüllen von leeren Stellen**
 
-Der Algorithmus zur Generierung der Wortfelder von diesem Schwierigkeitsgrad verwende eine andere Implementierung zur Auffüllung der Leerzeichen, welche am Ende aufgefüllt werden sollen. Im Gegensatz zu den einfachen Wortfeldern werden hier keine zufälligen Buchstaben mehr verwendete. Stattdessen verwendet der Algorithmus nur Buchstaben, welche auch in den Wörtern aus der Wortliste enthalten sind. In einigen Fällen kann dies aber auch dazu führen, dass dies das ganze Alphabet umfasst.
+Der Algorithmus zur Generierung der Wortfelder von diesem Schwierigkeitsgrad verwendet eine andere Implementierung zur Auffüllung der Leerzeichen, welche am Ende aufgefüllt werden sollen. Im Gegensatz zu den einfachen Wortfeldern werden hier keine zufälligen Buchstaben mehr verwendet. Stattdessen verwendet der Algorithmus nur Buchstaben, welche auch in den Wörtern aus der Wortliste enthalten sind. In einigen Fällen kann dies aber auch dazu führen, dass dies das ganze Alphabet umfasst.
 
 ```java
 //Sammeln aller Buchstaben, welche in den Wörtern aus der Wortliste enthalten sind
@@ -486,7 +486,7 @@ else return true;
 
 #### **Überschneidende Platzierung von Wörtern**
 
-Die Funktion #placeWordCrossing sucht ein passendes Wort, welches das gegebene Wort überschneidet. Anschließend wird zufällig eine der Ausrichtung für das zu positionierende Wort ausgewählt (Horizontal, Vertikal, Diagonal). Danach wird anhand des Schnittpunktes der beiden Wörter die Position des Wortes berechnet. Zum Schluss wird das Wort an der berechneten Stelle platziert. Falls dies nicht möglich ist, gibt auch diese Funktion false zurück.
+Die Funktion #placeWordCrossing sucht ein passendes Wort, welches das gegebene Wort überschneidet. Anschließend wird zufällig eine der Ausrichtungen für das zu positionierende Wort ausgewählt (Horizontal, Vertikal, Diagonal). Danach wird anhand des Schnittpunktes der beiden Wörter die Position des Wortes berechnet. Zum Schluss wird das Wort an der berechneten Stelle platziert. Falls dies nicht möglich ist, gibt auch diese Funktion false zurück.
 
 ```java
 protected boolean placeWordCrossing(String word) {
@@ -521,11 +521,11 @@ protected boolean placeWordCrossing(String word) {
         //Bestimmen der Orientierung des neuen Wortes
         WordPosition.Orientation newOrientation = WordPosition.randomOrientation(placedWord.getValue().orientation());
 
-        //Berechnen der Koorindaten des kreuzenden Wortes, welches platziert werden soll
+        //Berechnen der Koordinaten des kreuzenden Wortes, welches platziert werden soll
         int possiblePositionX = placedWord.getValue().crossWordX(crossingIndexX, crossingIndexY, newOrientation);
         int possiblePositionY = placedWord.getValue().crossWordY(crossingIndexX, crossingIndexY, newOrientation);
 
-        //Überspringen des momentanen Wortes, wenn die Koorindaten außerhalb des Feldes liegen
+        //Überspringen des momentanen Wortes, wenn die Koordinaten außerhalb des Feldes liegen
         if(possiblePositionX < 0 || possiblePositionX >= pattern[0].length) continue;
         if(possiblePositionY < 0 || possiblePositionY >= pattern.length) continue;
 
