@@ -3,6 +3,8 @@ package generator;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -35,7 +37,7 @@ public abstract class PatternGenerator {
 
     protected final Random instanceRandom = new Random();
     protected final PositionGenerator xGenerator = new PositionGenerator(instanceRandom); //Benutzerdefinierter Zufallsgenerator für alle X-Koordinaten
-    protected final PositionGenerator yGenerator = new PositionGenerator(instanceRandom); //Benutzerdefinierter Zufallsgenerator für alle Y-Koorindaten
+    protected final PositionGenerator yGenerator = new PositionGenerator(instanceRandom); //Benutzerdefinierter Zufallsgenerator für alle Y-Koordinaten
 
     /**
      * Konstruktor der Generator-Klasse.
@@ -78,6 +80,23 @@ public abstract class PatternGenerator {
     }
 
     /**
+     * Methode, welche das Wortfeld in einer Datei abspeichert.
+     *
+     * @param filePath Pfad der Ausgabedatei.
+     */
+    public void exportToFile(String filePath) {
+        try {
+            PrintWriter printWriter = new PrintWriter(filePath, StandardCharsets.UTF_8);
+            printWriter.print(formatMatrix(pattern));
+            printWriter.flush();
+            printWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Something went wrong :/ - " + e.getMessage());
+        }
+    }
+
+    /**
      * Hauptfunktion der Generator-Klasse, welche das Wortfeld generiert.
      * Diese Funktion generiert ein Wortfeld eines bestimmten Schwierigkeitsgrades mithilfe der angegebenen Parameter.
      *
@@ -89,32 +108,37 @@ public abstract class PatternGenerator {
      * @return Gibt das generierte Wortfeld zurück.
      */
     public String generatePattern() {
+        //Variablen werden initialisiert
         int placementAttempts = 0;
         pattern = new String[height][width];
-
-        Collections.sort(words);
-        Collections.reverse(words);
-
-        wordQueue.addAll(words);
-
         placedWords.clear();
         closedPositions.clear();
 
+        //Wortliste wird nach der Größe absteigend sortiert und der Queue hinzugefügt
+        Collections.sort(words);
+        Collections.reverse(words);
+        wordQueue.addAll(words);
+
+        //Alle Felder des Wortfeldes werden mit einem Leerzeichen aufgefüllt
         prepareEmptySpaces();
 
-        while(wordQueue.peek() != null) {
-            placementAttempts++;
+        //Hauptschleife des Algorithmus
+        while(wordQueue.peek() != null) { //Solange Elemente in der Queue enthalten sind
+            placementAttempts++; //Versuchszahl wird erhöht
             if(placementAttempts > wordCount * 3) {
+                //Bei zu vielen Versuchen wird der Algorithmus abgebrochen, sodass kein Stackoverflow entsteht
                 System.err.println("Failed to fit all words on the board. Restarting...");
                 return generatePattern();
             }
 
+            //Das Wort wird aus der Queue entfernt, wenn es erfolgreich platziert werden konnte
             if(placeWord(wordQueue.peekFirst())) wordQueue.removeFirst();
         }
 
-        System.out.println(formatMatrix(pattern));
-
+        //Verbleibende Leerstellen auffüllen
         fillEmptySpaces();
+
+        //Rückgabe des generierten Wortfeldes
         return formatMatrix(pattern);
     }
 
@@ -165,12 +189,12 @@ public abstract class PatternGenerator {
     protected abstract void fillEmptySpaces();
 
     /**
-     * Methode, welche die Koorindaten eines neuen Wortes in zwei HashMaps hinzufügt.
+     * Methode, welche die Koordinaten eines neuen Wortes in zwei HashMaps hinzufügt.
      * Die eine HashMap beeinhaltet alle Positionen, welche bereits belegt sind.
      * Damit wird der Algorithmus insofern optimiert, sodass belegte Felder, wenn genügend Platz vorhanden ist, nicht mehr betrachtet werden.
      * Die Koordinaten des Wortes werden dazu in eine Ausnahmeliste des Zufallsgenerators hinzugefügt, sodass diese Zahlen nicht mehr generiert werden.
      *
-     * @param x X-Koorindate des Wortes, welches dem Feld hinzugefügt wurde.
+     * @param x X-Koordinate des Wortes, welches dem Feld hinzugefügt wurde.
      * @param y Y-Koordinate des Wortes, welches dem Feld hinzugefügt wurde.
      */
     protected void addClosedCoordinate(int x, int y) {

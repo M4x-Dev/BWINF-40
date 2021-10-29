@@ -59,7 +59,7 @@ public class HardPatternGenerator extends MediumPatternGenerator {
      *
      * @param word Wort, welches auf dem Feld platziert werden soll.
      * @param optionalX X-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
-     * @param optionalY Y-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
+     * @param optionalY Y-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
      * @param crossingAllowed Legt fest, ob eine Überschneidung von Wörtern erlaubt sein soll, wenn dieses nicht ohne Weiteres platziert werden kann.
      *
      * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
@@ -77,7 +77,7 @@ public class HardPatternGenerator extends MediumPatternGenerator {
      *
      * @param word Wort, welches auf dem Feld platzert werden soll.
      * @param optionalX X-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
-     * @param optionalY Y-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese geneirert werden soll).
+     * @param optionalY Y-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese geneirert werden soll).
      * @param crossingAllowed Legt fest, ob eine Überschreitung von Wörtern erlaubt sein soll, wenn dieses nicht ohne Weiteres platziert werden kann.
      *
      * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
@@ -95,8 +95,8 @@ public class HardPatternGenerator extends MediumPatternGenerator {
      * Außerdem wird die Ausrichtung des Wortes (diagonal aufsteigend/absteigend) zufällig generiert, wenn diese nicht gegeben ist ({@link DiagonalDirection}).
      *
      * @param word Wort, welches auf dem Feld platziert werden soll.
-     * @param optionalX X-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
-     * @param optionalY Y-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
+     * @param optionalX X-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
+     * @param optionalY Y-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
      * @param orientation Ausrichtung des Wortes: Diagonal aufsteigend oder absteigend (kann auch zufällig generiert werden).
      * @param crossingAllowed Legt fest, ob eine Überschreitung von Wörtern erlaubt sein soll, wenn dieses nicht ohne Weiteres platziert werden kann.
      *
@@ -152,11 +152,11 @@ public class HardPatternGenerator extends MediumPatternGenerator {
             //Bestimmen der Orientierung des neuen Wortes
             WordPosition.Orientation newOrientation = WordPosition.randomOrientation(placedWord.getValue().orientation());
 
-            //Berechnen der Koorindaten des kreuzenden Wortes, welches platziert werden soll
+            //Berechnen der Koordinaten des kreuzenden Wortes, welches platziert werden soll
             int possiblePositionX = placedWord.getValue().crossWordX(crossingIndexX, crossingIndexY, newOrientation);
             int possiblePositionY = placedWord.getValue().crossWordY(crossingIndexX, crossingIndexY, newOrientation);
 
-            //Überspringen des momentanen Wortes, wenn die Koorindaten außerhalb des Feldes liegen
+            //Überspringen des momentanen Wortes, wenn die Koordinaten außerhalb des Feldes liegen
             if(possiblePositionX < 0 || possiblePositionX >= pattern[0].length) continue;
             if(possiblePositionY < 0 || possiblePositionY >= pattern.length) continue;
 
@@ -251,11 +251,11 @@ public class HardPatternGenerator extends MediumPatternGenerator {
             }
         }
 
-        //Auffüllen der übrigen Buchstaben mit zufälligen Buchstaben aus der Wortliste
+        //Auffüllen der übrigen Buchstaben mit zufälligen Buchstaben
         for(int y = 0; y < pattern.length; y++) {
             for(int x = 0; x < pattern[y].length; x++) {
                 if(pattern[y][x].equals(PatternGenerator.CHARACTER_EMPTY)) {
-                    pattern[y][x] = letterSet.get(instanceRandom.nextInt(letterSet.size()));
+                    pattern[y][x] = getRandomChar();
                     filledPoints.add(new Point(x, y));
                 }
             }

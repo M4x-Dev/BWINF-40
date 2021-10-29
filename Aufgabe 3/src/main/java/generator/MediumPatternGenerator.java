@@ -90,8 +90,8 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
      * Außerdem wird die Ausrichtung des Wortes (diagonal aufsteigend/absteigend) zufällig generiert, wenn diese nicht gegeben ist ({@link DiagonalDirection}).
      *
      * @param word Wort, welches auf dem Feld platziert werden soll.
-     * @param optionalX X-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
-     * @param optionalY Y-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
+     * @param optionalX X-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
+     * @param optionalY Y-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
      * @param orientation Ausrichtung des Wortes: Diagonal aufsteigend oder absteigend (kann auch zufällig generiert werden).
      * @param crossingAllowed Legt fest, ob eine Überschreitung von Wörtern erlaubt sein soll, wenn dieses nicht ohne Weiteres platziert werden kann.
      *
@@ -174,6 +174,14 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
         checkFilledSpaces(letterSet);
     }
 
+    /**
+     * Diese Methode überprüft die AUffüllungen der Lücken, welche zuvor durch den Algorithmus erfüllt wurden.
+     * Dabei durchläuft die Methode das Wortfeld von innen nach außen spiralförmig, und versucht mögliche Fehlerquellen auszuschließen.
+     * Das Hauptziel dabei ist zu vermeiden, dass durch die zufällige Auffüllung der Buchstaben Wörter doppelt entstehen.
+     * Die Methode {@link #checkFilledPosition} wird verwendet, um meine spezifische Position zu Überprüfen.
+     *
+     * @param letterSet Liste der Buchstaben, mit welchen die leeren Positionen aufgefüllt wurden.
+     */
     protected void checkFilledSpaces(ArrayList<String> letterSet) {
         //Überprüfen der platzierten Buchstaben, sodass nicht durch Zufall doppelte Wörter entstehen
         //Diese Überprüfung wird mehrfach durchgeführt, sodass so viele Fehler wie möglich ausgeschlossen werden können
@@ -185,7 +193,7 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
             int cols = width;
 
             for(int i = 0; i < Math.pow(Math.max(rows, cols), 2); i++) {
-                if(currentX > -rows / 2 && currentX <= rows / 2 && currentY > -cols / 2 && currentY <= cols / 2) {
+                if(currentX >= -rows / 2 && currentX <= rows / 2 && currentY >= -cols / 2 && currentY <= cols / 2) {
                     //Auffüllen der Buchstaben
                     int actualX = (int)Math.ceil((width / 2.0) + (double)currentX);
                     int actualY = (int)Math.ceil((height / 2.0) + (double)currentY);
@@ -206,6 +214,7 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
                 currentY = currentY + deltaY;
             }
 
+            //Die Ränder
             for(int x = 0; x < width; x++) {
                 checkFilledPosition(x, 0, letterSet);
                 checkFilledPosition(x, 1, letterSet);
@@ -215,11 +224,19 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
         }
     }
 
+    /**
+     * Methode, welche eine spezifische Position überprüft, sodass in deren Umkreis ein Wort nicht doppelt entsteht.
+     * Dazu wird der Umkreis der Position (3 Einheiten) überprüft und wenn alle Buchstaben zur Bildung eines Wortes vertreten sind, dann wird der Buchstabe durch einen zufälligen (aus dem Alphabet) ersetzt.
+     *
+     * @param posX X-Koordinate des zu überprüfenden Buchstabens
+     * @param posY Y-Koordinate des zu überprüfenden Buchstabens
+     * @param fullLetterSet Liste der Buchstaben, welche zur Auffüllung verwendet wurden
+     */
     protected void checkFilledPosition(int posX, int posY, ArrayList<String> fullLetterSet) {
         //Überprüfen und Auffüllen der Buchstaben
         ArrayList<String> reducedLetterSet = new ArrayList<>(fullLetterSet);
 
-        //Überprüfen aller Positionen im Umkreis von 5 Einheiten
+        //Überprüfen aller Positionen im Umkreis von 3 Einheiten
         for(int x = -FILL_CHECK_RADIUS; x <= FILL_CHECK_RADIUS; x++) {
             for(int y = -FILL_CHECK_RADIUS; y <= FILL_CHECK_RADIUS; y++) {
                 int checkX = posX + x;
@@ -232,8 +249,8 @@ public class MediumPatternGenerator extends EasyPatternGenerator {
         }
 
         //Platzieren des neuen Buchstabens innerhalb des Feldes
-        if(filledPoints.contains(new Point(posX, posY)))
-            pattern[posY][posX] = reducedLetterSet.size() > 1 ? reducedLetterSet.get(instanceRandom.nextInt(reducedLetterSet.size() - 1)) : getRandomChar();
+        if(filledPoints.contains(new Point(posX, posY)) && reducedLetterSet.size() == 0)
+            pattern[posY][posX] = getRandomChar();
     }
 
 }

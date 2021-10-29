@@ -28,7 +28,7 @@ public class EasyPatternGenerator extends PatternGenerator {
      */
     @Override
     public String generatePattern() {
-        randomCrossingEnabled = true;
+        randomCrossingEnabled = false;
         return super.generatePattern();
     }
 
@@ -44,7 +44,7 @@ public class EasyPatternGenerator extends PatternGenerator {
      */
     @Override
     protected boolean placeWord(String word) {
-        int maxAttempts = 10;
+        int maxAttempts = 3;
 
         switch(instanceRandom.nextInt(2)) {
             case 0:
@@ -70,12 +70,12 @@ public class EasyPatternGenerator extends PatternGenerator {
      * Dabei ist die Position jedoch nicht vollständig zufällig, sondern durch verschiedene Wahrscheinlichkeiten gekennzeichnet.
      * Diese Funktion wird verwendet, da es möglich ist, dass der Algorithmus keine Lösung findet, wenn sich die Wörter nicht kreuzen dürfen (Schwierigkeit "LEICHT").
      * <br>Bei horizontaler Ausrichtung:
-     * Wenn das Wort horizontal positioniert werden soll, dann ist die X-Koorindate des Wortes zufällig gewählt, da sie für die weitere Verteilung keine Rolle spielt.
-     * Die Y-Koorindate wird hier jedoch so berechnet, dass die Wahrscheinlichkeit, dass das Wort in der Mitte des Feldes positioniert wird am geringsten ist.
+     * Wenn das Wort horizontal positioniert werden soll, dann ist die X-Koordinate des Wortes zufällig gewählt, da sie für die weitere Verteilung keine Rolle spielt.
+     * Die Y-Koordinate wird hier jedoch so berechnet, dass die Wahrscheinlichkeit, dass das Wort in der Mitte des Feldes positioniert wird am geringsten ist.
      * Dafür wird das Wortfeld in drei gleich große Bereiche eingeteilt, welche die Wahrscheinlichkeiten: 40 % (oben), 20 % (mitte) und 40 % (unten) haben.
      * Damit werden horizontal positionierte Wörter also oft oben/unten in dem Feld platziert, sodass noch genug Platz für die vertikal ausgerichteten Wörter bleibt.
      * <br>Bei vertikaler Ausrichtung:
-     * Wenn das Wort vertikal positioniert werden soll, dann ist die Y-Koorindate des Wortes zufällig gewählt, da sie für die weitere Verteilung keine Rolle spielt.
+     * Wenn das Wort vertikal positioniert werden soll, dann ist die Y-Koordinate des Wortes zufällig gewählt, da sie für die weitere Verteilung keine Rolle spielt.
      * Die X-Koordinate wird hier jedoch so berechnet, dass die Wahrscheinlichkeit, am äußeren Rand des Feldes zu landen, am höchsten ist.
      * Dafür wird das Wortfeld erneut in drei gleich große Bereiche mit den folgenden Wahrscheinlichkeiten eingeteilt: 40 % (links), 20 % (mitte) und 40 % (rechts).
      * Damit werden vertikal positionierte Wörter also oft am Rand des Feldes positioniert, sodass noch genug Platz für die horizontal ausgerichteten Wörter bleibt.
@@ -88,7 +88,7 @@ public class EasyPatternGenerator extends PatternGenerator {
     public int[] getPositionForWord(String word, WordPosition.Orientation orientation) {
         switch(orientation) {
             case Horizontal:
-                //X-Koorindate wird zufällig generiert
+                //X-Koordinate wird zufällig generiert
                 int hx = instanceRandom.nextInt(width - word.length());
 
                 int[][] verticalSections = new int[3][2];
@@ -113,13 +113,13 @@ public class EasyPatternGenerator extends PatternGenerator {
                 else if(verticalSectionSelection < 60) verticalSectionIndex = 1; //Zweites Drittel (20 %)
                 else verticalSectionIndex = 2; //Letztes Drittel (40 %)
 
-                //Auswahl einer zufälligen Koorindate innerhalb des ausgewählten Bereiches
-                int hy = yGenerator.generate(verticalSections[verticalSectionIndex][1] - verticalSections[verticalSectionIndex][0]) + verticalSections[verticalSectionIndex][0];
+                //Auswahl einer zufälligen Koordinate innerhalb des ausgewählten Bereiches
+                int hy = instanceRandom.nextInt(verticalSections[verticalSectionIndex][1] - verticalSections[verticalSectionIndex][0]) + verticalSections[verticalSectionIndex][0];
 
                 //Rückgabe der berechneten Koordinaten
                 return new int[] { hx, hy };
             case Vertical:
-                //Y-Koorindate wird zufällig generiert
+                //Y-Koordinate wird zufällig generiert
                 int vy = instanceRandom.nextInt(height - word.length());
 
                 int[][] horizontalSections = new int[3][2];
@@ -145,12 +145,11 @@ public class EasyPatternGenerator extends PatternGenerator {
                 else horizontalSectionIndex = 2; //Letztes Drittel (40 %)
 
                 //Auswahl einer zufälligen Koordinate innerhalb des ausgewählten Bereiches
-                int vx = xGenerator.generate(horizontalSections[horizontalSectionIndex][1] - horizontalSections[horizontalSectionIndex][0]) + horizontalSections[horizontalSectionIndex][0];
+                int vx = instanceRandom.nextInt(horizontalSections[horizontalSectionIndex][1] - horizontalSections[horizontalSectionIndex][0]) + horizontalSections[horizontalSectionIndex][0];
 
                 //Rückgabe der berechneten Koordinaten
                 return new int[] { vx, vy };
-
-            //Falls die Funktion mit einer anderen Ausrichtung aufgerufen wird, soll die Koorindate vollständig zufällig generiert werden (diagonal)
+            //Falls die Funktion mit einer anderen Ausrichtung aufgerufen wird, soll die Koordinate vollständig zufällig generiert werden (diagonal)
             default: return new int[] { -1, -1 };
         }
     }
@@ -161,7 +160,7 @@ public class EasyPatternGenerator extends PatternGenerator {
      *
      * @param word Wort, welches auf dem Feld platziert werden soll.
      * @param optionalX X-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
-     * @param optionalY Y-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
+     * @param optionalY Y-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
      * @param crossingAllowed Legt fest, ob eine Überschneidung von Wörtern erlaubt sein soll, wenn dieses nicht ohne Weiteres platziert werden kann.
      *
      * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
@@ -177,7 +176,7 @@ public class EasyPatternGenerator extends PatternGenerator {
 
         //Überprüfen der Position, in welcher das Wort platziert werden soll
         for(int i = 0; i < word.length(); i++) {
-            if(!pattern[positionY][positionX + i].equals(CHARACTER_EMPTY) && /*(!randomCrossingEnabled ||*/ !pattern[positionY][positionX + i].equals(String.valueOf(word.charAt(i)))) {
+            if(!pattern[positionY][positionX + i].equals(CHARACTER_EMPTY) && !pattern[positionY][positionX + i].equals(String.valueOf(word.charAt(i)))) {
                 return false;
             }
         }
@@ -195,7 +194,7 @@ public class EasyPatternGenerator extends PatternGenerator {
      *
      * @param word Wort, welches auf dem Feld platzert werden soll.
      * @param optionalX X-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese generiert werden soll).
-     * @param optionalY Y-Koorindate, an welcher das Wort platziert werden soll (-1, wenn diese geneirert werden soll).
+     * @param optionalY Y-Koordinate, an welcher das Wort platziert werden soll (-1, wenn diese geneirert werden soll).
      * @param crossingAllowed Legt fest, ob eine Überschreitung von Wörtern erlaubt sein soll, wenn dieses nicht ohne Weiteres platziert werden kann.
      *
      * @return Gibt zurück, ob das Wort erfolgreich platziert werden konnte.
@@ -206,12 +205,12 @@ public class EasyPatternGenerator extends PatternGenerator {
         int positionY = optionalY;
 
         //Berechnen der Koordinaten
-        if(positionY == -1) positionY = pattern.length - word.length() != 0 ? yGenerator.generate(pattern.length - word.length()) : 0;
-        if(positionX == -1) positionX = xGenerator.generate(pattern[positionY].length);
+        if(positionY == COORDINATE_GENERATE) positionY = pattern.length - word.length() != 0 ? yGenerator.generate(pattern.length - word.length()) : 0;
+        if(positionX == COORDINATE_GENERATE) positionX = xGenerator.generate(pattern[positionY].length);
 
         //Überprüfen der Position, in welcher das Wort platziert werden soll
         for(int i = 0; i < word.length(); i++) {
-            if(!pattern[positionY + i][positionX].equals(CHARACTER_EMPTY) && (/*!randomCrossingEnabled ||*/ !pattern[positionY + i][positionX].equals(String.valueOf(word.charAt(i))))) {
+            if(!pattern[positionY + i][positionX].equals(CHARACTER_EMPTY) && (!pattern[positionY + i][positionX].equals(String.valueOf(word.charAt(i))))) {
                 return false;
             }
         }

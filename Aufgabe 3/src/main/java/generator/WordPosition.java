@@ -2,13 +2,26 @@ package generator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 /**
  * Klasse, welche die Positionierung eines Wortes innerhalb des Wortfeldes definiert.
  * Dazu zählt die Position des Wortes (X-Koorindate, Y-Koorindate) und die Ausrichtung (Horizontal, Vertikal, Diagonal).
  */
-public record WordPosition(int positionX, int positionY, generator.WordPosition.Orientation orientation) {
+public final class WordPosition {
+
+    private final int positionX;
+    private final int positionY;
+    private final Orientation orientation;
+
+    /**
+     */
+    public WordPosition(int positionX, int positionY, Orientation orientation) {
+        this.positionX = positionX;
+        this.positionY = positionY;
+        this.orientation = orientation;
+    }
 
     public enum Orientation {
         Horizontal,
@@ -43,9 +56,9 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
      * @return Gibt die X-Koorindate des schneidenden Wortes zurück.
      */
     public int crossWordX(int crossingIndexA, int crossingIndexB, Orientation crossOrientation) {
-        switch(orientation()) {
+        switch (orientation()) {
             case Horizontal:
-                switch(crossOrientation) {
+                switch (crossOrientation) {
                     case Vertical:
                         return positionX + crossingIndexA;
                     case DiagonalUp:
@@ -54,7 +67,7 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
                 }
                 break;
             case Vertical:
-                switch(crossOrientation) {
+                switch (crossOrientation) {
                     case Horizontal:
                     case DiagonalUp:
                     case DiagonalDown:
@@ -62,7 +75,7 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
                 }
                 break;
             case DiagonalUp:
-                switch(crossOrientation) {
+                switch (crossOrientation) {
                     case Vertical:
                         return positionX + crossingIndexA;
                     case Horizontal:
@@ -71,7 +84,7 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
                 }
                 break;
             case DiagonalDown:
-                switch(crossOrientation) {
+                switch (crossOrientation) {
                     case Vertical:
                         return positionX + crossingIndexA;
                     case Horizontal:
@@ -96,9 +109,9 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
      * @return Gibt die Y-Koorindate des schneidenden Wortes zurück.
      */
     public int crossWordY(int crossingIndexA, int crossingIndexB, Orientation crossOrientation) {
-        switch(orientation()) {
+        switch (orientation()) {
             case Horizontal:
-                switch(crossOrientation) {
+                switch (crossOrientation) {
                     case Vertical:
                     case DiagonalDown:
                         return positionY - crossingIndexB;
@@ -107,7 +120,7 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
                 }
                 break;
             case Vertical:
-                switch(crossOrientation) {
+                switch (crossOrientation) {
                     case Horizontal:
                         return positionY + crossingIndexA;
                     case DiagonalUp:
@@ -117,7 +130,7 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
                 }
                 break;
             case DiagonalUp:
-                switch(crossOrientation) {
+                switch (crossOrientation) {
                     case Vertical:
                     case DiagonalDown:
                         return positionY - (crossingIndexA + crossingIndexB);
@@ -126,7 +139,7 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
                 }
                 break;
             case DiagonalDown:
-                switch(crossOrientation) {
+                switch (crossOrientation) {
                     case Vertical:
                         return positionY + (crossingIndexA - crossingIndexB);
                     case Horizontal:
@@ -139,5 +152,41 @@ public record WordPosition(int positionX, int positionY, generator.WordPosition.
 
         return positionY;
     }
+
+    public int positionX() {
+        return positionX;
+    }
+
+    public int positionY() {
+        return positionY;
+    }
+
+    public Orientation orientation() {
+        return orientation;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (WordPosition) obj;
+        return this.positionX == that.positionX &&
+                this.positionY == that.positionY &&
+                Objects.equals(this.orientation, that.orientation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(positionX, positionY, orientation);
+    }
+
+    @Override
+    public String toString() {
+        return "WordPosition[" +
+                "positionX=" + positionX + ", " +
+                "positionY=" + positionY + ", " +
+                "orientation=" + orientation + ']';
+    }
+
 
 }

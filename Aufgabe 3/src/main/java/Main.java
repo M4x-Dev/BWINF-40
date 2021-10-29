@@ -2,6 +2,9 @@ import generator.EasyPatternGenerator;
 import generator.HardPatternGenerator;
 import generator.MediumPatternGenerator;
 
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Hauptklasse des Programmes
  */
@@ -45,9 +48,45 @@ public class Main {
      * Methode, welche die Wortfelder für alle Schwierigkeitsgrade generiert.
      */
     private static void generateAllPatterns() {
-        generateEasyPattern();
-        generateMediumPattern();
-        generateHardPattern();
+        EasyPatternGenerator easyGenerator = new EasyPatternGenerator(INPUT_FILE);
+        String easyPattern = easyGenerator.generatePattern();
+
+        MediumPatternGenerator mediumGenerator = new MediumPatternGenerator(INPUT_FILE);
+        String mediumPattern = mediumGenerator.generatePattern();
+
+        HardPatternGenerator hardGenerator = new HardPatternGenerator(INPUT_FILE);
+        String hardPattern = hardGenerator.generatePattern();
+
+        System.out.println();
+        System.out.println("Wortliste erfolgreich geladen");
+        System.out.println("Größe des Wortfeldes: " + easyGenerator.width + " x " + easyGenerator.height);
+        System.out.println("Anzahl der Wörter: " + easyGenerator.wordCount);
+        System.out.println();
+        System.out.println("--- Schwierigkeitsgrad LEICHT ---");
+        System.out.println();
+        System.out.println(easyPattern);
+        System.out.println();
+        System.out.println("--- Schwierigkeitsgrad MITTEL ---");
+        System.out.println();
+        System.out.println(mediumPattern);
+        System.out.println();
+        System.out.println("--- Schwierigkeitsgrad SCHWER ---");
+        System.out.println();
+        System.out.println(hardPattern);
+
+        try {
+            PrintWriter combinedWriter = new PrintWriter(OUTPUT_FILE, StandardCharsets.UTF_8);
+            combinedWriter.print(easyPattern);
+            combinedWriter.println();
+            combinedWriter.print(mediumPattern);
+            combinedWriter.println();
+            combinedWriter.print(hardPattern);
+            combinedWriter.flush();
+            combinedWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Something went wrong :/ - " + e.getMessage());
+        }
     }
 
     /**
@@ -63,6 +102,7 @@ public class Main {
         System.out.println("--- Schwierigkeitsgrad: LEICHT ---");
         System.out.println();
         System.out.println(easyGenerator.generatePattern());
+        easyGenerator.exportToFile(OUTPUT_FILE);
     }
 
     /**
@@ -78,6 +118,7 @@ public class Main {
         System.out.println("--- Schwierigkeitsgrad: MITTEL ---");
         System.out.println();
         System.out.println(mediumGenerator.generatePattern());
+        mediumGenerator.exportToFile(OUTPUT_FILE);
     }
 
     /**
@@ -93,6 +134,7 @@ public class Main {
         System.out.println("--- Schwierigkeitsgrad: SCHWER ---");
         System.out.println();
         System.out.println(hardGenerator.generatePattern());
+        hardGenerator.exportToFile(OUTPUT_FILE);
     }
 
 }

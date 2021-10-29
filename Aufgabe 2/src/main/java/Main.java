@@ -38,6 +38,7 @@ public class Main {
         System.out.println();
         System.out.println("--- Route ---");
         System.out.println(bestRoute.printPretty());
+        bestRoute.exportToFile(OUTPUT_FILE);
     }
 
 }

@@ -3,6 +3,8 @@ package models;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -112,7 +114,6 @@ public class RoutePlan {
                 }
             }
         } else {
-            System.out.println("Threshold set: " + currentRoute.getLowestHotelRating());
             if(currentRoute.getLowestHotelRating() > ratingThreshold && currentRoute.hotels.size() <= MAX_TRAVELTIME) { //Abbruchbedingungen 1 und 2
                 ratingThreshold = currentRoute.getLowestHotelRating(); //Neuer Mindestwert für Abbruchbedingung 2 wird gesetzt
                 resolvedRoutes.add(currentRoute); //Route wird den möglichen Routen hinzugefügt

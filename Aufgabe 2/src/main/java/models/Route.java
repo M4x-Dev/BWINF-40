@@ -1,5 +1,7 @@
 package models;
 
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -24,6 +26,23 @@ public class Route {
      */
     public Route(Route route) {
         this.hotels = new ArrayList<>(route.hotels);
+    }
+
+    /**
+     * Methode, welche die verschiedenen Ziele in eine Datei schreibt.
+     *
+     * @param output Pfad der Ausgabedatei
+     */
+    public void exportToFile(String output) {
+        try {
+            PrintWriter outputWriter = new PrintWriter(output, StandardCharsets.UTF_8);
+            for(int i = 0; i < hotels.size(); i++) outputWriter.println("Hotel " + i + ": " + hotels.get(i).distanceFromStart + " min, " + hotels.get(i).averageRating + " stars");
+            outputWriter.flush();
+            outputWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Something went wrong :/ - " + e.getMessage());
+        }
     }
 
     /**
