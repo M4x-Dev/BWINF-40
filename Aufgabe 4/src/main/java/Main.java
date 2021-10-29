@@ -1,3 +1,6 @@
+import simulation.LudoDice;
+import simulation.LudoSimulation;
+
 /**
  * Hauptklasse des Programmes
  */
@@ -20,6 +23,10 @@ public class Main {
         System.out.println("Bundeswettbewerb für Informatik - Aufgabe 4 (Würfelglück) - by Maximilian Flügel");
         System.out.println("--------------------------------------------------------------------------------");
         System.out.println("Würfel \"" + INPUT_FILE + "\" werden geladen...");
+
+        LudoSimulation testSimulation = new LudoSimulation(LudoDice.sixSided(), LudoDice.sixSided());
+        testSimulation.field.printField();
+        testSimulation.start(true);
     }
 
 }
