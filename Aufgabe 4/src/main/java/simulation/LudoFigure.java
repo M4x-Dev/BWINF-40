@@ -15,6 +15,11 @@ public class LudoFigure {
         this.distanceFromStart += delta;
     }
 
+    public void moveToGoal(int positionInGoal) {
+        this.currentPosition = - (positionInGoal + 1);
+        this.distanceFromStart = LudoField.ROUND_COMPLETE + positionInGoal;
+    }
+
     public void returnToHome() {
         this.currentPosition = -1;
         this.distanceFromStart = 0;

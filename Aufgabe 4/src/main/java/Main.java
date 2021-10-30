@@ -26,7 +26,7 @@ public class Main {
 
         LudoSimulation testSimulation = new LudoSimulation(LudoDice.sixSided(), LudoDice.sixSided());
         testSimulation.field.printField();
-        testSimulation.start(true);
+        System.out.println("PLAYER " + testSimulation.simulate(true).playerTag + " WON THE GAME!");
     }
 
 }
