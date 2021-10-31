@@ -12,49 +12,60 @@ public class Scale {
 
     public ScaleState balance(int initialWeight, ArrayList<Integer> availableWeights) {
         leftWeights.add(initialWeight);
-        balanceInternal(initialWeight, availableWeights);
-        return bestState;
+        return balanceInternal(initialWeight, initialWeight, availableWeights);
     }
 
-    public boolean balanceInternal(int lastDifference, ArrayList<Integer> availableWeights) {
+    public ScaleState balanceInternal(int initialWeight, int lastDifference, ArrayList<Integer> availableWeights) {
         int difference = getPlatformDifference();
 
-        /*System.out.println(leftWeights + " --- " + rightWeights);
-        System.out.println("Difference: " + difference);*/
+        System.out.println(leftWeights + " --- " + rightWeights);
 
-        if(Math.abs(difference) > Math.abs(lastDifference)) return false;
+        if(Math.abs(difference) > Math.abs(lastDifference) && bestState.rightWeights().size() > 0) return bestState;
         else bestState = new ScaleState(new ArrayList<>(leftWeights), new ArrayList<>(rightWeights), false);
 
         if(difference > 0) {
             //Rechte Seite ist schwerer
-            int nearestWeight = getNearestWeight(availableWeights, difference);
+            int nearestWeightAdd = getNearestWeight(availableWeights, difference);
+            int nearestWeightRemove = getNearestWeight(rightWeights, difference);
 
-            if(nearestWeight != -1) {
-                availableWeights.remove((Integer)nearestWeight);
+            if(isAdditionBetter(nearestWeightAdd, nearestWeightRemove, difference)) {
+                if(nearestWeightAdd != -1) {
+                    availableWeights.remove((Integer)nearestWeightAdd);
+                } else {
+                    nearestWeightAdd = getNearestWeight(rightWeights, difference);
+                    rightWeights.remove((Integer)nearestWeightAdd);
+                }
+
+                leftWeights.add(nearestWeightAdd);
             } else {
-                nearestWeight = getNearestWeight(rightWeights, difference);
-                rightWeights.remove((Integer)nearestWeight);
+                rightWeights.remove((Integer)nearestWeightRemove);
+                leftWeights.add(nearestWeightRemove);
             }
 
-            leftWeights.add(nearestWeight);
-            return balanceInternal(difference, availableWeights);
+            return balanceInternal(initialWeight, difference, availableWeights);
         } else if(difference < 0) {
             //Links Seite ist schwerer
-            int nearestWeight = getNearestWeight(availableWeights, difference);
+            int nearestWeightAdd = getNearestWeight(availableWeights, difference);
+            int nearestWeightRemove = getNearestWeight(leftWeights, difference);
 
-            if(nearestWeight != -1) {
-                availableWeights.remove((Integer)nearestWeight);
+            if(isAdditionBetter(nearestWeightAdd, nearestWeightRemove, difference) || nearestWeightRemove == initialWeight) {
+                if(nearestWeightAdd != -1) {
+                    availableWeights.remove((Integer)nearestWeightAdd);
+                } else if(nearestWeightRemove != initialWeight) {
+                    nearestWeightAdd = getNearestWeight(leftWeights, difference);
+                    leftWeights.remove((Integer)nearestWeightAdd);
+                }
+
+                rightWeights.add(nearestWeightAdd);
             } else {
-                nearestWeight = getNearestWeight(leftWeights, difference);
-                leftWeights.remove((Integer)nearestWeight);
+                leftWeights.remove((Integer)nearestWeightRemove);
+                rightWeights.add(nearestWeightRemove);
             }
 
-            rightWeights.add(nearestWeight);
-            return balanceInternal(difference, availableWeights);
+            return balanceInternal(initialWeight, difference, availableWeights);
         } else {
             //Gleichgewicht ist erreicht
-            bestState = new ScaleState(new ArrayList<>(leftWeights), new ArrayList<>(rightWeights), true);
-            return true;
+            return new ScaleState(new ArrayList<>(leftWeights), new ArrayList<>(rightWeights), true);
         }
     }
 
@@ -73,8 +84,22 @@ public class Scale {
         return bestNum;
     }
 
+    public boolean isAdditionBetter(Integer nearestWeight, Integer alternative, int difference) {
+        if(nearestWeight == -1) return false;
+        return nearestWeight - difference < alternative - difference;
+    }
+
     public int getPlatformDifference() {
-        return Utils.sumIntegerList(rightWeights) - Utils.sumIntegerList(leftWeights);
+        return sumIntegerList(rightWeights) - sumIntegerList(leftWeights);
+    }
+
+    public static int sumIntegerList(ArrayList<Integer> list) {
+        int sum = 0;
+
+        for(Integer num : list)
+            sum += num;
+
+        return sum;
     }
 
     public record ScaleState(ArrayList<Integer> leftWeights, ArrayList<Integer> rightWeights, boolean done) { }

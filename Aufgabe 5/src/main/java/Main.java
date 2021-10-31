@@ -27,8 +27,8 @@ public class Main {
         System.out.println();
         System.out.println("--- Ergebnis ---");
         for(ScaleEvaluator.EvaluationResultEntry entry : result.resultEntries) {
-            if(entry.scaleBalanced()) System.out.println("Gewicht: " + entry.targetWeight() + " - " + entry.printState());
-            else System.out.println("Gewicht: " + entry.targetWeight() + ": " + entry.achievedDifference() + " - " + entry.printState());
+            if(entry.scaleBalanced()) System.out.println("Gewicht: " + entry.targetWeight() + "g - " + entry.printState());
+            else System.out.println("Gewicht: " + entry.targetWeight() + "g: " + entry.achievedDifference() + " - " + entry.printState());
         }
     }
 

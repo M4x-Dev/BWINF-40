@@ -39,13 +39,13 @@ public class ScaleEvaluator {
     public EvaluationResult evaluate() {
         EvaluationResult result = new EvaluationResult();
 
-        for(int i = 1; i < 10000 / 10; i++) {
-            Scale.ScaleState scaleResult = new Scale().balance(10 * i, availableWeights);
+        for(int i = 1; i <= 10000 / 10; i++) {
+            Scale.ScaleState scaleResult = new Scale().balance(10 * i, new ArrayList<>(availableWeights));
             result.resultEntries.add(new EvaluationResultEntry(
                     scaleResult.leftWeights(),
                     scaleResult.rightWeights(),
-                    Utils.sumIntegerList(scaleResult.rightWeights()),
-                    Utils.sumIntegerList(scaleResult.rightWeights()) - Utils.sumIntegerList(scaleResult.leftWeights()),
+                    Scale.sumIntegerList(scaleResult.rightWeights()),
+                    Scale.sumIntegerList(scaleResult.rightWeights()) - Scale.sumIntegerList(scaleResult.leftWeights()),
                     10 * i,
                     scaleResult.done()
             ));
