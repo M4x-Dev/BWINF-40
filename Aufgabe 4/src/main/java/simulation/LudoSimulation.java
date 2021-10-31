@@ -44,19 +44,28 @@ public class LudoSimulation {
     public LudoPlayer simulate(boolean startWithA) {
         if(debugOutput) System.out.println("Starting simulation...");
 
+        //Platzieren der ersten Figur des ersten Spielers auf dem Spielfeld
         playerA.playersHome--;
         playerA.playerTurns = 0;
         playerA.playerFigures.get(0).currentPosition = LudoField.POSITION_PLAYER_A_START;
         field.mainField[LudoField.POSITION_PLAYER_A_START] = playerA.playerTag;
 
+        //Platzieren der ersten Figur des zweiten Spielers auf dem Spielfeld
         playerB.playersHome--;
         playerB.playerTurns = 0;
         playerB.playerFigures.get(0).currentPosition = LudoField.POSITION_PLAYER_B_START;
         field.mainField[LudoField.POSITION_PLAYER_B_START] = playerB.playerTag;
 
-        if(!playerA.playerDice.validate()) return playerB;
-        if(!playerB.playerDice.validate()) return playerA;
+        //Abbrechen des Spieles, falls einer der Würfel ungültig ist
+        boolean diceAValid = playerA.playerDice.validate();
+        boolean diceBValid = playerB.playerDice.validate();
 
+        if(!diceAValid && !diceBValid) return null;
+
+        if(!diceAValid) return playerB;
+        if(!diceBValid) return playerA;
+
+        //Starten der rekursiven Schleife des Algorithmuses
         return makeTurn(startWithA ? playerA : playerB);
     }
 

@@ -8,7 +8,7 @@ import java.util.ArrayList;
  */
 public class Main {
 
-    public static String INPUT_FILE = "src/main/resources/wuerfel2.txt"; //Eingabedatei des Programmes
+    public static String INPUT_FILE = "src/main/resources/wuerfel0.txt"; //Eingabedatei des Programmes
     public static String OUTPUT_FILE = "output.txt"; //Ausgabedatei des Programmes
 
     public static boolean DEBUG_OUTPUT = false; //Ausgabe des Spielgeschehens
