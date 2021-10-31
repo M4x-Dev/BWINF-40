@@ -7,6 +7,10 @@ import java.util.Comparator;
 
 public class LudoSimulation {
 
+    private static final int TURNS_MAX = 1000; //Begrenzung der Spiellänge um einen StackOverflowError zu verhindern
+
+    public static boolean debugOutput = false;
+
     public final LudoPlayer playerA;
     public final LudoPlayer playerB;
 
@@ -18,17 +22,20 @@ public class LudoSimulation {
     }
 
     public LudoPlayer simulate(boolean startWithA) {
-        System.out.println("Starting simulation...");
+        if(debugOutput) System.out.println("Starting simulation...");
 
         playerA.playersHome--;
+        playerA.playerTurns = 0;
         playerA.playerFigures.get(0).currentPosition = LudoField.POSITION_PLAYER_A_START;
         field.mainField[LudoField.POSITION_PLAYER_A_START] = playerA.playerTag;
 
         playerB.playersHome--;
+        playerB.playerTurns = 0;
         playerB.playerFigures.get(0).currentPosition = LudoField.POSITION_PLAYER_B_START;
         field.mainField[LudoField.POSITION_PLAYER_B_START] = playerB.playerTag;
 
-        field.printField();
+        if(!playerA.playerDice.validate()) return playerB;
+        if(!playerB.playerDice.validate()) return playerA;
 
         return makeTurn(startWithA ? playerA : playerB);
     }
@@ -37,22 +44,29 @@ public class LudoSimulation {
         int moves = player.playerDice.roll();
         player.playerTurns++;
 
-        field.printField();
-        System.out.println("Player " + player.playerTag + " will move " + moves + " spaces.");
-        System.out.println("Figures on field:");
-        for(int i = 0; i < player.playerFigures.size(); i++) System.out.println("Figure: " + player.playerFigures.get(i).currentPosition + " (" + player.playerFigures.get(i).distanceFromStart + ")");
-        System.out.println();
+        if(player.playerTurns > TURNS_MAX || getOtherPlayer(player).playerTurns > TURNS_MAX) {
+            if(debugOutput) System.err.println("Das Spiel kann nicht in endlicher Zeit beendet werden, da einer der beiden Spieler das Ziel nie erreichen wird!");
+            return player.playersHome < getOtherPlayer(player).playersHome ? player : getOtherPlayer(player);
+        }
 
-        System.out.println("Goal of player A: " + Arrays.toString(playerA.playersGoal));
-        System.out.println("Goal of player B: " + Arrays.toString(playerB.playersGoal));
+        if(debugOutput) {
+            field.printField();
+            System.out.println("Player " + player.playerTag + " will move " + moves + " spaces.");
+            System.out.println("Figures on field:");
+            for(int i = 0; i < player.playerFigures.size(); i++) System.out.println("Figure: " + player.playerFigures.get(i).currentPosition + " (" + player.playerFigures.get(i).distanceFromStart + ")");
+            System.out.println();
+
+            System.out.println("Goal of player A: " + Arrays.toString(playerA.playersGoal));
+            System.out.println("Goal of player B: " + Arrays.toString(playerB.playersGoal));
+        }
 
         if(player.playersHome == 0 && player.goalComplete()) {
             if(getOtherPlayer(player).playersHome == 0 && getOtherPlayer(player).goalComplete()) {
-                System.out.println("DRAW! Both players have all their figures in the goals.");
+                if(debugOutput) System.out.println("DRAW! Both players have all their figures in the goals.");
                 return player;
             }
 
-            System.out.println("Player " + player.playerTag + " won the game! Turns needed: " + player.playerTurns);
+            if(debugOutput) System.out.println("Player " + player.playerTag + " won the game! Turns needed: " + player.playerTurns);
             return player;
         }
 
@@ -96,6 +110,20 @@ public class LudoSimulation {
             int finalPosition = targetFigure.currentPosition + moves;
             finalPosition = finalPosition > field.mainField.length - 1 ? finalPosition - (field.mainField.length - 1) : finalPosition;
 
+            if(targetFigure.currentPosition < 0 || targetFigure.distanceFromStart > LudoField.ROUND_COMPLETE) {
+                if(targetFigure.distanceFromStart + moves >= LudoField.ROUND_COMPLETE + player.playersGoal.length)
+                    continue;
+
+                int currentGoalPosition = targetFigure.distanceFromStart - LudoField.ROUND_COMPLETE;
+                int positionInGoal = (targetFigure.distanceFromStart + moves) - LudoField.ROUND_COMPLETE;
+                if(player.playersGoal[positionInGoal].equals(LudoField.FIELD_EMPTY)) {
+                    player.playersGoal[currentGoalPosition] = LudoField.FIELD_EMPTY;
+                    player.playersGoal[positionInGoal] = player.playerTag;
+                    targetFigure.moveToGoal(positionInGoal);
+                    return makeTurn(moves == 6 ? player : getOtherPlayer(player));
+                } else continue;
+            }
+
             if(targetFigure.distanceFromStart + moves >= LudoField.ROUND_COMPLETE) {
                 if(targetFigure.distanceFromStart + moves >= LudoField.ROUND_COMPLETE + player.playersGoal.length)
                     continue;
@@ -106,7 +134,7 @@ public class LudoSimulation {
                     field.mainField[targetFigure.currentPosition] = LudoField.FIELD_EMPTY;
                     targetFigure.moveToGoal(positionInGoal);
                     return makeTurn(moves == 6 ? player : getOtherPlayer(player));
-                }
+                } else continue;
             }
 
             if(field.mainField[finalPosition].equals(LudoField.FIELD_EMPTY)) {
@@ -147,14 +175,14 @@ public class LudoSimulation {
         Collections.reverse(player.playerFigures);
 
         for(LudoFigure remainingFigure : player.playerFigures) {
-            if(remainingFigure.currentPosition != player.playerStartPosition && remainingFigure.currentPosition > -1 && remainingFigure.currentPosition <= 40)
+            if(remainingFigure.currentPosition != player.playerStartPosition && remainingFigure.currentPosition != -1 && remainingFigure.currentPosition <= 40)
                 finalList.add(remainingFigure);
         }
 
         return finalList;
     }
 
-    private LudoPlayer getOtherPlayer(LudoPlayer currentPlayer) {
+    public LudoPlayer getOtherPlayer(LudoPlayer currentPlayer) {
         return currentPlayer == playerA ? playerB : playerA;
     }
 

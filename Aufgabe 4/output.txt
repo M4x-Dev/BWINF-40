@@ -1,0 +1,8 @@
+Würfel 1 [1, 2, 3, 4, 5, 6] : 29 Siege
+Würfel 2 [1, 2, 3, 4, 5, 6, 7, 8] : 32 Siege
+Würfel 3 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : 18 Siege
+Würfel 4 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] : 25 Siege
+Würfel 5 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] : 6 Siege
+Würfel 6 [1, 2, 5, 6] : 40 Siege
+
+Ergebnis: Der beste Würfel ist der Würfel [1, 2, 5, 6] mit 40 Siegen.

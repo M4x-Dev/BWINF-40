@@ -1,5 +1,6 @@
 package simulation;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Random;
  */
 public class LudoDice {
 
-    private int[] sides; //Seiten des Würfels
+    public ArrayList<Integer> sides; //Seiten des Würfels
 
     /**
      * Konstruktor, welcher einen Würfel aus einer Zeile aus einer Textdatei einließt.
@@ -17,9 +18,9 @@ public class LudoDice {
      */
     public LudoDice(String fileLine) {
         try {
-            String[] rawSides = fileLine.split(" ");
-            sides = new int[rawSides.length];
-            for(int i = 0; i < rawSides.length; i++) sides[i] = Integer.parseInt(rawSides[i]);
+            String[] rawSides = fileLine.substring(fileLine.indexOf(" ") + 1).split(" ");
+            sides = new ArrayList<>();
+            for (String rawSide : rawSides) sides.add(Integer.parseInt(rawSide));
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Something went wrong :/ - " + e.getMessage());
@@ -33,7 +34,18 @@ public class LudoDice {
      * @return Gibt eine Seite des Würfels zurück.
      */
     public int roll() {
-        return sides[new Random().nextInt(sides.length)];
+        return sides.get(new Random().nextInt(sides.size()));
+    }
+
+    /**
+     * Funktion, welche einen Würfel validiert.
+     * Damit ein Würfel gültig ist, muss mindestens eine der Seiten des Würfels eine 6 haben.
+     * Andernfalls kann das Spiel nicht gespielt werden, da die B-Felder nicht verlassen werden können.
+     *
+     * @return Gibt zurück, ob der Würfel gültig ist.
+     */
+    public boolean validate() {
+        return sides.contains(6);
     }
 
     /**
@@ -42,7 +54,7 @@ public class LudoDice {
      * @return Gibt den normalen Spielwürfel zurück.
      */
     public static LudoDice sixSided() {
-        return new LudoDice("1 2 3 4 5 6");
+        return new LudoDice("6 1 2 3 4 5 6");
     }
 
 }
