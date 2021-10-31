@@ -1,6 +1,7 @@
 package simulation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -18,8 +19,11 @@ public class LudoDice {
      */
     public LudoDice(String fileLine) {
         try {
+            //Wegschneiden der ersten Zahl, da diese die Anzahl an Seiten angibt
             String[] rawSides = fileLine.substring(fileLine.indexOf(" ") + 1).split(" ");
             sides = new ArrayList<>();
+
+            //Speichern aller Seiten des Würfels
             for (String rawSide : rawSides) sides.add(Integer.parseInt(rawSide));
         } catch (Exception e) {
             e.printStackTrace();
@@ -34,6 +38,7 @@ public class LudoDice {
      * @return Gibt eine Seite des Würfels zurück.
      */
     public int roll() {
+        //Zufällige Seite des Würfels wird ermittelt
         return sides.get(new Random().nextInt(sides.size()));
     }
 
@@ -46,6 +51,19 @@ public class LudoDice {
      */
     public boolean validate() {
         return sides.contains(6);
+    }
+
+    /**
+     * Funktion, welche die kleinste Augenzahl auf dem Würfel zurückgibt.
+     *
+     * @return Gibt die kleinste Augenzahl auf dem Würfel zurück.
+     */
+    public int getSmallestSide() {
+        ArrayList<Integer> sideCopy = new ArrayList<>(sides);
+
+        //Seiten werden der Größe nach sortiert, sodass die kleinste Zahl an erster Stelle steht
+        Collections.sort(sideCopy);
+        return sideCopy.get(0);
     }
 
     /**
