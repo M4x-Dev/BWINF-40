@@ -3,8 +3,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ScaleEvaluator {
 
@@ -39,14 +37,15 @@ public class ScaleEvaluator {
     public EvaluationResult evaluate() {
         EvaluationResult result = new EvaluationResult();
 
-        for(int i = 1; i <= 10000 / 10; i++) {
-            Scale.ScaleState scaleResult = new Scale().balance(10 * i, new ArrayList<>(availableWeights));
+        for(int i = 1; i <= 100 / 10; i++) {
+            int targetWeight = 10 * i;
+            Scale.ScaleState scaleResult = new Scale().balance(targetWeight, new ArrayList<>(availableWeights));
             result.resultEntries.add(new EvaluationResultEntry(
                     scaleResult.leftWeights(),
                     scaleResult.rightWeights(),
                     Scale.sumIntegerList(scaleResult.rightWeights()),
                     Scale.sumIntegerList(scaleResult.rightWeights()) - Scale.sumIntegerList(scaleResult.leftWeights()),
-                    10 * i,
+                    targetWeight,
                     scaleResult.done()
             ));
         }

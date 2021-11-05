@@ -3,7 +3,7 @@
  */
 public class Main {
 
-    public static String INPUT_FILE = "src/main/resources/gewichtsstuecke0.txt";
+    public static String INPUT_FILE = "src/main/resources/gewichtsstuecke5.txt";
     public static String OUTPUT_FILE = "output.txt";
 
     /**
