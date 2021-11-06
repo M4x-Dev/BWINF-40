@@ -3,10 +3,10 @@
  */
 public class Main {
 
-    public static boolean DEBUG_MODE = false;
+    public static boolean DEBUG_MODE = false; //Debugmodus
 
-    public static String INPUT_FILE = "src/main/resources/gewichtsstuecke0.txt";
-    public static String OUTPUT_FILE = "output.txt";
+    public static String INPUT_FILE = "src/main/resources/gewichtsstuecke0.txt"; //Eingabedatei
+    public static String OUTPUT_FILE = "output.txt"; //Ausgabedatei
 
     /**
      * Hauptmethode des Programmes.
@@ -33,6 +33,9 @@ public class Main {
             if(entry.scaleBalanced()) System.out.println("Gewicht: " + entry.targetWeight() + "g - " + entry.printState());
             else System.out.println("Gewicht: " + entry.targetWeight() + "g: " + entry.achievedDifference() + " - " + entry.printState());
         }
+        System.out.println();
+        long resolvedWeights = result.resultEntries.stream().filter(ScaleEvaluator.EvaluationResultEntry::scaleBalanced).count();
+        System.out.println("Von allen Gewichten zwischen 10g und 10kg konnte" + (resolvedWeights == 1 ? "" : "n") + " insgesamt " + resolvedWeights + " Gewicht" + (resolvedWeights == 1 ? "" : "e") + " abgebildet werden.");
         result.export(OUTPUT_FILE);
     }
 
