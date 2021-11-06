@@ -1,7 +1,5 @@
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class ScaleEvaluator {
@@ -37,7 +35,7 @@ public class ScaleEvaluator {
     public EvaluationResult evaluate() {
         EvaluationResult result = new EvaluationResult();
 
-        for(int i = 1; i <= 100 / 10; i++) {
+        for(int i = 1; i <= 10000 / 10; i++) {
             int targetWeight = 10 * i;
             Scale.ScaleState scaleResult = new Scale().balance(targetWeight, new ArrayList<>(availableWeights));
             result.resultEntries.add(new EvaluationResultEntry(
@@ -56,6 +54,24 @@ public class ScaleEvaluator {
     public static class EvaluationResult {
 
         final ArrayList<EvaluationResultEntry> resultEntries = new ArrayList<>();
+
+        public void export(String filePath) {
+            try {
+                //Schreiben der Inhalte in die Datei
+                PrintWriter outputWriter = new PrintWriter(filePath, StandardCharsets.UTF_8);
+                resultEntries.forEach(entry -> {
+                    if(entry.scaleBalanced) outputWriter.println(entry.targetWeight + "g: " + entry.leftWeights + " --- " + entry.rightWeights);
+                    else outputWriter.println(entry.achievedWeight + "g/" + entry.targetWeight + "g: " + entry.leftWeights + " --- " + entry.rightWeights);
+                });
+
+                //Schließen der benötigten Ressourcen
+                outputWriter.flush();
+                outputWriter.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("Something went wrong :/ - " + e.getMessage());
+            }
+        }
 
     }
 

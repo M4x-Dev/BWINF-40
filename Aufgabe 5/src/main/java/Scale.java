@@ -5,7 +5,7 @@ import java.util.ArrayList;
  */
 public class Scale {
 
-    private static final int NEGATIVE_RECURSIONS_MAX = 1000;
+    private static final int NEGATIVE_RECURSIONS_MAX = 10;
 
     public final ArrayList<Integer> leftWeights = new ArrayList<>(); //Linke Seite der Waage
     public final ArrayList<Integer> rightWeights = new ArrayList<>(); //Rechte Seite der Waage
@@ -13,57 +13,67 @@ public class Scale {
     private ScaleState bestState; //Zustand der Waage, welcher am nächsten an das Zielgewicht herankam
 
     public ScaleState balance(int initialWeight, ArrayList<Integer> availableWeights) {
-        System.out.println();
+        println("");
         return balanceInternal(initialWeight, initialWeight, availableWeights, 0).finalize(initialWeight); //Ausbalancieren der Waage
     }
 
     public ScaleState balanceInternal(int initialWeight, int lastDifference, ArrayList<Integer> availableWeights, int negativeRecursions) {
         int difference = getPlatformDifference(initialWeight);
 
-        System.out.println(leftWeights + " --- " + rightWeights + " | " + difference + "; last: " + lastDifference);
+        println(leftWeights + " --- " + rightWeights + " | " + difference + "; last: " + lastDifference);
 
-        if(bestState == null || (Math.abs(difference) <= Math.abs(bestState.difference(initialWeight)))) bestState = new ScaleState(new ArrayList<>(leftWeights), new ArrayList<>(rightWeights), false);
+        if(bestState == null || (Math.abs(difference) < Math.abs(bestState.difference(initialWeight)))) bestState = new ScaleState(new ArrayList<>(leftWeights), new ArrayList<>(rightWeights), false);
         else negativeRecursions++;
 
         if(negativeRecursions > NEGATIVE_RECURSIONS_MAX) return bestState;
 
         if(difference > 0) {
             //Rechte Seite ist schwerer
-            System.out.println("Right side is heavier");
+            println("Right side is heavier");
             int nearestWeightAdd = getNearestWeight(availableWeights, difference);
             int nearestWeightRemove = getNearestWeight(rightWeights, difference);
 
-            if(isAdditionBetter(nearestWeightAdd, nearestWeightRemove, difference) || availableWeights.size() > 0) {
-                if(nearestWeightAdd != -1) {
-                    System.out.println("Adding " + nearestWeightAdd + " from open set");
-                    availableWeights.remove((Integer)nearestWeightAdd);
+            switch (getBestAction(nearestWeightAdd, nearestWeightRemove, initialWeight, false)) {
+                case Add -> {
+                    println("Adding " + nearestWeightAdd + " from open set");
+                    availableWeights.remove((Integer) nearestWeightAdd);
                     leftWeights.add(nearestWeightAdd);
                 }
-            } else {
-                System.out.println("Removing " + nearestWeightRemove + " from right side");
-                rightWeights.remove((Integer)nearestWeightRemove);
-                if(isSwappingBetter(nearestWeightRemove, difference, initialWeight, false)) leftWeights.add(nearestWeightRemove);
-                else availableWeights.add(nearestWeightRemove);
+                case Remove -> {
+                    println("Removing " + nearestWeightRemove + " from right side");
+                    rightWeights.remove((Integer) nearestWeightRemove);
+                    availableWeights.add(nearestWeightRemove);
+                }
+                case Swap -> {
+                    println("Swapping " + nearestWeightRemove + " from right side to left side");
+                    rightWeights.remove((Integer) nearestWeightRemove);
+                    leftWeights.add(nearestWeightRemove);
+                }
             }
 
             return balanceInternal(initialWeight, difference, availableWeights, negativeRecursions);
         } else if(difference < 0) {
             //Links Seite ist schwerer
-            System.out.println("Left side is heavier");
+            println("Left side is heavier");
             int nearestWeightAdd = getNearestWeight(availableWeights, difference);
             int nearestWeightRemove = getNearestWeight(leftWeights, difference);
 
-            if(isAdditionBetter(nearestWeightAdd, nearestWeightRemove, difference) || availableWeights.size() > 0) {
-                if(nearestWeightAdd != -1) {
-                    System.out.println("Adding " + nearestWeightAdd + " from open set");
+            switch (getBestAction(nearestWeightAdd, nearestWeightRemove, initialWeight, true)) {
+                case Add -> {
+                    println("Adding " + nearestWeightAdd + " from open set");
                     availableWeights.remove((Integer)nearestWeightAdd);
                     rightWeights.add(nearestWeightAdd);
                 }
-            } else {
-                System.out.println("Removing " + nearestWeightRemove + " from left side");
-                leftWeights.remove((Integer)nearestWeightRemove);
-                if(isSwappingBetter(nearestWeightRemove, difference, initialWeight, true)) rightWeights.add(nearestWeightRemove);
-                else availableWeights.add(nearestWeightRemove);
+                case Remove -> {
+                    println("Removing " + nearestWeightRemove + " from left side");
+                    leftWeights.remove((Integer)nearestWeightRemove);
+                    availableWeights.add(nearestWeightRemove);
+                }
+                case Swap -> {
+                    println("Swapping " + nearestWeightRemove + " from left side to right side");
+                    leftWeights.remove((Integer)nearestWeightRemove);
+                    rightWeights.add(nearestWeightRemove);
+                }
             }
 
             return balanceInternal(initialWeight, difference, availableWeights, negativeRecursions);
@@ -88,25 +98,41 @@ public class Scale {
         return bestNum;
     }
 
-    public boolean isAdditionBetter(Integer nearestWeight, Integer alternative, int difference) {
-        if(nearestWeight == -1) return false;
-        if(alternative == -1) return true;
-        return nearestWeight - difference < alternative - difference;
+    public enum Action {
+        Add,
+        Remove,
+        Swap
     }
 
-    public boolean isSwappingBetter(Integer remove, int difference, int targetWeight, boolean left) {
+    public Action getBestAction(Integer possibleAdd, Integer possibleRemove, int targetWeight, boolean leftHeavier) {
         ArrayList<Integer> dummyLeftWeights = new ArrayList<>(leftWeights);
         ArrayList<Integer> dummyRightWeights = new ArrayList<>(rightWeights);
 
-        if(left) dummyLeftWeights.remove(remove);
-        else dummyRightWeights.remove(remove);
-        int differenceWithoutAdding = getPlatformDifference(dummyLeftWeights, dummyRightWeights, targetWeight);
+        if(leftHeavier) dummyRightWeights.add(possibleAdd);
+        else dummyLeftWeights.add(possibleAdd);
+        int differenceAdd = possibleAdd != -1 ? Math.abs(getPlatformDifference(dummyLeftWeights, dummyRightWeights, targetWeight)) : 1000;
 
-        if(left) dummyRightWeights.add(remove);
-        else dummyLeftWeights.add(remove);
-        int differenceWithAdding = getPlatformDifference(dummyLeftWeights, dummyRightWeights, targetWeight);
+        dummyLeftWeights = new ArrayList<>(leftWeights);
+        dummyRightWeights = new ArrayList<>(rightWeights);
 
-        return Math.abs(differenceWithAdding) < Math.abs(differenceWithoutAdding);
+        if(leftHeavier) dummyLeftWeights.remove(possibleRemove);
+        else dummyRightWeights.remove(possibleRemove);
+        int differenceRemove = possibleRemove != -1 ? Math.abs(getPlatformDifference(dummyLeftWeights, dummyRightWeights, targetWeight)) : 1000;
+
+        if(leftHeavier) dummyRightWeights.add(possibleRemove);
+        else dummyLeftWeights.add(possibleRemove);
+        int differenceSwap = possibleRemove != -1 ? Math.abs(getPlatformDifference(dummyLeftWeights, dummyRightWeights, targetWeight)) : 1000;
+
+        int bestDifference = differenceAdd;
+        if(differenceRemove < bestDifference) bestDifference = differenceRemove;
+        if(differenceSwap < bestDifference) bestDifference = differenceSwap;
+
+        if(possibleRemove == -1) return Action.Add;
+        if(possibleAdd == -1) bestDifference = differenceRemove;
+
+        if(bestDifference == differenceAdd) return Action.Add;
+        else if(bestDifference == differenceRemove) return Action.Remove;
+        else return Action.Swap;
     }
 
     public int getPlatformDifference(int targetWeight) {
@@ -137,6 +163,10 @@ public class Scale {
             return sumIntegerList(rightWeights) - (sumIntegerList(leftWeights) + targetWeight);
         }
 
+    }
+
+    public static void println(String line) {
+        if(Main.DEBUG_MODE) System.out.println(line);
     }
 
 }

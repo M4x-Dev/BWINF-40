@@ -3,7 +3,9 @@
  */
 public class Main {
 
-    public static String INPUT_FILE = "src/main/resources/gewichtsstuecke5.txt";
+    public static boolean DEBUG_MODE = false;
+
+    public static String INPUT_FILE = "src/main/resources/gewichtsstuecke0.txt";
     public static String OUTPUT_FILE = "output.txt";
 
     /**
@@ -14,6 +16,7 @@ public class Main {
     public static void main(String[] args) {
         if(args.length > 0) INPUT_FILE = args[0]; //Eingabedatei kann auch als Konsolenparameter angegeben werden
         if(args.length > 1) OUTPUT_FILE = args[1]; //Ausgabedatei kann auch als Konsolenparameter angegeben werden
+        if(args.length > 2) DEBUG_MODE = Boolean.parseBoolean(args[2]); //Debug-Modus kann durch Konsolenparameter aktiviert werden
 
         //Laden der Eingabedatei
         System.out.println();
@@ -30,6 +33,7 @@ public class Main {
             if(entry.scaleBalanced()) System.out.println("Gewicht: " + entry.targetWeight() + "g - " + entry.printState());
             else System.out.println("Gewicht: " + entry.targetWeight() + "g: " + entry.achievedDifference() + " - " + entry.printState());
         }
+        result.export(OUTPUT_FILE);
     }
 
 }
