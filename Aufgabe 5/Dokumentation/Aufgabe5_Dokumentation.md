@@ -6,6 +6,8 @@ Schreibe ein Programm, das solche Fragestellungen beantwortet. Dein Programm sol
 
 ## Lösungsidee
 
+Das Hauptziel des Algorithmuses ist, anhand eines gegebenen Gewichtes auf der linken Seite einer Waage und einer Liste an verfügbaren Gewichten eine Marktwaage auszubalancieren. Dabei dürfen Gewichte sowohl auf die linke, als auch auf die rechte Seite gelegt werden. Der Vorgang wird für alle Gewichte zwischen 10g und 10kg in 10g-Schritten ausgeführt.
+
 ## Verwendung des Programmes
 
 Das Programm zur Lösung dieses Problemes befindet sich in der Datei "Aufgabe_5.jar". Das Programm kann mit der Befehlszeile (CMD auf Windows bzw. Terminal auf MacOS) ausgeführt werden. Dafür navigiert man zuerst in den Ordner der JAR-Datei (hier Aufgabe 5).
@@ -13,3 +15,1255 @@ Anschließend führt man den Befehl "java -jar Aufgabe_5.jar \<Eingabedatei> \<A
 Die Ausgabedatei ist optional. Wenn keine Ausgabedatei angegeben ist, dann wird das Ergebnis als "output.txt" in dem Ordner der JAR-Datei gespeichert.
 
 ## Implementierung
+
+### Einlesen der Beispieldateien
+
+```java
+//Auslesen der Inhalte der Datei
+String line;
+while((line = fileReader.readLine()) != null) contentBuilder.append(line).append("\n");
+String[] fileContent = contentBuilder.toString().split("\n");
+
+//Interpretieren der Daten
+int weightAmount = Integer.parseInt(fileContent[0]);
+
+//Verfügbaren Gewichte werden der Liste hinzugefügt
+for(int i = 0; i < weightAmount; i++) {
+    String[] splitContent = fileContent[1 + i].split(" ");
+
+    for(int a = 0; a < Integer.parseInt(splitContent[1]); a++) {
+        //Eigentliches Gewicht hinzufügen
+        availableWeights.add(new ScaleWeight(Integer.parseInt(splitContent[0])));
+    }
+}
+```
+
+Die Beispieldateien werden durch die Klasse "ScaleEvaluator" eingelesen. Dabei werden die verfügbaren Gewichte in einer Liste gespeichert.
+Dabei stellt die erste Teile der Datei die Gesamtanzahl an Gewichten dar.
+Die folgenden Zeilen beeinhalten die einzelnen Gewichte, wobei hier die erste Zahl das Gewicht in Gramm und die zweite Zahl die Menge des Gewichtes angibt.
+
+### Ablauf der Auswertung
+
+```java
+public EvaluationResult evaluate() {
+    EvaluationResult result = new EvaluationResult(); //Instanz, welche das Ergebnis beeinhalten wird
+
+    //Schleife, welche alle Gewichte zwischen 10g und 10kg ausprobiert
+    for(int i = 1; i <= 10000 / 10; i++) {
+        int targetWeight = 10 * i; //Zielgewicht
+        Scale.ScaleState scaleResult = new Scale().balance(targetWeight, new ArrayList<>(availableWeights));
+        result.resultEntries.add(new EvaluationResultEntry(
+                //Gewichte auf der linken Seite
+                scaleResult.leftWeights(),
+                //Gewichte auf der rechten Seite
+                scaleResult.rightWeights(),
+                //Summe der Gewichte auf der rechten Seite
+                Scale.sumWeights(scaleResult.rightWeights()),
+                //Differenz zum Zielgewicht, falls dieses nicht erreicht werden konnte
+                Scale.sumWeights(scaleResult.rightWeights()) - Scale.sumWeights(scaleResult.leftWeights()),
+                //Zielgewicht
+                targetWeight,
+                //Konnte das Zielgewicht erreicht werden?
+                scaleResult.balanced()
+        ));
+    }
+
+    return result; //Rückgabe des Ergebnisses
+}
+```
+
+Die Funktion EvaluationResult#evaluate stellt die Hauptfunktion des Algorithmuses zur Lösung des gegebenen Problemes dar. Dazu erstellt der Algorithmus eine neue Instanz der "EvaluationResult"-Klasse, in welcher die Ergebnisse für alle Testgewichte gespeichert werden.
+Anschließend durchläuft eine Schleife alle Gewichte von 10g bis 10kg in 10g-Schritten. Diese Schleife verwendet ein "Scale"-Objekt zur Simulation des Problemes. Diese Klasse stellt eine Waage dar, welche ausbalanciert wird. Anschließend wird das Ergebnis der Simulation in dem Ergebnis-Objekt gespeichert.
+Zum Schluss wird dieses Objekt zurückgegeben.
+
+### Ablauf der eigentlichen Simulation
+
+```java
+//Differenz der beiden Seiten der Waage
+int difference = getPlatformDifference(initialWeight);
+
+//Wenn das Zielgewicht größer ist, als die Summe der verfügbaren Gewichte, kann die Waage nicht ausbalanciert werden
+if(initialWeight > sumWeights(availableWeights) && rightWeights.size() == 0) return new ScaleState(new ArrayList<>(leftWeights), new ArrayList<>(availableWeights), false);
+
+if(bestState == null || (Math.abs(difference) < Math.abs(bestState.difference(initialWeight)))) bestState = new ScaleState(new ArrayList<>(leftWeights), new ArrayList<>(rightWeights), false);
+else negativeRecursions++;
+
+//Rückgabe des Zustandes, wenn die Waage nicht weiter ausbalanciert werden kann.
+if(negativeRecursions > NEGATIVE_RECURSIONS_MAX) return bestState;
+```
+
+Der eigentliche Algorithmus zum Ausbalancieren der Marktwaage besteht aus einer Funktion, welche rekursiv ausgeführt wird, bis entweder die Waage erfolgreich ausbalanciert werden konnte, oder eine bestimmte Abbruchbedingung erfüllt wurde, damit der Algorithmus nicht unendlich lange läuft.  
+Zu Beginn dieser Funktion werden diese Abbruchbedingungen überprüft. Dafür wird zunächst die Differenz der beiden Seiten der Waage ausgerechnet. Dazu wird die Summe aller Gewichte von der linken Seite von der Summe aller Gewichte auf der rechten Seite subtrahiert.  
+Anschließend wird die Abbruchbedingung überprüft. Der Algorithmus wird abgebrochen, wenn die Funktion 10-mal durchlaufen wurde und das Ergebnis, also die erzielte Differenz zum Zielgewicht dabei größer geworden ist. Daraus lässt sich schließen, dass die Waage für dieses Zielgewicht nicht ausbalanciert werden kann.  
+Des Weiteren wird der Algorithmus sofort abgebrochen, wenn das Zielgewicht größer ist, als die Summe aller verfügbaren Gewichte. In diesem Fall kann die Waage auch nicht ausbalanciert werden. Als Ergebnis werden alle verfügbaren Gewichte auf die rechte Seite gelegt, da dies am nähesten an das Zielgewicht heranführt.
+
+Danach überprüft der Algorithmus die Differenz der beiden Seiten, welche zuvor berechnet wurde.
+
+```java
+//Rechte Seite ist schwerer
+ScaleWeight nearestWeightAdd = getNearestWeight(availableWeights, difference); //Gewicht, welches hinzugefügt werden könnte
+ScaleWeight nearestWeightRemove = getNearestWeight(rightWeights, difference); //Gewicht, welches heruntergenommen werden könnte
+ScaleWeight nearestWeightSwap = getNearestWeight(rightWeights, difference / 2); //Gewicht, welches verschoben werden könnte
+
+//Berechnen der optimalsten Aktion, welche die Waage am weitesten ausbalanciert
+switch (getBestAction(nearestWeightAdd, nearestWeightRemove, nearestWeightSwap, initialWeight, false)) {
+    case Add -> {
+        //Das Gewicht wird auf die linke Seite der Waage gestellt
+        availableWeights.remove(nearestWeightAdd);
+        leftWeights.add(nearestWeightAdd);
+        lastMovedWeight = nearestWeightAdd;
+    }
+    case Remove -> {
+        //Das Gewicht wird von der rechten Seite der Waage heruntergenommen
+        rightWeights.remove(nearestWeightRemove);
+        availableWeights.add(nearestWeightRemove);
+        lastMovedWeight = nearestWeightRemove;
+    }
+    case Swap -> {
+        //Das Gewicht wird von der rechten Seite auf die linke Seite der Waage gestellt
+        rightWeights.remove(nearestWeightSwap);
+        leftWeights.add(nearestWeightSwap);
+        lastMovedWeight = nearestWeightSwap;
+    }
+}
+
+//Funktion wird rekursiv aufgerufen
+return balanceInternal(initialWeight, availableWeights, negativeRecursions);
+```
+
+Falls die Different kleiner als 0 ist, dann muss die rechte Seite der Waage schwerer sein. Als nächstes überprüft der Algorithmus alle möglichen Züge, welche er nun ausführen könnte und wählt daraus die Möglichkeit aus, welche die Differenz am kleinsten werden lässt. Um den besten Zug zu ermitteln wird die Funktion Scale#getBestAction verwendet.
+
+```java
+public Action getBestAction(ScaleWeight possibleAdd, ScaleWeight possibleRemove, ScaleWeight possibleSwap, int targetWeight, boolean leftHeavier) {
+    //Berechnen der neuen Differenz, wenn das Gewicht der Waage hinzugefügt wird
+    ArrayList<ScaleWeight> dummyLeftWeights = new ArrayList<>(leftWeights);
+    ArrayList<ScaleWeight> dummyRightWeights = new ArrayList<>(rightWeights);
+
+    if(leftHeavier) dummyRightWeights.add(possibleAdd);
+    else dummyLeftWeights.add(possibleAdd);
+    int differenceAdd = possibleAdd.value != -1 ? Math.abs(getPlatformDifference(dummyLeftWeights, dummyRightWeights, targetWeight)) : 1000;
+
+    //Berechnen der neuen Differenz, wenn das Gewicht von der Waage entfernt wird
+    dummyLeftWeights = new ArrayList<>(leftWeights);
+    dummyRightWeights = new ArrayList<>(rightWeights);
+
+    if(leftHeavier) dummyLeftWeights.remove(possibleRemove);
+    else dummyRightWeights.remove(possibleRemove);
+    int differenceRemove = possibleRemove.value != -1 ? Math.abs(getPlatformDifference(dummyLeftWeights, dummyRightWeights, targetWeight)) : 1000;
+
+    //Berechnen der neuen Differenz, wenn das Gewicht von der einen Seite auf die andere Seite der Waage verschoben wird
+    dummyLeftWeights = new ArrayList<>(leftWeights);
+    dummyRightWeights = new ArrayList<>(rightWeights);
+
+    if(leftHeavier) dummyLeftWeights.remove(possibleSwap);
+    else dummyRightWeights.remove(possibleSwap);
+    if(leftHeavier) dummyRightWeights.add(possibleSwap);
+    else dummyLeftWeights.add(possibleSwap);
+
+    int differenceSwap = possibleSwap.value != -1 ? Math.abs(getPlatformDifference(dummyLeftWeights, dummyRightWeights, targetWeight)) : 1000;
+
+    //Herausfinden der besten Differenz
+    int bestDifference = differenceAdd;
+    if(differenceRemove < bestDifference) bestDifference = differenceRemove;
+    if(differenceSwap < bestDifference) bestDifference = differenceSwap;
+
+    //Abbruchbedingungen
+    if(possibleRemove.value == -1 && possibleAdd.value == -1 && possibleSwap.value == -1) {
+        //Keine Zugmöglichkeit
+        return Action.None;
+    }
+
+    //Abbruchbedingungen
+    if(possibleRemove.value == -1) return Action.Add;
+    if(possibleAdd.value == -1) bestDifference = differenceRemove;
+
+    //Zurückgeben der besten nächsten Aktion
+    if(bestDifference == differenceAdd) return Action.Add;
+    else if(bestDifference == differenceRemove) return Action.Remove;
+    else return Action.Swap;
+}
+```
+
+Diese Funktion überprüft alle Zugmöglichkeiten vom momentanen Zustand aus und gibt den Zug zurück, welcher die Waage am weitesten ausbalanciert und die Differenz somit am kleinsten werden lässt.  
+Die folgenden Zugmöglichkeiten stehen zur Auswahl:
+ - eines der verfügbaren Gewichte wird auf die leichtere Seite der Waage gestellt (Add - Hinzufügen)
+ - ein Gewicht wird von der schwereren Seite entfernt (Remove - Entfernen)
+ - ein Gewicht wird von der schwereren Seite auf die leichtere Seite gestellt (Swap - Tauschen)
+
+Um die beste Möglichkeit zu ermitteln, werden alle genannten Möglichkeiten mithilfe einer Kopie der Waage ausprobiert und zwischengespeichert. Zum Schluss wird dann der Zug zurückgegeben, welcher die Differenz am kleinsten werden lassen hat. Dieser Zug wird dann durch den Algorithmus auf der eigentlichen Waage ausgeführt.
+
+```java
+ArrayList<ScaleWeight> workingSource = new ArrayList<>(source); //Kopieren der Liste
+
+//Entfernen des Gewichtes, welches zuletzt bewegt wurde, damit dieses nicht erneut verwendet werden kann
+if(workingSource.contains(lastMovedWeight) && workingSource.size() > 1) workingSource.remove(lastMovedWeight);
+
+//Initialisieren der lokalen Variablen
+ScaleWeight bestWeight = workingSource.size() > 0 ? workingSource.get(0) : new ScaleWeight(-1);
+int bestDiff = workingSource.size() > 0 ? Math.abs(workingSource.get(0).value - Math.abs(difference)) : -1;
+
+//Ermitteln des besten Gewichtes
+for(ScaleWeight weight : workingSource) {
+    int diff = Math.abs(weight.value - Math.abs(difference));
+    if(diff < bestDiff) {
+        bestWeight = weight;
+        bestDiff = diff;
+    }
+}
+
+//Rückgabe des besten Gewichtes
+return bestWeight;
+```
+
+Die Funktion Scale#getBestMove verwendet eine Hilfsfunktion, um das Gewicht zu ermitteln, welches die Differenz am weitesten ausgleichen kann. Wenn die Differenz also -100g ist und damit die rechte Seite schwerer ist, dann wird das Gewicht 100g ausgewählt, falls dies in der Liste der verfügbaren Gewichte ist. Wenn dieses Gewicht nicht existiert, dann wird das Gewicht ausgewählt, welches am nächsten an diesen 100g ist.
+
+```java
+//Links Seite ist schwerer
+ScaleWeight nearestWeightAdd = getNearestWeight(availableWeights, difference);
+ScaleWeight nearestWeightRemove = getNearestWeight(leftWeights, difference);
+ScaleWeight nearestWeightSwap = getNearestWeight(leftWeights, difference / 2);
+
+//Berechnen der optimalsten Aktion, welche die Waage am weitesten ausbalanciert
+switch (getBestAction(nearestWeightAdd, nearestWeightRemove, nearestWeightSwap, initialWeight, true)) {
+    case Add -> {
+        //Das Gewicht wird auf die rechte Seite der Waage gestellt
+        availableWeights.remove(nearestWeightAdd);
+        rightWeights.add(nearestWeightAdd);
+        lastMovedWeight = nearestWeightAdd;
+    }
+    case Remove -> {
+        //Das Gewicht wird von der linken Seite der Waage heruntergenommen
+        leftWeights.remove(nearestWeightRemove);
+        availableWeights.add(nearestWeightRemove);
+        lastMovedWeight = nearestWeightRemove;
+    }
+    case Swap -> {
+        //Das Gewicht wird von der rechten Seite auf die linke Seite der Waage gestellt
+        leftWeights.remove(nearestWeightSwap);
+        rightWeights.add(nearestWeightSwap);
+        lastMovedWeight = nearestWeightSwap;
+    }
+}
+
+//Funktion wird rekursiv aufgerufen
+return balanceInternal(initialWeight, availableWeights, negativeRecursions);
+```
+
+Der Ablauf des Algorithmuses, wenn die Differenz größer als 0 ist funktioniert analog zum Ablauf, wenn die Differenz kleiner als 0 ist. In diesem Fall ist jedoch die linke Seite der Waage schwerer und alle Aktionen werden folglich umgekehrt ausgeführt. Auch hier wird wieder die beste Zugmöglichkeit durch die Funktion Scale#getBestAction berechnet.
+
+Wenn die Differenz der beiden Seiten gleich null ist, dann bedeutet dies, dass die Waage ausbalanciert ist. Folglich wird der momentane Zustand der Waage zurückgegeben und die Hauptschleife des Algorithmuses kann fortfahren.
+
+## Beispiel (gewichtsstuecke0.txt)
+
+### Eingabe des Programmes
+
+6  
+10 3  
+50 2  
+100 3  
+500 3  
+1000 3  
+5000 1  
+
+### Ausgabe des Programmes
+
+10g: [10g] --- [10g]  
+20g: [20g] --- [10g, 10g]  
+30g: [30g] --- [10g, 10g, 10g]  
+40g: [40g, 10g] --- [50g]  
+50g: [50g] --- [50g]  
+60g: [60g] --- [50g, 10g]  
+70g: [70g] --- [50g, 10g, 10g]  
+80g: [80g, 10g, 10g] --- [100g]  
+90g: [90g, 10g] --- [100g]  
+100g: [100g] --- [100g]  
+110g: [110g] --- [100g, 10g]  
+120g: [120g] --- [100g, 10g, 10g]  
+130g: [130g] --- [100g, 10g, 10g, 10g]  
+140g: [140g, 10g] --- [100g, 50g]  
+150g: [150g] --- [100g, 50g]  
+160g: [160g] --- [100g, 50g, 10g]  
+170g: [170g] --- [100g, 50g, 10g, 10g]  
+180g: [180g, 10g, 10g] --- [100g, 100g]  
+190g: [190g, 10g] --- [100g, 100g]  
+200g: [200g] --- [100g, 100g]  
+210g: [210g] --- [100g, 100g, 10g]  
+220g: [220g] --- [100g, 100g, 10g, 10g]  
+230g: [230g] --- [100g, 100g, 10g, 10g, 10g]  
+240g: [240g, 10g] --- [100g, 100g, 50g]  
+250g: [250g] --- [100g, 100g, 50g]  
+260g: [260g] --- [100g, 100g, 50g, 10g]  
+270g: [270g] --- [100g, 100g, 50g, 10g, 10g]  
+280g: [280g, 10g, 10g] --- [100g, 100g, 100g]  
+290g: [290g, 10g] --- [100g, 100g, 100g]  
+300g: [300g] --- [100g, 100g, 100g]  
+310g: [310g, 100g, 100g] --- [500g, 10g]  
+320g: [320g, 100g, 100g] --- [500g, 10g, 10g]  
+330g: [330g, 100g, 50g, 10g, 10g] --- [500g]  
+340g: [340g, 100g, 50g, 10g] --- [500g]  
+350g: [350g, 100g, 50g] --- [500g]  
+360g: [360g, 100g, 50g] --- [500g, 10g]  
+370g: [370g, 100g, 10g, 10g, 10g] --- [500g]  
+380g: [380g, 100g, 10g, 10g] --- [500g]  
+390g: [390g, 100g, 10g] --- [500g]  
+400g: [400g, 100g] --- [500g]  
+410g: [410g, 100g] --- [500g, 10g]  
+420g: [420g, 100g] --- [500g, 10g, 10g]  
+430g: [430g, 50g, 10g, 10g] --- [500g]  
+440g: [440g, 50g, 10g] --- [500g]  
+450g: [450g, 50g] --- [500g]  
+460g: [460g, 50g] --- [500g, 10g]  
+470g: [470g, 10g, 10g, 10g] --- [500g]  
+480g: [480g, 10g, 10g] --- [500g]  
+490g: [490g, 10g] --- [500g]  
+500g: [500g] --- [500g]  
+510g: [510g] --- [500g, 10g]  
+520g: [520g] --- [500g, 10g, 10g]  
+530g: [530g] --- [500g, 10g, 10g, 10g]  
+540g: [540g, 10g] --- [500g, 50g]  
+550g: [550g] --- [500g, 50g]  
+560g: [560g] --- [500g, 50g, 10g]  
+570g: [570g] --- [500g, 50g, 10g, 10g]  
+580g: [580g, 10g, 10g] --- [500g, 100g]  
+590g: [590g, 10g] --- [500g, 100g]  
+600g: [600g] --- [500g, 100g]  
+610g: [610g] --- [500g, 100g, 10g]  
+620g: [620g] --- [500g, 100g, 10g, 10g]  
+630g: [630g] --- [500g, 100g, 10g, 10g, 10g]  
+640g: [640g, 10g] --- [500g, 100g, 50g]  
+650g: [650g] --- [500g, 100g, 50g]  
+660g: [660g] --- [500g, 100g, 50g, 10g]  
+670g: [670g] --- [500g, 100g, 50g, 10g, 10g]  
+680g: [680g, 10g, 10g] --- [500g, 100g, 100g]  
+690g: [690g, 10g] --- [500g, 100g, 100g]  
+700g: [700g] --- [500g, 100g, 100g]  
+710g: [710g] --- [500g, 100g, 100g, 10g]  
+720g: [720g] --- [500g, 100g, 100g, 10g, 10g]  
+730g: [730g] --- [500g, 100g, 100g, 10g, 10g, 10g]  
+740g: [740g, 10g] --- [500g, 100g, 100g, 50g]  
+750g: [750g] --- [500g, 100g, 100g, 50g]  
+760g: [760g, 100g, 100g, 50g] --- [1000g, 10g]  
+770g: [770g, 100g, 100g, 10g, 10g, 10g] --- [1000g]  
+780g: [780g, 100g, 100g, 10g, 10g] --- [1000g]  
+790g: [790g, 100g, 100g, 10g] --- [1000g]  
+800g: [800g, 100g, 100g] --- [1000g]  
+810g: [810g, 100g, 100g] --- [1000g, 10g]  
+820g: [820g, 100g, 100g] --- [1000g, 10g, 10g]  
+830g: [830g, 100g, 50g, 10g, 10g] --- [1000g]  
+840g: [840g, 100g, 50g, 10g] --- [1000g]  
+850g: [850g, 100g, 50g] --- [1000g]  
+860g: [860g, 100g, 50g] --- [1000g, 10g]  
+870g: [870g, 100g, 10g, 10g, 10g] --- [1000g]  
+880g: [880g, 100g, 10g, 10g] --- [1000g]  
+890g: [890g, 100g, 10g] --- [1000g]  
+900g: [900g, 100g] --- [1000g]  
+910g: [910g, 100g] --- [1000g, 10g]  
+920g: [920g, 100g] --- [1000g, 10g, 10g]  
+930g: [930g, 50g, 10g, 10g] --- [1000g]  
+940g: [940g, 50g, 10g] --- [1000g]  
+950g: [950g, 50g] --- [1000g]  
+960g: [960g, 50g] --- [1000g, 10g]  
+970g: [970g, 10g, 10g, 10g] --- [1000g]  
+980g: [980g, 10g, 10g] --- [1000g]  
+990g: [990g, 10g] --- [1000g]  
+1000g: [1000g] --- [1000g]  
+1010g: [1010g] --- [1000g, 10g]  
+1020g: [1020g] --- [1000g, 10g, 10g]  
+1030g: [1030g] --- [1000g, 10g, 10g, 10g]  
+1040g: [1040g, 10g] --- [1000g, 50g]  
+1050g: [1050g] --- [1000g, 50g]  
+1060g: [1060g] --- [1000g, 50g, 10g]  
+1070g: [1070g] --- [1000g, 50g, 10g, 10g]  
+1080g: [1080g, 10g, 10g] --- [1000g, 100g]  
+1090g: [1090g, 10g] --- [1000g, 100g]  
+1100g: [1100g] --- [1000g, 100g]  
+1110g: [1110g] --- [1000g, 100g, 10g]  
+1120g: [1120g] --- [1000g, 100g, 10g, 10g]  
+1130g: [1130g] --- [1000g, 100g, 10g, 10g, 10g]  
+1140g: [1140g, 10g] --- [1000g, 100g, 50g]  
+1150g: [1150g] --- [1000g, 100g, 50g]  
+1160g: [1160g] --- [1000g, 100g, 50g, 10g]  
+1170g: [1170g] --- [1000g, 100g, 50g, 10g, 10g]  
+1180g: [1180g, 10g, 10g] --- [1000g, 100g, 100g]  
+1190g: [1190g, 10g] --- [1000g, 100g, 100g]  
+1200g: [1200g] --- [1000g, 100g, 100g]  
+1210g: [1210g] --- [1000g, 100g, 100g, 10g]  
+1220g: [1220g] --- [1000g, 100g, 100g, 10g, 10g]  
+1230g: [1230g] --- [1000g, 100g, 100g, 10g, 10g, 10g]  
+1240g: [1240g, 10g] --- [1000g, 100g, 100g, 50g]  
+1250g: [1250g] --- [1000g, 100g, 100g, 50g]  
+1260g: [1260g] --- [1000g, 100g, 100g, 50g, 10g]  
+1270g: [1270g] --- [1000g, 100g, 100g, 50g, 10g, 10g]  
+1280g: [1280g, 10g, 10g] --- [1000g, 100g, 100g, 100g]  
+1290g: [1290g, 10g] --- [1000g, 100g, 100g, 100g]  
+1300g: [1300g] --- [1000g, 100g, 100g, 100g]  
+1310g: [1310g, 100g, 100g] --- [1000g, 500g, 10g]  
+1320g: [1320g, 100g, 100g] --- [1000g, 500g, 10g, 10g]  
+1330g: [1330g, 100g, 50g, 10g, 10g] --- [1000g, 500g]  
+1340g: [1340g, 100g, 50g, 10g] --- [1000g, 500g]  
+1350g: [1350g, 100g, 50g] --- [1000g, 500g]  
+1360g: [1360g, 100g, 50g] --- [1000g, 500g, 10g]  
+1370g: [1370g, 100g, 10g, 10g, 10g] --- [1000g, 500g]  
+1380g: [1380g, 100g, 10g, 10g] --- [1000g, 500g]  
+1390g: [1390g, 100g, 10g] --- [1000g, 500g]  
+1400g: [1400g, 100g] --- [1000g, 500g]  
+1410g: [1410g, 100g] --- [1000g, 500g, 10g]  
+1420g: [1420g, 100g] --- [1000g, 500g, 10g, 10g]  
+1430g: [1430g, 50g, 10g, 10g] --- [1000g, 500g]  
+1440g: [1440g, 50g, 10g] --- [1000g, 500g]  
+1450g: [1450g, 50g] --- [1000g, 500g]  
+1460g: [1460g, 50g] --- [1000g, 500g, 10g]  
+1470g: [1470g, 10g, 10g, 10g] --- [1000g, 500g]  
+1480g: [1480g, 10g, 10g] --- [1000g, 500g]  
+1490g: [1490g, 10g] --- [1000g, 500g]  
+1500g: [1500g] --- [1000g, 500g]  
+1510g: [1510g] --- [1000g, 500g, 10g]  
+1520g: [1520g] --- [1000g, 500g, 10g, 10g]  
+1530g: [1530g] --- [1000g, 500g, 10g, 10g, 10g]  
+1540g: [1540g, 10g] --- [1000g, 500g, 50g]  
+1550g: [1550g] --- [1000g, 500g, 50g]  
+1560g: [1560g] --- [1000g, 500g, 50g, 10g]  
+1570g: [1570g] --- [1000g, 500g, 50g, 10g, 10g]  
+1580g: [1580g, 10g, 10g] --- [1000g, 500g, 100g]  
+1590g: [1590g, 10g] --- [1000g, 500g, 100g]  
+1600g: [1600g] --- [1000g, 500g, 100g]  
+1610g: [1610g] --- [1000g, 500g, 100g, 10g]  
+1620g: [1620g] --- [1000g, 500g, 100g, 10g, 10g]  
+1630g: [1630g] --- [1000g, 500g, 100g, 10g, 10g, 10g]  
+1640g: [1640g, 10g] --- [1000g, 500g, 100g, 50g]  
+1650g: [1650g] --- [1000g, 500g, 100g, 50g]  
+1660g: [1660g] --- [1000g, 500g, 100g, 50g, 10g]  
+1670g: [1670g] --- [1000g, 500g, 100g, 50g, 10g, 10g]  
+1680g: [1680g, 10g, 10g] --- [1000g, 500g, 100g, 100g]  
+1690g: [1690g, 10g] --- [1000g, 500g, 100g, 100g]  
+1700g: [1700g] --- [1000g, 500g, 100g, 100g]  
+1710g: [1710g] --- [1000g, 500g, 100g, 100g, 10g]  
+1720g: [1720g] --- [1000g, 500g, 100g, 100g, 10g, 10g]  
+1730g: [1730g] --- [1000g, 500g, 100g, 100g, 10g, 10g, 10g]  
+1740g: [1740g, 10g] --- [1000g, 500g, 100g, 100g, 50g]  
+1750g: [1750g] --- [1000g, 500g, 100g, 100g, 50g]  
+1760g: [1760g, 100g, 100g, 50g] --- [1000g, 1000g, 10g]  
+1770g: [1770g, 100g, 100g, 10g, 10g, 10g] --- [1000g, 1000g]  
+1780g: [1780g, 100g, 100g, 10g, 10g] --- [1000g, 1000g]  
+1790g: [1790g, 100g, 100g, 10g] --- [1000g, 1000g]  
+1800g: [1800g, 100g, 100g] --- [1000g, 1000g]  
+1810g: [1810g, 100g, 100g] --- [1000g, 1000g, 10g]  
+1820g: [1820g, 100g, 100g] --- [1000g, 1000g, 10g, 10g]  
+1830g: [1830g, 100g, 50g, 10g, 10g] --- [1000g, 1000g]  
+1840g: [1840g, 100g, 50g, 10g] --- [1000g, 1000g]  
+1850g: [1850g, 100g, 50g] --- [1000g, 1000g]  
+1860g: [1860g, 100g, 50g] --- [1000g, 1000g, 10g]  
+1870g: [1870g, 100g, 10g, 10g, 10g] --- [1000g, 1000g]  
+1880g: [1880g, 100g, 10g, 10g] --- [1000g, 1000g]  
+1890g: [1890g, 100g, 10g] --- [1000g, 1000g]  
+1900g: [1900g, 100g] --- [1000g, 1000g]  
+1910g: [1910g, 100g] --- [1000g, 1000g, 10g]  
+1920g: [1920g, 100g] --- [1000g, 1000g, 10g, 10g]  
+1930g: [1930g, 50g, 10g, 10g] --- [1000g, 1000g]  
+1940g: [1940g, 50g, 10g] --- [1000g, 1000g]  
+1950g: [1950g, 50g] --- [1000g, 1000g]  
+1960g: [1960g, 50g] --- [1000g, 1000g, 10g]  
+1970g: [1970g, 10g, 10g, 10g] --- [1000g, 1000g]  
+1980g: [1980g, 10g, 10g] --- [1000g, 1000g]  
+1990g: [1990g, 10g] --- [1000g, 1000g]  
+2000g: [2000g] --- [1000g, 1000g]  
+2010g: [2010g] --- [1000g, 1000g, 10g]  
+2020g: [2020g] --- [1000g, 1000g, 10g, 10g]  
+2030g: [2030g] --- [1000g, 1000g, 10g, 10g, 10g]  
+2040g: [2040g, 10g] --- [1000g, 1000g, 50g]  
+2050g: [2050g] --- [1000g, 1000g, 50g]  
+2060g: [2060g] --- [1000g, 1000g, 50g, 10g]  
+2070g: [2070g] --- [1000g, 1000g, 50g, 10g, 10g]  
+2080g: [2080g, 10g, 10g] --- [1000g, 1000g, 100g]  
+2090g: [2090g, 10g] --- [1000g, 1000g, 100g]  
+2100g: [2100g] --- [1000g, 1000g, 100g]  
+2110g: [2110g] --- [1000g, 1000g, 100g, 10g]  
+2120g: [2120g] --- [1000g, 1000g, 100g, 10g, 10g]  
+2130g: [2130g] --- [1000g, 1000g, 100g, 10g, 10g, 10g]  
+2140g: [2140g, 10g] --- [1000g, 1000g, 100g, 50g]  
+2150g: [2150g] --- [1000g, 1000g, 100g, 50g]  
+2160g: [2160g] --- [1000g, 1000g, 100g, 50g, 10g]  
+2170g: [2170g] --- [1000g, 1000g, 100g, 50g, 10g, 10g]  
+2180g: [2180g, 10g, 10g] --- [1000g, 1000g, 100g, 100g]  
+2190g: [2190g, 10g] --- [1000g, 1000g, 100g, 100g]  
+2200g: [2200g] --- [1000g, 1000g, 100g, 100g]  
+2210g: [2210g] --- [1000g, 1000g, 100g, 100g, 10g]  
+2220g: [2220g] --- [1000g, 1000g, 100g, 100g, 10g, 10g]  
+2230g: [2230g] --- [1000g, 1000g, 100g, 100g, 10g, 10g, 10g]  
+2240g: [2240g, 10g] --- [1000g, 1000g, 100g, 100g, 50g]  
+2250g: [2250g] --- [1000g, 1000g, 100g, 100g, 50g]  
+2260g: [2260g] --- [1000g, 1000g, 100g, 100g, 50g, 10g]  
+2270g: [2270g] --- [1000g, 1000g, 100g, 100g, 50g, 10g, 10g]  
+2280g: [2280g, 10g, 10g] --- [1000g, 1000g, 100g, 100g, 100g]  
+2290g: [2290g, 10g] --- [1000g, 1000g, 100g, 100g, 100g]  
+2300g: [2300g] --- [1000g, 1000g, 100g, 100g, 100g]  
+2310g: [2310g, 100g, 100g] --- [1000g, 1000g, 500g, 10g]  
+2320g: [2320g, 100g, 100g] --- [1000g, 1000g, 500g, 10g, 10g]  
+2330g: [2330g, 100g, 50g, 10g, 10g] --- [1000g, 1000g, 500g]  
+2340g: [2340g, 100g, 50g, 10g] --- [1000g, 1000g, 500g]  
+2350g: [2350g, 100g, 50g] --- [1000g, 1000g, 500g]  
+2360g: [2360g, 100g, 50g] --- [1000g, 1000g, 500g, 10g]  
+2370g: [2370g, 100g, 10g, 10g, 10g] --- [1000g, 1000g, 500g]  
+2380g: [2380g, 100g, 10g, 10g] --- [1000g, 1000g, 500g]  
+2390g: [2390g, 100g, 10g] --- [1000g, 1000g, 500g]  
+2400g: [2400g, 100g] --- [1000g, 1000g, 500g]  
+2410g: [2410g, 100g] --- [1000g, 1000g, 500g, 10g]  
+2420g: [2420g, 100g] --- [1000g, 1000g, 500g, 10g, 10g]  
+2430g: [2430g, 50g, 10g, 10g] --- [1000g, 1000g, 500g]  
+2440g: [2440g, 50g, 10g] --- [1000g, 1000g, 500g]  
+2450g: [2450g, 50g] --- [1000g, 1000g, 500g]  
+2460g: [2460g, 50g] --- [1000g, 1000g, 500g, 10g]  
+2470g: [2470g, 10g, 10g, 10g] --- [1000g, 1000g, 500g]  
+2480g: [2480g, 10g, 10g] --- [1000g, 1000g, 500g]  
+2490g: [2490g, 10g] --- [1000g, 1000g, 500g]  
+2500g: [2500g] --- [1000g, 1000g, 500g]  
+2510g: [2510g] --- [1000g, 1000g, 500g, 10g]  
+2520g: [2520g] --- [1000g, 1000g, 500g, 10g, 10g]  
+2530g: [2530g] --- [1000g, 1000g, 500g, 10g, 10g, 10g]  
+2540g: [2540g, 10g] --- [1000g, 1000g, 500g, 50g]  
+2550g: [2550g] --- [1000g, 1000g, 500g, 50g]  
+2560g: [2560g] --- [1000g, 1000g, 500g, 50g, 10g]  
+2570g: [2570g] --- [1000g, 1000g, 500g, 50g, 10g, 10g]  
+2580g: [2580g, 10g, 10g] --- [1000g, 1000g, 500g, 100g]  
+2590g: [2590g, 10g] --- [1000g, 1000g, 500g, 100g]  
+2600g: [2600g] --- [1000g, 1000g, 500g, 100g]  
+2610g: [2610g] --- [1000g, 1000g, 500g, 100g, 10g]  
+2620g: [2620g] --- [1000g, 1000g, 500g, 100g, 10g, 10g]  
+2630g: [2630g] --- [1000g, 1000g, 500g, 100g, 10g, 10g, 10g]  
+2640g: [2640g, 10g] --- [1000g, 1000g, 500g, 100g, 50g]  
+2650g: [2650g] --- [1000g, 1000g, 500g, 100g, 50g]  
+2660g: [2660g] --- [1000g, 1000g, 500g, 100g, 50g, 10g]  
+2670g: [2670g] --- [1000g, 1000g, 500g, 100g, 50g, 10g, 10g]  
+2680g: [2680g, 10g, 10g] --- [1000g, 1000g, 500g, 100g, 100g]  
+2690g: [2690g, 10g] --- [1000g, 1000g, 500g, 100g, 100g]  
+2700g: [2700g] --- [1000g, 1000g, 500g, 100g, 100g]  
+2710g: [2710g] --- [1000g, 1000g, 500g, 100g, 100g, 10g]  
+2720g: [2720g] --- [1000g, 1000g, 500g, 100g, 100g, 10g, 10g]  
+2730g: [2730g] --- [1000g, 1000g, 500g, 100g, 100g, 10g, 10g, 10g]  
+2740g: [2740g, 10g] --- [1000g, 1000g, 500g, 100g, 100g, 50g]  
+2750g: [2750g] --- [1000g, 1000g, 500g, 100g, 100g, 50g]  
+2760g: [2760g, 100g, 100g, 50g] --- [1000g, 1000g, 1000g, 10g]  
+2770g: [2770g, 100g, 100g, 10g, 10g, 10g] --- [1000g, 1000g, 1000g]  
+2780g: [2780g, 100g, 100g, 10g, 10g] --- [1000g, 1000g, 1000g]  
+2790g: [2790g, 100g, 100g, 10g] --- [1000g, 1000g, 1000g]  
+2800g: [2800g, 100g, 100g] --- [1000g, 1000g, 1000g]  
+2810g: [2810g, 100g, 100g] --- [1000g, 1000g, 1000g, 10g]  
+2820g: [2820g, 100g, 100g] --- [1000g, 1000g, 1000g, 10g, 10g]  
+2830g: [2830g, 100g, 50g, 10g, 10g] --- [1000g, 1000g, 1000g]  
+2840g: [2840g, 100g, 50g, 10g] --- [1000g, 1000g, 1000g]  
+2850g: [2850g, 100g, 50g] --- [1000g, 1000g, 1000g]  
+2860g: [2860g, 100g, 50g] --- [1000g, 1000g, 1000g, 10g]  
+2870g: [2870g, 100g, 10g, 10g, 10g] --- [1000g, 1000g, 1000g]  
+2880g: [2880g, 100g, 10g, 10g] --- [1000g, 1000g, 1000g]  
+2890g: [2890g, 100g, 10g] --- [1000g, 1000g, 1000g]  
+2900g: [2900g, 100g] --- [1000g, 1000g, 1000g]  
+2910g: [2910g, 100g] --- [1000g, 1000g, 1000g, 10g]  
+2920g: [2920g, 100g] --- [1000g, 1000g, 1000g, 10g, 10g]  
+2930g: [2930g, 50g, 10g, 10g] --- [1000g, 1000g, 1000g]  
+2940g: [2940g, 50g, 10g] --- [1000g, 1000g, 1000g]  
+2950g: [2950g, 50g] --- [1000g, 1000g, 1000g]  
+2960g: [2960g, 50g] --- [1000g, 1000g, 1000g, 10g]  
+2970g: [2970g, 10g, 10g, 10g] --- [1000g, 1000g, 1000g]  
+2980g: [2980g, 10g, 10g] --- [1000g, 1000g, 1000g]  
+2990g: [2990g, 10g] --- [1000g, 1000g, 1000g]  
+3000g: [3000g] --- [1000g, 1000g, 1000g]  
+3010g: [3010g, 1000g, 1000g] --- [5000g, 10g]  
+3020g: [3020g, 1000g, 1000g] --- [5000g, 10g, 10g]  
+3030g: [3030g, 1000g, 1000g] --- [5000g, 10g, 10g, 10g]  
+3040g: [3040g, 1000g, 1000g, 10g] --- [5000g, 50g]  
+3050g: [3050g, 1000g, 1000g] --- [5000g, 50g]  
+3060g: [3060g, 1000g, 1000g] --- [5000g, 50g, 10g]  
+3070g: [3070g, 1000g, 1000g] --- [5000g, 50g, 10g, 10g]  
+3080g: [3080g, 1000g, 1000g, 10g, 10g] --- [5000g, 100g]  
+3090g: [3090g, 1000g, 1000g, 10g] --- [5000g, 100g]  
+3100g: [3100g, 1000g, 1000g] --- [5000g, 100g]  
+3110g: [3110g, 1000g, 1000g] --- [5000g, 100g, 10g]  
+3120g: [3120g, 1000g, 1000g] --- [5000g, 100g, 10g, 10g]  
+3130g: [3130g, 1000g, 1000g] --- [5000g, 100g, 10g, 10g, 10g]  
+3140g: [3140g, 1000g, 1000g, 10g] --- [5000g, 100g, 50g]  
+3150g: [3150g, 1000g, 1000g] --- [5000g, 100g, 50g]  
+3160g: [3160g, 1000g, 1000g] --- [5000g, 100g, 50g, 10g]  
+3170g: [3170g, 1000g, 1000g] --- [5000g, 100g, 50g, 10g, 10g]  
+3180g: [3180g, 1000g, 1000g, 10g, 10g] --- [5000g, 100g, 100g]  
+3190g: [3190g, 1000g, 1000g, 10g] --- [5000g, 100g, 100g]  
+3200g: [3200g, 1000g, 1000g] --- [5000g, 100g, 100g]  
+3210g: [3210g, 1000g, 1000g] --- [5000g, 100g, 100g, 10g]  
+3220g: [3220g, 1000g, 1000g] --- [5000g, 100g, 100g, 10g, 10g]  
+3230g: [3230g, 1000g, 1000g] --- [5000g, 100g, 100g, 10g, 10g, 10g]  
+3240g: [3240g, 1000g, 1000g, 10g] --- [5000g, 100g, 100g, 50g]  
+3250g: [3250g, 1000g, 500g, 100g, 100g, 50g] --- [5000g]  
+3260g: [3260g, 1000g, 500g, 100g, 100g, 50g] --- [5000g, 10g]  
+3270g: [3270g, 1000g, 500g, 100g, 100g, 10g, 10g, 10g] --- [5000g]  
+3280g: [3280g, 1000g, 500g, 100g, 100g, 10g, 10g] --- [5000g]  
+3290g: [3290g, 1000g, 500g, 100g, 100g, 10g] --- [5000g]  
+3300g: [3300g, 1000g, 500g, 100g, 100g] --- [5000g]  
+3310g: [3310g, 1000g, 500g, 100g, 100g] --- [5000g, 10g]  
+3320g: [3320g, 1000g, 500g, 100g, 100g] --- [5000g, 10g, 10g]  
+3330g: [3330g, 1000g, 500g, 100g, 50g, 10g, 10g] --- [5000g]  
+3340g: [3340g, 1000g, 500g, 100g, 50g, 10g] --- [5000g]  
+3350g: [3350g, 1000g, 500g, 100g, 50g] --- [5000g]  
+3360g: [3360g, 1000g, 500g, 100g, 50g] --- [5000g, 10g]  
+3370g: [3370g, 1000g, 500g, 100g, 10g, 10g, 10g] --- [5000g]  
+3380g: [3380g, 1000g, 500g, 100g, 10g, 10g] --- [5000g]  
+3390g: [3390g, 1000g, 500g, 100g, 10g] --- [5000g]  
+3400g: [3400g, 1000g, 500g, 100g] --- [5000g]  
+3410g: [3410g, 1000g, 500g, 100g] --- [5000g, 10g]  
+3420g: [3420g, 1000g, 500g, 100g] --- [5000g, 10g, 10g]  
+3430g: [3430g, 1000g, 500g, 50g, 10g, 10g] --- [5000g]  
+3440g: [3440g, 1000g, 500g, 50g, 10g] --- [5000g]  
+3450g: [3450g, 1000g, 500g, 50g] --- [5000g]  
+3460g: [3460g, 1000g, 500g, 50g] --- [5000g, 10g]  
+3470g: [3470g, 1000g, 500g, 10g, 10g, 10g] --- [5000g]  
+3480g: [3480g, 1000g, 500g, 10g, 10g] --- [5000g]  
+3490g: [3490g, 1000g, 500g, 10g] --- [5000g]  
+3500g: [3500g, 1000g, 500g] --- [5000g]  
+3510g: [3510g, 1000g, 500g] --- [5000g, 10g]  
+3520g: [3520g, 1000g, 500g] --- [5000g, 10g, 10g]  
+3530g: [3530g, 1000g, 500g] --- [5000g, 10g, 10g, 10g]  
+3540g: [3540g, 1000g, 500g, 10g] --- [5000g, 50g]  
+3550g: [3550g, 1000g, 500g] --- [5000g, 50g]  
+3560g: [3560g, 1000g, 500g] --- [5000g, 50g, 10g]  
+3570g: [3570g, 1000g, 500g] --- [5000g, 50g, 10g, 10g]  
+3580g: [3580g, 1000g, 500g, 10g, 10g] --- [5000g, 100g]  
+3590g: [3590g, 1000g, 500g, 10g] --- [5000g, 100g]  
+3600g: [3600g, 1000g, 500g] --- [5000g, 100g]  
+3610g: [3610g, 1000g, 500g] --- [5000g, 100g, 10g]  
+3620g: [3620g, 1000g, 500g] --- [5000g, 100g, 10g, 10g]  
+3630g: [3630g, 1000g, 500g] --- [5000g, 100g, 10g, 10g, 10g]  
+3640g: [3640g, 1000g, 500g, 10g] --- [5000g, 100g, 50g]  
+3650g: [3650g, 1000g, 500g] --- [5000g, 100g, 50g]  
+3660g: [3660g, 1000g, 500g] --- [5000g, 100g, 50g, 10g]  
+3670g: [3670g, 1000g, 500g] --- [5000g, 100g, 50g, 10g, 10g]  
+3680g: [3680g, 1000g, 500g, 10g, 10g] --- [5000g, 100g, 100g]  
+3690g: [3690g, 1000g, 500g, 10g] --- [5000g, 100g, 100g]  
+3700g: [3700g, 1000g, 100g, 100g, 100g] --- [5000g]  
+3710g: [3710g, 1000g, 100g, 100g, 100g] --- [5000g, 10g]  
+3720g: [3720g, 1000g, 100g, 100g, 100g] --- [5000g, 10g, 10g]  
+3730g: [3730g, 1000g, 100g, 100g, 50g, 10g, 10g] --- [5000g]  
+3740g: [3740g, 1000g, 100g, 100g, 50g, 10g] --- [5000g]  
+3750g: [3750g, 1000g, 100g, 100g, 50g] --- [5000g]  
+3760g: [3760g, 1000g, 100g, 100g, 50g] --- [5000g, 10g]  
+3770g: [3770g, 1000g, 100g, 100g, 10g, 10g, 10g] --- [5000g]  
+3780g: [3780g, 1000g, 100g, 100g, 10g, 10g] --- [5000g]  
+3790g: [3790g, 1000g, 100g, 100g, 10g] --- [5000g]  
+3800g: [3800g, 1000g, 100g, 100g] --- [5000g]  
+3810g: [3810g, 1000g, 100g, 100g] --- [5000g, 10g]  
+3820g: [3820g, 1000g, 100g, 100g] --- [5000g, 10g, 10g]  
+3830g: [3830g, 1000g, 100g, 50g, 10g, 10g] --- [5000g]  
+3840g: [3840g, 1000g, 100g, 50g, 10g] --- [5000g]  
+3850g: [3850g, 1000g, 100g, 50g] --- [5000g]  
+3860g: [3860g, 1000g, 100g, 50g] --- [5000g, 10g]  
+3870g: [3870g, 1000g, 100g, 10g, 10g, 10g] --- [5000g]  
+3880g: [3880g, 1000g, 100g, 10g, 10g] --- [5000g]  
+3890g: [3890g, 1000g, 100g, 10g] --- [5000g]  
+3900g: [3900g, 1000g, 100g] --- [5000g]  
+3910g: [3910g, 1000g, 100g] --- [5000g, 10g]  
+3920g: [3920g, 1000g, 100g] --- [5000g, 10g, 10g]  
+3930g: [3930g, 1000g, 50g, 10g, 10g] --- [5000g]  
+3940g: [3940g, 1000g, 50g, 10g] --- [5000g]  
+3950g: [3950g, 1000g, 50g] --- [5000g]  
+3960g: [3960g, 1000g, 50g] --- [5000g, 10g]  
+3970g: [3970g, 1000g, 10g, 10g, 10g] --- [5000g]  
+3980g: [3980g, 1000g, 10g, 10g] --- [5000g]  
+3990g: [3990g, 1000g, 10g] --- [5000g]  
+4000g: [4000g, 1000g] --- [5000g]  
+4010g: [4010g, 1000g] --- [5000g, 10g]  
+4020g: [4020g, 1000g] --- [5000g, 10g, 10g]  
+4030g: [4030g, 1000g] --- [5000g, 10g, 10g, 10g]  
+4040g: [4040g, 1000g, 10g] --- [5000g, 50g]  
+4050g: [4050g, 1000g] --- [5000g, 50g]  
+4060g: [4060g, 1000g] --- [5000g, 50g, 10g]  
+4070g: [4070g, 1000g] --- [5000g, 50g, 10g, 10g]  
+4080g: [4080g, 1000g, 10g, 10g] --- [5000g, 100g]  
+4090g: [4090g, 1000g, 10g] --- [5000g, 100g]  
+4100g: [4100g, 1000g] --- [5000g, 100g]  
+4110g: [4110g, 1000g] --- [5000g, 100g, 10g]  
+4120g: [4120g, 1000g] --- [5000g, 100g, 10g, 10g]  
+4130g: [4130g, 1000g] --- [5000g, 100g, 10g, 10g, 10g]  
+4140g: [4140g, 1000g, 10g] --- [5000g, 100g, 50g]  
+4150g: [4150g, 1000g] --- [5000g, 100g, 50g]  
+4160g: [4160g, 1000g] --- [5000g, 100g, 50g, 10g]  
+4170g: [4170g, 1000g] --- [5000g, 100g, 50g, 10g, 10g]  
+4180g: [4180g, 1000g, 10g, 10g] --- [5000g, 100g, 100g]  
+4190g: [4190g, 1000g, 10g] --- [5000g, 100g, 100g]  
+4200g: [4200g, 1000g] --- [5000g, 100g, 100g]  
+4210g: [4210g, 1000g] --- [5000g, 100g, 100g, 10g]  
+4220g: [4220g, 1000g] --- [5000g, 100g, 100g, 10g, 10g]  
+4230g: [4230g, 1000g] --- [5000g, 100g, 100g, 10g, 10g, 10g]  
+4240g: [4240g, 1000g, 10g] --- [5000g, 100g, 100g, 50g]  
+4250g: [4250g, 500g, 100g, 100g, 50g] --- [5000g]  
+4260g: [4260g, 500g, 100g, 100g, 50g] --- [5000g, 10g]  
+4270g: [4270g, 500g, 100g, 100g, 10g, 10g, 10g] --- [5000g]  
+4280g: [4280g, 500g, 100g, 100g, 10g, 10g] --- [5000g]  
+4290g: [4290g, 500g, 100g, 100g, 10g] --- [5000g]  
+4300g: [4300g, 500g, 100g, 100g] --- [5000g]  
+4310g: [4310g, 500g, 100g, 100g] --- [5000g, 10g]  
+4320g: [4320g, 500g, 100g, 100g] --- [5000g, 10g, 10g]  
+4330g: [4330g, 500g, 100g, 50g, 10g, 10g] --- [5000g]  
+4340g: [4340g, 500g, 100g, 50g, 10g] --- [5000g]  
+4350g: [4350g, 500g, 100g, 50g] --- [5000g]  
+4360g: [4360g, 500g, 100g, 50g] --- [5000g, 10g]  
+4370g: [4370g, 500g, 100g, 10g, 10g, 10g] --- [5000g]  
+4380g: [4380g, 500g, 100g, 10g, 10g] --- [5000g]  
+4390g: [4390g, 500g, 100g, 10g] --- [5000g]  
+4400g: [4400g, 500g, 100g] --- [5000g]  
+4410g: [4410g, 500g, 100g] --- [5000g, 10g]  
+4420g: [4420g, 500g, 100g] --- [5000g, 10g, 10g]  
+4430g: [4430g, 500g, 50g, 10g, 10g] --- [5000g]  
+4440g: [4440g, 500g, 50g, 10g] --- [5000g]  
+4450g: [4450g, 500g, 50g] --- [5000g]  
+4460g: [4460g, 500g, 50g] --- [5000g, 10g]  
+4470g: [4470g, 500g, 10g, 10g, 10g] --- [5000g]  
+4480g: [4480g, 500g, 10g, 10g] --- [5000g]  
+4490g: [4490g, 500g, 10g] --- [5000g]  
+4500g: [4500g, 500g] --- [5000g]  
+4510g: [4510g, 500g] --- [5000g, 10g]  
+4520g: [4520g, 500g] --- [5000g, 10g, 10g]  
+4530g: [4530g, 500g] --- [5000g, 10g, 10g, 10g]  
+4540g: [4540g, 500g, 10g] --- [5000g, 50g]  
+4550g: [4550g, 500g] --- [5000g, 50g]  
+4560g: [4560g, 500g] --- [5000g, 50g, 10g]  
+4570g: [4570g, 500g] --- [5000g, 50g, 10g, 10g]  
+4580g: [4580g, 500g, 10g, 10g] --- [5000g, 100g]  
+4590g: [4590g, 500g, 10g] --- [5000g, 100g]  
+4600g: [4600g, 500g] --- [5000g, 100g]  
+4610g: [4610g, 500g] --- [5000g, 100g, 10g]  
+4620g: [4620g, 500g] --- [5000g, 100g, 10g, 10g]  
+4630g: [4630g, 500g] --- [5000g, 100g, 10g, 10g, 10g]  
+4640g: [4640g, 500g, 10g] --- [5000g, 100g, 50g]  
+4650g: [4650g, 500g] --- [5000g, 100g, 50g]  
+4660g: [4660g, 500g] --- [5000g, 100g, 50g, 10g]  
+4670g: [4670g, 500g] --- [5000g, 100g, 50g, 10g, 10g]  
+4680g: [4680g, 500g, 10g, 10g] --- [5000g, 100g, 100g]  
+4690g: [4690g, 500g, 10g] --- [5000g, 100g, 100g]  
+4700g: [4700g, 100g, 100g, 100g] --- [5000g]  
+4710g: [4710g, 100g, 100g, 100g] --- [5000g, 10g]  
+4720g: [4720g, 100g, 100g, 100g] --- [5000g, 10g, 10g]  
+4730g: [4730g, 100g, 100g, 50g, 10g, 10g] --- [5000g]  
+4740g: [4740g, 100g, 100g, 50g, 10g] --- [5000g]  
+4750g: [4750g, 100g, 100g, 50g] --- [5000g]  
+4760g: [4760g, 100g, 100g, 50g] --- [5000g, 10g]  
+4770g: [4770g, 100g, 100g, 10g, 10g, 10g] --- [5000g]  
+4780g: [4780g, 100g, 100g, 10g, 10g] --- [5000g]  
+4790g: [4790g, 100g, 100g, 10g] --- [5000g]  
+4800g: [4800g, 100g, 100g] --- [5000g]  
+4810g: [4810g, 100g, 100g] --- [5000g, 10g]  
+4820g: [4820g, 100g, 100g] --- [5000g, 10g, 10g]  
+4830g: [4830g, 100g, 50g, 10g, 10g] --- [5000g]  
+4840g: [4840g, 100g, 50g, 10g] --- [5000g]  
+4850g: [4850g, 100g, 50g] --- [5000g]  
+4860g: [4860g, 100g, 50g] --- [5000g, 10g]  
+4870g: [4870g, 100g, 10g, 10g, 10g] --- [5000g]  
+4880g: [4880g, 100g, 10g, 10g] --- [5000g]  
+4890g: [4890g, 100g, 10g] --- [5000g]  
+4900g: [4900g, 100g] --- [5000g]  
+4910g: [4910g, 100g] --- [5000g, 10g]  
+4920g: [4920g, 100g] --- [5000g, 10g, 10g]  
+4930g: [4930g, 50g, 10g, 10g] --- [5000g]  
+4940g: [4940g, 50g, 10g] --- [5000g]  
+4950g: [4950g, 50g] --- [5000g]  
+4960g: [4960g, 50g] --- [5000g, 10g]  
+4970g: [4970g, 10g, 10g, 10g] --- [5000g]  
+4980g: [4980g, 10g, 10g] --- [5000g]  
+4990g: [4990g, 10g] --- [5000g]  
+5000g: [5000g] --- [5000g]  
+5010g: [5010g] --- [5000g, 10g]  
+5020g: [5020g] --- [5000g, 10g, 10g]  
+5030g: [5030g] --- [5000g, 10g, 10g, 10g]  
+5040g: [5040g, 10g] --- [5000g, 50g]  
+5050g: [5050g] --- [5000g, 50g]  
+5060g: [5060g] --- [5000g, 50g, 10g]  
+5070g: [5070g] --- [5000g, 50g, 10g, 10g]  
+5080g: [5080g, 10g, 10g] --- [5000g, 100g]  
+5090g: [5090g, 10g] --- [5000g, 100g]  
+5100g: [5100g] --- [5000g, 100g]  
+5110g: [5110g] --- [5000g, 100g, 10g]  
+5120g: [5120g] --- [5000g, 100g, 10g, 10g]  
+5130g: [5130g] --- [5000g, 100g, 10g, 10g, 10g]  
+5140g: [5140g, 10g] --- [5000g, 100g, 50g]  
+5150g: [5150g] --- [5000g, 100g, 50g]  
+5160g: [5160g] --- [5000g, 100g, 50g, 10g]  
+5170g: [5170g] --- [5000g, 100g, 50g, 10g, 10g]  
+5180g: [5180g, 10g, 10g] --- [5000g, 100g, 100g]  
+5190g: [5190g, 10g] --- [5000g, 100g, 100g]  
+5200g: [5200g] --- [5000g, 100g, 100g]  
+5210g: [5210g] --- [5000g, 100g, 100g, 10g]  
+5220g: [5220g] --- [5000g, 100g, 100g, 10g, 10g]  
+5230g: [5230g] --- [5000g, 100g, 100g, 10g, 10g, 10g]  
+5240g: [5240g, 10g] --- [5000g, 100g, 100g, 50g]  
+5250g: [5250g] --- [5000g, 100g, 100g, 50g]  
+5260g: [5260g] --- [5000g, 100g, 100g, 50g, 10g]  
+5270g: [5270g] --- [5000g, 100g, 100g, 50g, 10g, 10g]  
+5280g: [5280g, 10g, 10g] --- [5000g, 100g, 100g, 100g]  
+5290g: [5290g, 10g] --- [5000g, 100g, 100g, 100g]  
+5300g: [5300g] --- [5000g, 100g, 100g, 100g]  
+5310g: [5310g, 100g, 100g] --- [5000g, 500g, 10g]  
+5320g: [5320g, 100g, 100g] --- [5000g, 500g, 10g, 10g]  
+5330g: [5330g, 100g, 50g, 10g, 10g] --- [5000g, 500g]  
+5340g: [5340g, 100g, 50g, 10g] --- [5000g, 500g]  
+5350g: [5350g, 100g, 50g] --- [5000g, 500g]  
+5360g: [5360g, 100g, 50g] --- [5000g, 500g, 10g]  
+5370g: [5370g, 100g, 10g, 10g, 10g] --- [5000g, 500g]  
+5380g: [5380g, 100g, 10g, 10g] --- [5000g, 500g]  
+5390g: [5390g, 100g, 10g] --- [5000g, 500g]  
+5400g: [5400g, 100g] --- [5000g, 500g]  
+5410g: [5410g, 100g] --- [5000g, 500g, 10g]  
+5420g: [5420g, 100g] --- [5000g, 500g, 10g, 10g]  
+5430g: [5430g, 50g, 10g, 10g] --- [5000g, 500g]  
+5440g: [5440g, 50g, 10g] --- [5000g, 500g]  
+5450g: [5450g, 50g] --- [5000g, 500g]  
+5460g: [5460g, 50g] --- [5000g, 500g, 10g]  
+5470g: [5470g, 10g, 10g, 10g] --- [5000g, 500g]  
+5480g: [5480g, 10g, 10g] --- [5000g, 500g]  
+5490g: [5490g, 10g] --- [5000g, 500g]  
+5500g: [5500g] --- [5000g, 500g]  
+5510g: [5510g] --- [5000g, 500g, 10g]  
+5520g: [5520g] --- [5000g, 500g, 10g, 10g]  
+5530g: [5530g] --- [5000g, 500g, 10g, 10g, 10g]  
+5540g: [5540g, 10g] --- [5000g, 500g, 50g]  
+5550g: [5550g] --- [5000g, 500g, 50g]  
+5560g: [5560g] --- [5000g, 500g, 50g, 10g]  
+5570g: [5570g] --- [5000g, 500g, 50g, 10g, 10g]  
+5580g: [5580g, 10g, 10g] --- [5000g, 500g, 100g]  
+5590g: [5590g, 10g] --- [5000g, 500g, 100g]  
+5600g: [5600g] --- [5000g, 500g, 100g]  
+5610g: [5610g] --- [5000g, 500g, 100g, 10g]  
+5620g: [5620g] --- [5000g, 500g, 100g, 10g, 10g]  
+5630g: [5630g] --- [5000g, 500g, 100g, 10g, 10g, 10g]  
+5640g: [5640g, 10g] --- [5000g, 500g, 100g, 50g]  
+5650g: [5650g] --- [5000g, 500g, 100g, 50g]  
+5660g: [5660g] --- [5000g, 500g, 100g, 50g, 10g]  
+5670g: [5670g] --- [5000g, 500g, 100g, 50g, 10g, 10g]  
+5680g: [5680g, 10g, 10g] --- [5000g, 500g, 100g, 100g]  
+5690g: [5690g, 10g] --- [5000g, 500g, 100g, 100g]  
+5700g: [5700g] --- [5000g, 500g, 100g, 100g]  
+5710g: [5710g] --- [5000g, 500g, 100g, 100g, 10g]  
+5720g: [5720g] --- [5000g, 500g, 100g, 100g, 10g, 10g]  
+5730g: [5730g] --- [5000g, 500g, 100g, 100g, 10g, 10g, 10g]  
+5740g: [5740g, 10g] --- [5000g, 500g, 100g, 100g, 50g]  
+5750g: [5750g] --- [5000g, 500g, 100g, 100g, 50g]  
+5760g: [5760g, 100g, 100g, 50g] --- [5000g, 1000g, 10g]  
+5770g: [5770g, 100g, 100g, 10g, 10g, 10g] --- [5000g, 1000g]  
+5780g: [5780g, 100g, 100g, 10g, 10g] --- [5000g, 1000g]  
+5790g: [5790g, 100g, 100g, 10g] --- [5000g, 1000g]  
+5800g: [5800g, 100g, 100g] --- [5000g, 1000g]  
+5810g: [5810g, 100g, 100g] --- [5000g, 1000g, 10g]  
+5820g: [5820g, 100g, 100g] --- [5000g, 1000g, 10g, 10g]  
+5830g: [5830g, 100g, 50g, 10g, 10g] --- [5000g, 1000g]  
+5840g: [5840g, 100g, 50g, 10g] --- [5000g, 1000g]  
+5850g: [5850g, 100g, 50g] --- [5000g, 1000g]  
+5860g: [5860g, 100g, 50g] --- [5000g, 1000g, 10g]  
+5870g: [5870g, 100g, 10g, 10g, 10g] --- [5000g, 1000g]  
+5880g: [5880g, 100g, 10g, 10g] --- [5000g, 1000g]  
+5890g: [5890g, 100g, 10g] --- [5000g, 1000g]  
+5900g: [5900g, 100g] --- [5000g, 1000g]  
+5910g: [5910g, 100g] --- [5000g, 1000g, 10g]  
+5920g: [5920g, 100g] --- [5000g, 1000g, 10g, 10g]  
+5930g: [5930g, 50g, 10g, 10g] --- [5000g, 1000g]  
+5940g: [5940g, 50g, 10g] --- [5000g, 1000g]  
+5950g: [5950g, 50g] --- [5000g, 1000g]  
+5960g: [5960g, 50g] --- [5000g, 1000g, 10g]  
+5970g: [5970g, 10g, 10g, 10g] --- [5000g, 1000g]  
+5980g: [5980g, 10g, 10g] --- [5000g, 1000g]  
+5990g: [5990g, 10g] --- [5000g, 1000g]  
+6000g: [6000g] --- [5000g, 1000g]  
+6010g: [6010g] --- [5000g, 1000g, 10g]  
+6020g: [6020g] --- [5000g, 1000g, 10g, 10g]  
+6030g: [6030g] --- [5000g, 1000g, 10g, 10g, 10g]  
+6040g: [6040g, 10g] --- [5000g, 1000g, 50g]  
+6050g: [6050g] --- [5000g, 1000g, 50g]  
+6060g: [6060g] --- [5000g, 1000g, 50g, 10g]  
+6070g: [6070g] --- [5000g, 1000g, 50g, 10g, 10g]  
+6080g: [6080g, 10g, 10g] --- [5000g, 1000g, 100g]  
+6090g: [6090g, 10g] --- [5000g, 1000g, 100g]  
+6100g: [6100g] --- [5000g, 1000g, 100g]  
+6110g: [6110g] --- [5000g, 1000g, 100g, 10g]  
+6120g: [6120g] --- [5000g, 1000g, 100g, 10g, 10g]  
+6130g: [6130g] --- [5000g, 1000g, 100g, 10g, 10g, 10g]  
+6140g: [6140g, 10g] --- [5000g, 1000g, 100g, 50g]  
+6150g: [6150g] --- [5000g, 1000g, 100g, 50g]  
+6160g: [6160g] --- [5000g, 1000g, 100g, 50g, 10g]  
+6170g: [6170g] --- [5000g, 1000g, 100g, 50g, 10g, 10g]  
+6180g: [6180g, 10g, 10g] --- [5000g, 1000g, 100g, 100g]  
+6190g: [6190g, 10g] --- [5000g, 1000g, 100g, 100g]  
+6200g: [6200g] --- [5000g, 1000g, 100g, 100g]  
+6210g: [6210g] --- [5000g, 1000g, 100g, 100g, 10g]  
+6220g: [6220g] --- [5000g, 1000g, 100g, 100g, 10g, 10g]  
+6230g: [6230g] --- [5000g, 1000g, 100g, 100g, 10g, 10g, 10g]  
+6240g: [6240g, 10g] --- [5000g, 1000g, 100g, 100g, 50g]  
+6250g: [6250g] --- [5000g, 1000g, 100g, 100g, 50g]  
+6260g: [6260g] --- [5000g, 1000g, 100g, 100g, 50g, 10g]  
+6270g: [6270g] --- [5000g, 1000g, 100g, 100g, 50g, 10g, 10g]  
+6280g: [6280g, 10g, 10g] --- [5000g, 1000g, 100g, 100g, 100g]  
+6290g: [6290g, 10g] --- [5000g, 1000g, 100g, 100g, 100g]  
+6300g: [6300g] --- [5000g, 1000g, 100g, 100g, 100g]  
+6310g: [6310g, 100g, 100g] --- [5000g, 1000g, 500g, 10g]  
+6320g: [6320g, 100g, 100g] --- [5000g, 1000g, 500g, 10g, 10g]  
+6330g: [6330g, 100g, 50g, 10g, 10g] --- [5000g, 1000g, 500g]  
+6340g: [6340g, 100g, 50g, 10g] --- [5000g, 1000g, 500g]  
+6350g: [6350g, 100g, 50g] --- [5000g, 1000g, 500g]  
+6360g: [6360g, 100g, 50g] --- [5000g, 1000g, 500g, 10g]  
+6370g: [6370g, 100g, 10g, 10g, 10g] --- [5000g, 1000g, 500g]  
+6380g: [6380g, 100g, 10g, 10g] --- [5000g, 1000g, 500g]  
+6390g: [6390g, 100g, 10g] --- [5000g, 1000g, 500g]  
+6400g: [6400g, 100g] --- [5000g, 1000g, 500g]  
+6410g: [6410g, 100g] --- [5000g, 1000g, 500g, 10g]  
+6420g: [6420g, 100g] --- [5000g, 1000g, 500g, 10g, 10g]  
+6430g: [6430g, 50g, 10g, 10g] --- [5000g, 1000g, 500g]  
+6440g: [6440g, 50g, 10g] --- [5000g, 1000g, 500g]  
+6450g: [6450g, 50g] --- [5000g, 1000g, 500g]  
+6460g: [6460g, 50g] --- [5000g, 1000g, 500g, 10g]  
+6470g: [6470g, 10g, 10g, 10g] --- [5000g, 1000g, 500g]  
+6480g: [6480g, 10g, 10g] --- [5000g, 1000g, 500g]  
+6490g: [6490g, 10g] --- [5000g, 1000g, 500g]  
+6500g: [6500g] --- [5000g, 1000g, 500g]  
+6510g: [6510g] --- [5000g, 1000g, 500g, 10g]  
+6520g: [6520g] --- [5000g, 1000g, 500g, 10g, 10g]  
+6530g: [6530g] --- [5000g, 1000g, 500g, 10g, 10g, 10g]  
+6540g: [6540g, 10g] --- [5000g, 1000g, 500g, 50g]  
+6550g: [6550g] --- [5000g, 1000g, 500g, 50g]  
+6560g: [6560g] --- [5000g, 1000g, 500g, 50g, 10g]  
+6570g: [6570g] --- [5000g, 1000g, 500g, 50g, 10g, 10g]  
+6580g: [6580g, 10g, 10g] --- [5000g, 1000g, 500g, 100g]  
+6590g: [6590g, 10g] --- [5000g, 1000g, 500g, 100g]  
+6600g: [6600g] --- [5000g, 1000g, 500g, 100g]  
+6610g: [6610g] --- [5000g, 1000g, 500g, 100g, 10g]  
+6620g: [6620g] --- [5000g, 1000g, 500g, 100g, 10g, 10g]  
+6630g: [6630g] --- [5000g, 1000g, 500g, 100g, 10g, 10g, 10g]  
+6640g: [6640g, 10g] --- [5000g, 1000g, 500g, 100g, 50g]  
+6650g: [6650g] --- [5000g, 1000g, 500g, 100g, 50g]  
+6660g: [6660g] --- [5000g, 1000g, 500g, 100g, 50g, 10g]  
+6670g: [6670g] --- [5000g, 1000g, 500g, 100g, 50g, 10g, 10g]  
+6680g: [6680g, 10g, 10g] --- [5000g, 1000g, 500g, 100g, 100g]  
+6690g: [6690g, 10g] --- [5000g, 1000g, 500g, 100g, 100g]  
+6700g: [6700g] --- [5000g, 1000g, 500g, 100g, 100g]  
+6710g: [6710g] --- [5000g, 1000g, 500g, 100g, 100g, 10g]  
+6720g: [6720g] --- [5000g, 1000g, 500g, 100g, 100g, 10g, 10g]  
+6730g: [6730g] --- [5000g, 1000g, 500g, 100g, 100g, 10g, 10g, 10g]  
+6740g: [6740g, 10g] --- [5000g, 1000g, 500g, 100g, 100g, 50g]  
+6750g: [6750g] --- [5000g, 1000g, 500g, 100g, 100g, 50g]  
+6760g: [6760g, 100g, 100g, 50g] --- [5000g, 1000g, 1000g, 10g]  
+6770g: [6770g, 100g, 100g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g]  
+6780g: [6780g, 100g, 100g, 10g, 10g] --- [5000g, 1000g, 1000g]  
+6790g: [6790g, 100g, 100g, 10g] --- [5000g, 1000g, 1000g]  
+6800g: [6800g, 100g, 100g] --- [5000g, 1000g, 1000g]  
+6810g: [6810g, 100g, 100g] --- [5000g, 1000g, 1000g, 10g]  
+6820g: [6820g, 100g, 100g] --- [5000g, 1000g, 1000g, 10g, 10g]  
+6830g: [6830g, 100g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g]  
+6840g: [6840g, 100g, 50g, 10g] --- [5000g, 1000g, 1000g]  
+6850g: [6850g, 100g, 50g] --- [5000g, 1000g, 1000g]  
+6860g: [6860g, 100g, 50g] --- [5000g, 1000g, 1000g, 10g]  
+6870g: [6870g, 100g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g]  
+6880g: [6880g, 100g, 10g, 10g] --- [5000g, 1000g, 1000g]  
+6890g: [6890g, 100g, 10g] --- [5000g, 1000g, 1000g]  
+6900g: [6900g, 100g] --- [5000g, 1000g, 1000g]  
+6910g: [6910g, 100g] --- [5000g, 1000g, 1000g, 10g]  
+6920g: [6920g, 100g] --- [5000g, 1000g, 1000g, 10g, 10g]  
+6930g: [6930g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g]  
+6940g: [6940g, 50g, 10g] --- [5000g, 1000g, 1000g]  
+6950g: [6950g, 50g] --- [5000g, 1000g, 1000g]  
+6960g: [6960g, 50g] --- [5000g, 1000g, 1000g, 10g]  
+6970g: [6970g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g]  
+6980g: [6980g, 10g, 10g] --- [5000g, 1000g, 1000g]  
+6990g: [6990g, 10g] --- [5000g, 1000g, 1000g]  
+7000g: [7000g] --- [5000g, 1000g, 1000g]  
+7010g: [7010g] --- [5000g, 1000g, 1000g, 10g]  
+7020g: [7020g] --- [5000g, 1000g, 1000g, 10g, 10g]  
+7030g: [7030g] --- [5000g, 1000g, 1000g, 10g, 10g, 10g]  
+7040g: [7040g, 10g] --- [5000g, 1000g, 1000g, 50g]  
+7050g: [7050g] --- [5000g, 1000g, 1000g, 50g]  
+7060g: [7060g] --- [5000g, 1000g, 1000g, 50g, 10g]  
+7070g: [7070g] --- [5000g, 1000g, 1000g, 50g, 10g, 10g]  
+7080g: [7080g, 10g, 10g] --- [5000g, 1000g, 1000g, 100g]  
+7090g: [7090g, 10g] --- [5000g, 1000g, 1000g, 100g]  
+7100g: [7100g] --- [5000g, 1000g, 1000g, 100g]  
+7110g: [7110g] --- [5000g, 1000g, 1000g, 100g, 10g]  
+7120g: [7120g] --- [5000g, 1000g, 1000g, 100g, 10g, 10g]  
+7130g: [7130g] --- [5000g, 1000g, 1000g, 100g, 10g, 10g, 10g]  
+7140g: [7140g, 10g] --- [5000g, 1000g, 1000g, 100g, 50g]  
+7150g: [7150g] --- [5000g, 1000g, 1000g, 100g, 50g]  
+7160g: [7160g] --- [5000g, 1000g, 1000g, 100g, 50g, 10g]  
+7170g: [7170g] --- [5000g, 1000g, 1000g, 100g, 50g, 10g, 10g]  
+7180g: [7180g, 10g, 10g] --- [5000g, 1000g, 1000g, 100g, 100g]  
+7190g: [7190g, 10g] --- [5000g, 1000g, 1000g, 100g, 100g]  
+7200g: [7200g] --- [5000g, 1000g, 1000g, 100g, 100g]  
+7210g: [7210g] --- [5000g, 1000g, 1000g, 100g, 100g, 10g]  
+7220g: [7220g] --- [5000g, 1000g, 1000g, 100g, 100g, 10g, 10g]  
+7230g: [7230g] --- [5000g, 1000g, 1000g, 100g, 100g, 10g, 10g, 10g]  
+7240g: [7240g, 10g] --- [5000g, 1000g, 1000g, 100g, 100g, 50g]  
+7250g: [7250g] --- [5000g, 1000g, 1000g, 100g, 100g, 50g]  
+7260g: [7260g] --- [5000g, 1000g, 1000g, 100g, 100g, 50g, 10g]  
+7270g: [7270g] --- [5000g, 1000g, 1000g, 100g, 100g, 50g, 10g, 10g]  
+7280g: [7280g, 10g, 10g] --- [5000g, 1000g, 1000g, 100g, 100g, 100g]  
+7290g: [7290g, 10g] --- [5000g, 1000g, 1000g, 100g, 100g, 100g]  
+7300g: [7300g] --- [5000g, 1000g, 1000g, 100g, 100g, 100g]  
+7310g: [7310g, 100g, 100g] --- [5000g, 1000g, 1000g, 500g, 10g]  
+7320g: [7320g, 100g, 100g] --- [5000g, 1000g, 1000g, 500g, 10g, 10g]  
+7330g: [7330g, 100g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7340g: [7340g, 100g, 50g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7350g: [7350g, 100g, 50g] --- [5000g, 1000g, 1000g, 500g]  
+7360g: [7360g, 100g, 50g] --- [5000g, 1000g, 1000g, 500g, 10g]  
+7370g: [7370g, 100g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7380g: [7380g, 100g, 10g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7390g: [7390g, 100g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7400g: [7400g, 100g] --- [5000g, 1000g, 1000g, 500g]  
+7410g: [7410g, 100g] --- [5000g, 1000g, 1000g, 500g, 10g]  
+7420g: [7420g, 100g] --- [5000g, 1000g, 1000g, 500g, 10g, 10g]  
+7430g: [7430g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7440g: [7440g, 50g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7450g: [7450g, 50g] --- [5000g, 1000g, 1000g, 500g]  
+7460g: [7460g, 50g] --- [5000g, 1000g, 1000g, 500g, 10g]  
+7470g: [7470g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7480g: [7480g, 10g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7490g: [7490g, 10g] --- [5000g, 1000g, 1000g, 500g]  
+7500g: [7500g] --- [5000g, 1000g, 1000g, 500g]  
+7510g: [7510g] --- [5000g, 1000g, 1000g, 500g, 10g]  
+7520g: [7520g] --- [5000g, 1000g, 1000g, 500g, 10g, 10g]  
+7530g: [7530g] --- [5000g, 1000g, 1000g, 500g, 10g, 10g, 10g]  
+7540g: [7540g, 10g] --- [5000g, 1000g, 1000g, 500g, 50g]  
+7550g: [7550g] --- [5000g, 1000g, 1000g, 500g, 50g]  
+7560g: [7560g] --- [5000g, 1000g, 1000g, 500g, 50g, 10g]  
+7570g: [7570g] --- [5000g, 1000g, 1000g, 500g, 50g, 10g, 10g]  
+7580g: [7580g, 10g, 10g] --- [5000g, 1000g, 1000g, 500g, 100g]  
+7590g: [7590g, 10g] --- [5000g, 1000g, 1000g, 500g, 100g]  
+7600g: [7600g] --- [5000g, 1000g, 1000g, 500g, 100g]  
+7610g: [7610g] --- [5000g, 1000g, 1000g, 500g, 100g, 10g]  
+7620g: [7620g] --- [5000g, 1000g, 1000g, 500g, 100g, 10g, 10g]  
+7630g: [7630g] --- [5000g, 1000g, 1000g, 500g, 100g, 10g, 10g, 10g]  
+7640g: [7640g, 10g] --- [5000g, 1000g, 1000g, 500g, 100g, 50g]  
+7650g: [7650g] --- [5000g, 1000g, 1000g, 500g, 100g, 50g]  
+7660g: [7660g] --- [5000g, 1000g, 1000g, 500g, 100g, 50g, 10g]  
+7670g: [7670g] --- [5000g, 1000g, 1000g, 500g, 100g, 50g, 10g, 10g]  
+7680g: [7680g, 10g, 10g] --- [5000g, 1000g, 1000g, 500g, 100g, 100g]  
+7690g: [7690g, 10g] --- [5000g, 1000g, 1000g, 500g, 100g, 100g]  
+7700g: [7700g] --- [5000g, 1000g, 1000g, 500g, 100g, 100g]  
+7710g: [7710g] --- [5000g, 1000g, 1000g, 500g, 100g, 100g, 10g]  
+7720g: [7720g] --- [5000g, 1000g, 1000g, 500g, 100g, 100g, 10g, 10g]  
+7730g: [7730g] --- [5000g, 1000g, 1000g, 500g, 100g, 100g, 10g, 10g, 10g]  
+7740g: [7740g, 10g] --- [5000g, 1000g, 1000g, 500g, 100g, 100g, 50g]  
+7750g: [7750g] --- [5000g, 1000g, 1000g, 500g, 100g, 100g, 50g]  
+7760g: [7760g, 100g, 100g, 50g] --- [5000g, 1000g, 1000g, 1000g, 10g]  
+7770g: [7770g, 100g, 100g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7780g: [7780g, 100g, 100g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7790g: [7790g, 100g, 100g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7800g: [7800g, 100g, 100g] --- [5000g, 1000g, 1000g, 1000g]  
+7810g: [7810g, 100g, 100g] --- [5000g, 1000g, 1000g, 1000g, 10g]  
+7820g: [7820g, 100g, 100g] --- [5000g, 1000g, 1000g, 1000g, 10g, 10g]  
+7830g: [7830g, 100g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7840g: [7840g, 100g, 50g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7850g: [7850g, 100g, 50g] --- [5000g, 1000g, 1000g, 1000g]  
+7860g: [7860g, 100g, 50g] --- [5000g, 1000g, 1000g, 1000g, 10g]  
+7870g: [7870g, 100g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7880g: [7880g, 100g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7890g: [7890g, 100g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7900g: [7900g, 100g] --- [5000g, 1000g, 1000g, 1000g]  
+7910g: [7910g, 100g] --- [5000g, 1000g, 1000g, 1000g, 10g]  
+7920g: [7920g, 100g] --- [5000g, 1000g, 1000g, 1000g, 10g, 10g]  
+7930g: [7930g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7940g: [7940g, 50g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7950g: [7950g, 50g] --- [5000g, 1000g, 1000g, 1000g]  
+7960g: [7960g, 50g] --- [5000g, 1000g, 1000g, 1000g, 10g]  
+7970g: [7970g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7980g: [7980g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+7990g: [7990g, 10g] --- [5000g, 1000g, 1000g, 1000g]  
+8000g: [8000g] --- [5000g, 1000g, 1000g, 1000g]  
+8010g: [8010g] --- [5000g, 1000g, 1000g, 1000g, 10g]  
+8020g: [8020g] --- [5000g, 1000g, 1000g, 1000g, 10g, 10g]  
+8030g: [8030g] --- [5000g, 1000g, 1000g, 1000g, 10g, 10g, 10g]  
+8040g: [8040g, 10g] --- [5000g, 1000g, 1000g, 1000g, 50g]  
+8050g: [8050g] --- [5000g, 1000g, 1000g, 1000g, 50g]  
+8060g: [8060g] --- [5000g, 1000g, 1000g, 1000g, 50g, 10g]  
+8070g: [8070g] --- [5000g, 1000g, 1000g, 1000g, 50g, 10g, 10g]  
+8080g: [8080g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 100g]  
+8090g: [8090g, 10g] --- [5000g, 1000g, 1000g, 1000g, 100g]  
+8100g: [8100g] --- [5000g, 1000g, 1000g, 1000g, 100g]  
+8110g: [8110g] --- [5000g, 1000g, 1000g, 1000g, 100g, 10g]  
+8120g: [8120g] --- [5000g, 1000g, 1000g, 1000g, 100g, 10g, 10g]  
+8130g: [8130g] --- [5000g, 1000g, 1000g, 1000g, 100g, 10g, 10g, 10g]  
+8140g: [8140g, 10g] --- [5000g, 1000g, 1000g, 1000g, 100g, 50g]  
+8150g: [8150g] --- [5000g, 1000g, 1000g, 1000g, 100g, 50g]  
+8160g: [8160g] --- [5000g, 1000g, 1000g, 1000g, 100g, 50g, 10g]  
+8170g: [8170g] --- [5000g, 1000g, 1000g, 1000g, 100g, 50g, 10g, 10g]  
+8180g: [8180g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g]  
+8190g: [8190g, 10g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g]  
+8200g: [8200g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g]  
+8210g: [8210g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 10g]  
+8220g: [8220g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 10g, 10g]  
+8230g: [8230g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 10g, 10g, 10g]  
+8240g: [8240g, 10g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 50g]  
+8250g: [8250g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 50g]  
+8260g: [8260g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 50g, 10g]  
+8270g: [8270g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 50g, 10g, 10g]  
+8280g: [8280g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 100g]  
+8290g: [8290g, 10g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 100g]  
+8300g: [8300g] --- [5000g, 1000g, 1000g, 1000g, 100g, 100g, 100g]  
+8310g: [8310g, 100g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 10g]  
+8320g: [8320g, 100g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 10g, 10g]  
+8330g: [8330g, 100g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8340g: [8340g, 100g, 50g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8350g: [8350g, 100g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8360g: [8360g, 100g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 10g]  
+8370g: [8370g, 100g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8380g: [8380g, 100g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8390g: [8390g, 100g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8400g: [8400g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8410g: [8410g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 10g]  
+8420g: [8420g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 10g, 10g]  
+8430g: [8430g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8440g: [8440g, 50g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8450g: [8450g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8460g: [8460g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 10g]  
+8470g: [8470g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8480g: [8480g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8490g: [8490g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8500g: [8500g] --- [5000g, 1000g, 1000g, 1000g, 500g]  
+8510g: [8510g] --- [5000g, 1000g, 1000g, 1000g, 500g, 10g]  
+8520g: [8520g] --- [5000g, 1000g, 1000g, 1000g, 500g, 10g, 10g]  
+8530g: [8530g] --- [5000g, 1000g, 1000g, 1000g, 500g, 10g, 10g, 10g]  
+8540g: [8540g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 50g]  
+8550g: [8550g] --- [5000g, 1000g, 1000g, 1000g, 500g, 50g]  
+8560g: [8560g] --- [5000g, 1000g, 1000g, 1000g, 500g, 50g, 10g]  
+8570g: [8570g] --- [5000g, 1000g, 1000g, 1000g, 500g, 50g, 10g, 10g]  
+8580g: [8580g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g]  
+8590g: [8590g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g]  
+8600g: [8600g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g]  
+8610g: [8610g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 10g]  
+8620g: [8620g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 10g, 10g]  
+8630g: [8630g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 10g, 10g, 10g]  
+8640g: [8640g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 50g]  
+8650g: [8650g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 50g]  
+8660g: [8660g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 50g, 10g]  
+8670g: [8670g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 50g, 10g, 10g]  
+8680g: [8680g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g]  
+8690g: [8690g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g]  
+8700g: [8700g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g]  
+8710g: [8710g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 10g]  
+8720g: [8720g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 10g, 10g]  
+8730g: [8730g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 10g, 10g, 10g]  
+8740g: [8740g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 50g]  
+8750g: [8750g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 50g]  
+8760g: [8760g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 50g, 10g]  
+8770g: [8770g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 50g, 10g, 10g]  
+8780g: [8780g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 100g]  
+8790g: [8790g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 100g]  
+8800g: [8800g] --- [5000g, 1000g, 1000g, 1000g, 500g, 100g, 100g, 100g]  
+8810g: [8810g, 100g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 10g]  
+8820g: [8820g, 100g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 10g, 10g]  
+8830g: [8830g, 100g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8840g: [8840g, 100g, 50g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8850g: [8850g, 100g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8860g: [8860g, 100g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 10g]  
+8870g: [8870g, 100g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8880g: [8880g, 100g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8890g: [8890g, 100g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8900g: [8900g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8910g: [8910g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 10g]  
+8920g: [8920g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 10g, 10g]  
+8930g: [8930g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8940g: [8940g, 50g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8950g: [8950g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8960g: [8960g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 10g]  
+8970g: [8970g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8980g: [8980g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+8990g: [8990g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+9000g: [9000g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g]  
+9010g: [9010g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 10g]  
+9020g: [9020g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 10g, 10g]  
+9030g: [9030g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 10g, 10g, 10g]  
+9040g: [9040g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 50g]  
+9050g: [9050g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 50g]  
+9060g: [9060g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 50g, 10g]  
+9070g: [9070g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 50g, 10g, 10g]  
+9080g: [9080g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g]  
+9090g: [9090g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g]  
+9100g: [9100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g]  
+9110g: [9110g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 10g]  
+9120g: [9120g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 10g, 10g]  
+9130g: [9130g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 10g, 10g, 10g]  
+9140g: [9140g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 50g]  
+9150g: [9150g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 50g]  
+9160g: [9160g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 50g, 10g]  
+9170g: [9170g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 50g, 10g, 10g]  
+9180g: [9180g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g]  
+9190g: [9190g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g]  
+9200g: [9200g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g]  
+9210g: [9210g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 10g]  
+9220g: [9220g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 10g, 10g]  
+9230g: [9230g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 10g, 10g, 10g]  
+9240g: [9240g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 50g]  
+9250g: [9250g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 50g]  
+9260g: [9260g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 50g, 10g]  
+9270g: [9270g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 50g, 10g, 10g]  
+9280g: [9280g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 100g]  
+9290g: [9290g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 100g]  
+9300g: [9300g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 100g, 100g, 100g]  
+9310g: [9310g, 100g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 10g]  
+9320g: [9320g, 100g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 10g, 10g]  
+9330g: [9330g, 100g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9340g: [9340g, 100g, 50g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9350g: [9350g, 100g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9360g: [9360g, 100g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 10g]  
+9370g: [9370g, 100g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9380g: [9380g, 100g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9390g: [9390g, 100g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9400g: [9400g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9410g: [9410g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 10g]  
+9420g: [9420g, 100g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 10g, 10g]  
+9430g: [9430g, 50g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9440g: [9440g, 50g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9450g: [9450g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9460g: [9460g, 50g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 10g]  
+9470g: [9470g, 10g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9480g: [9480g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9490g: [9490g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9500g: [9500g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g]  
+9510g: [9510g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 10g]  
+9520g: [9520g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 10g, 10g]  
+9530g: [9530g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 10g, 10g, 10g]  
+9540g: [9540g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 50g]  
+9550g: [9550g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 50g]  
+9560g: [9560g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 50g, 10g]  
+9570g: [9570g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 50g, 10g, 10g]  
+9580g: [9580g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g]  
+9590g: [9590g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g]  
+9600g: [9600g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g]  
+9610g: [9610g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 10g]  
+9620g: [9620g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 10g, 10g]  
+9630g: [9630g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 10g, 10g, 10g]  
+9640g: [9640g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 50g]  
+9650g: [9650g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 50g]  
+9660g: [9660g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 50g, 10g]  
+9670g: [9670g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 50g, 10g, 10g]  
+9680g: [9680g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g]  
+9690g: [9690g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g]  
+9700g: [9700g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g]  
+9710g: [9710g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 10g]  
+9720g: [9720g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 10g, 10g]  
+9730g: [9730g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 10g, 10g, 10g]  
+9740g: [9740g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 50g]  
+9750g: [9750g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 50g]  
+9760g: [9760g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 50g, 10g]  
+9770g: [9770g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 50g, 10g, 10g]  
+9780g: [9780g, 10g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g]  
+9790g: [9790g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g]  
+9800g: [9800g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g]  
+9810g: [9810g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 10g]  
+9820g: [9820g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 10g, 10g]  
+9830g: [9830g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 10g, 10g, 10g]  
+9840g: [9840g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g]  
+9850g: [9850g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g]  
+9860g: [9860g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g, 10g]  
+9870g: [9870g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g, 10g, 10g]  
+9880g: [9880g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g, 10g, 10g, 10g]  
+9890g: [9890g, 10g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g, 50g]  
+9900g: [9900g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g, 50g]  
+9910g: [9910g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g, 50g, 10g]  
+9920g: [9920g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g, 50g, 10g, 10g]  
+9930g: [9930g] --- [5000g, 1000g, 1000g, 1000g, 500g, 500g, 500g, 100g, 100g, 100g, 50g, 50g, 10g, 10g, 10g]  
+9930g/9940g: [9940g] --- [10g, 10g, 10g, 50g, 50g, 100g, 100g, 100g, 500g, 500g, 500g, 1000g, 1000g, 1000g, 5000g]  
+9930g/9950g: [9950g] --- [10g, 10g, 10g, 50g, 50g, 100g, 100g, 100g, 500g, 500g, 500g, 1000g, 1000g, 1000g, 5000g]  
+9930g/9960g: [9960g] --- [10g, 10g, 10g, 50g, 50g, 100g, 100g, 100g, 500g, 500g, 500g, 1000g, 1000g, 1000g, 5000g]  
+9930g/9970g: [9970g] --- [10g, 10g, 10g, 50g, 50g, 100g, 100g, 100g, 500g, 500g, 500g, 1000g, 1000g, 1000g, 5000g]  
+9930g/9980g: [9980g] --- [10g, 10g, 10g, 50g, 50g, 100g, 100g, 100g, 500g, 500g, 500g, 1000g, 1000g, 1000g, 5000g]  
+9930g/9990g: [9990g] --- [10g, 10g, 10g, 50g, 50g, 100g, 100g, 100g, 500g, 500g, 500g, 1000g, 1000g, 1000g, 5000g]  
+9930g/10000g: [10000g] --- [10g, 10g, 10g, 50g, 50g, 100g, 100g, 100g, 500g, 500g, 500g, 1000g, 1000g, 1000g, 5000g]  

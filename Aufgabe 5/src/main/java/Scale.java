@@ -62,6 +62,9 @@ public class Scale {
 
         println(leftWeights + " --- " + rightWeights + " | " + difference);
 
+        //Wenn das Zielgewicht größer ist, als die Summe der verfügbaren Gewichte, kann die Waage nicht ausbalanciert werden
+        if(initialWeight > sumWeights(availableWeights) && rightWeights.size() == 0) return new ScaleState(new ArrayList<>(leftWeights), new ArrayList<>(availableWeights), false);
+
         if(bestState == null || (Math.abs(difference) < Math.abs(bestState.difference(initialWeight)))) bestState = new ScaleState(new ArrayList<>(leftWeights), new ArrayList<>(rightWeights), false);
         else negativeRecursions++;
 
