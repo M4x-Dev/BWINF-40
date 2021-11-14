@@ -1,8 +1,8 @@
-Würfel 1 [1, 1, 1, 6, 6, 6] : 18827 Siege
-Würfel 2 [1, 2, 3, 4, 5, 6] : 29016 Siege
-Würfel 3 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] : 49850 Siege
-Würfel 4 [1, 2, 3, 4] : 0 Siege
-Würfel 5 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : 23948 Siege
-Würfel 6 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] : 26830 Siege
+Würfel 1 [1, 2, 5, 6] : 20567 Siege
+Würfel 2 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : 16378 Siege
+Würfel 3 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] : 49816 Siege
+Würfel 4 [1, 2, 3, 4, 5, 6] : 21732 Siege
+Würfel 5 [1, 2, 3, 4, 5, 6, 7, 8] : 16862 Siege
+Würfel 6 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] : 21278 Siege
 
-Ergebnis: Der beste Würfel ist der Würfel [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] mit 49850 Siegen.
+Ergebnis: Der beste Würfel ist der Würfel [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] mit 49816 Siegen.

@@ -89,7 +89,7 @@ public class EasyPatternGenerator extends PatternGenerator {
         switch(orientation) {
             case Horizontal:
                 //X-Koordinate wird zufällig generiert
-                int hx = instanceRandom.nextInt(width - word.length());
+                int hx = word.length() < width ? instanceRandom.nextInt(width - word.length()) : 0;
 
                 int[][] verticalSections = new int[3][2];
                 int verticalSectionIndex = 0;
@@ -120,7 +120,7 @@ public class EasyPatternGenerator extends PatternGenerator {
                 return new int[] { hx, hy };
             case Vertical:
                 //Y-Koordinate wird zufällig generiert
-                int vy = instanceRandom.nextInt(height - word.length());
+                int vy = word.length() < height ? instanceRandom.nextInt(height - word.length()) : 0;
 
                 int[][] horizontalSections = new int[3][2];
                 int horizontalSectionIndex = 0;

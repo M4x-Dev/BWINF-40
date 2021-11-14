@@ -95,8 +95,8 @@ public class ScaleEvaluator {
                 //Schreiben der Inhalte in die Datei
                 PrintWriter outputWriter = new PrintWriter(filePath, StandardCharsets.UTF_8);
                 resultEntries.forEach(entry -> {
-                    if(entry.scaleBalanced) outputWriter.println(entry.targetWeight + "g: " + entry.leftWeights + " --- " + entry.rightWeights);
-                    else outputWriter.println(entry.achievedWeight + "g/" + entry.targetWeight + "g: " + entry.leftWeights + " --- " + entry.rightWeights);
+                    if(entry.scaleBalanced) outputWriter.println(entry.targetWeight + "g: " + entry.leftWeights + " --- " + entry.rightWeights + "  ");
+                    else outputWriter.println(entry.achievedWeight + "g/" + entry.targetWeight + "g: " + entry.leftWeights + " --- " + entry.rightWeights + "  ");
                 });
 
                 //Schließen der benötigten Ressourcen

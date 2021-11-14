@@ -359,24 +359,10 @@ Wenn sich jedoch eine eigene Figur auf dem Feld befindet, dann springt der Algor
 
 Wenn keine Figur erfolgreich verschoben werden konnte, dann wird die Funktion rekursiv aufgerufen, sodass der nächste Spieler an der Reihe ist (bzw. der gleiche wenn eine 6 gewürfelt wurde).
 
-## Beispiel (wuerfel0.txt)
+## Beispiele
 
-### Eingabe des Programmes
+### Beispiel 1 (wuerfel0.txt)
 
-6  
-6 1 2 3 4 5 6  
-6 1 1 1 6 6 6  
-4 1 2 3 4  
-10 0 1 2 3 4 5 6 7 8 9  
-12 1 2 3 4 5 6 7 8 9 10 11 12  
-20 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20  
-
-- sechs verschiedene Würfel mit unterschiedlichen Seiten
-- der dritte Würfel ist ungültig und wird somit alle Spiele verlieren
-
-### Ausgabe des Programmes
-
---- Ergebnisse ---  
 Mit Würfel 1 [1, 1, 1, 6, 6, 6] wurde 18827 mal gewonnen  
 Mit Würfel 2 [1, 2, 3, 4, 5, 6] wurde 29016 mal gewonnen  
 Mit Würfel 3 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] wurde 49850 mal gewonnen  
@@ -386,4 +372,34 @@ Mit Würfel 6 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
 
 Der Würfel [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] hat demnach die besten Gewinnchancen (Gewonnen: 49850)
 
-Die Auswertung durch den Algorithmus hat ergeben, dass der vierte Würfel die größten Gewinnchancen hat, da dieser in den Simulationen die meisten Spiele gewonnen hat.
+### Beispiel 2 (wuerfel1.txt)
+
+Mit Würfel 1 [2, 3, 4, 5, 6, 7] wurde 34523 mal gewonnen  
+Mit Würfel 2 [5, 6, 7, 8, 9, 10] wurde 8676 mal gewonnen  
+Mit Würfel 3 [4, 5, 6, 7, 8, 9] wurde 14364 mal gewonnen  
+Mit Würfel 4 [1, 2, 3, 4, 5, 6] wurde 45187 mal gewonnen  
+Mit Würfel 5 [3, 4, 5, 6, 7, 8] wurde 23640 mal gewonnen  
+Mit Würfel 6 [6, 7, 8, 9, 10, 11] wurde 7081 mal gewonnen  
+
+Der Würfel [1, 2, 3, 4, 5, 6] hat demnach die besten Gewinnchancen (Gewonnen: 45187)  
+
+### Beispiel 3 (wuerfel2.txt)
+
+Mit Würfel 1 [1, 1, 1, 1, 6, 6] wurde 29116 mal gewonnen  
+Mit Würfel 2 [1, 6, 6, 6, 6, 6] wurde 1592 mal gewonnen  
+Mit Würfel 3 [1, 1, 6, 6, 6, 6] wurde 10189 mal gewonnen  
+Mit Würfel 4 [1, 1, 1, 1, 1, 6] wurde 38684 mal gewonnen  
+Mit Würfel 5 [1, 1, 1, 6, 6, 6] wurde 19257 mal gewonnen  
+
+Der Würfel [1, 1, 1, 1, 1, 6] hat demnach die besten Gewinnchancen (Gewonnen: 38684)  
+
+### Beispiel 4 (wuerfel3.txt)
+
+Mit Würfel 1 [1, 2, 5, 6] wurde 20567 mal gewonnen  
+Mit Würfel 2 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] wurde 16378 mal gewonnen  
+Mit Würfel 3 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] wurde 49816 mal gewonnen  
+Mit Würfel 4 [1, 2, 3, 4, 5, 6] wurde 21732 mal gewonnen  
+Mit Würfel 5 [1, 2, 3, 4, 5, 6, 7, 8] wurde 16862 mal gewonnen  
+Mit Würfel 6 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] wurde 21278 mal gewonnen  
+
+Der Würfel [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] hat demnach die besten Gewinnchancen (Gewonnen: 49816)  
