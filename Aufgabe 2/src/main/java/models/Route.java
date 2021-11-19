@@ -1,3 +1,9 @@
+/*
+ * Created by Maximilian Flügel, 12a
+ * 40. Bundeswettbewerb für Informatik - Runde 1
+ * Gymnasium Stadtfeld Wernigerode
+ */
+
 package models;
 
 import java.io.PrintWriter;
@@ -91,7 +97,7 @@ public class Route {
     public String print() {
         StringBuilder instanceBuilder = new StringBuilder();
         for(Hotel hotel : hotels) instanceBuilder.append(hotel.distanceFromStart).append("/").append(hotel.averageRating).append(" --> ");
-        return instanceBuilder.substring(0, instanceBuilder.length() - " --> ".length());
+        return instanceBuilder.length() > 0 ? instanceBuilder.substring(0, instanceBuilder.length() - " --> ".length()) : instanceBuilder.toString();
     }
 
     /**
@@ -102,7 +108,7 @@ public class Route {
     public String printPretty() {
         StringBuilder instanceBuilder = new StringBuilder();
         for(Hotel hotel : hotels) instanceBuilder.append(hotel.distanceFromStart).append("/").append(hotel.averageRating).append(" --> ");
-        return instanceBuilder.substring(0, instanceBuilder.length() - " --> ".length());
+        return instanceBuilder.length() > 0 ? instanceBuilder.substring(0, instanceBuilder.length() - " --> ".length()) : instanceBuilder.toString();
     }
 
 }

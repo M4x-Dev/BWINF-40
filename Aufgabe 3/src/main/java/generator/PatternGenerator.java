@@ -1,3 +1,9 @@
+/*
+ * Created by Maximilian Flügel, 12a
+ * 40. Bundeswettbewerb für Informatik - Runde 1
+ * Gymnasium Stadtfeld Wernigerode
+ */
+
 package generator;
 
 import java.io.BufferedReader;

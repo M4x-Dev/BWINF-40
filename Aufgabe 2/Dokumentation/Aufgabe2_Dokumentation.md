@@ -124,12 +124,24 @@ public ArrayList<Hotel> getHotelsInRange(ArrayList<Hotel> availableHotels, long 
 }
 ```
 
-## Beispiel
+## Beispiele
+
+### Beispiel 1 (hotels1.txt)
+
+Gesamtzahl Hotels: 12  
+Gesamtfahrzeit: 1680 min
+
+**Optimale Route:**  
+Hotel 1: 326 min / 4.8 Sterne  
+Hotel 2: 553 min / 3.6 Sterne  
+Hotel 3: 687 min / 4.4 Sterne  
+Hotel 4: 1007 min / 2.8 Sterne  
+Hotel 5: 1360 min / 2.8 Sterne  
 
 ![Zustand zu Beginn des Algorithmuses](Algorithm_Start.jpg)
 ![Alle möglichen Pfade für die Route](Algorithm_Pre.jpg)
 
-### Erster Schritt
+#### **Erster Schritt**
 
 ![Erster Schritt des Algorithmuses](Algorithm_1.jpg)
 
@@ -137,38 +149,85 @@ Im ersten Schritt sucht der Algorithmus alle Hotels, welche vom momentanen Stand
 Beispiel: position = 0; hotel = 325; hotel - position = 325 < 360  
 Danach sucht der Algorithmus das Hotel mit der besten Bewertung, in diesem Fall sind das 4,8 Sterne. Die Prozedur wird dann für dieses Hotel erneut ausgeführt.
 
-### Zweiter Schritt
+#### **Zweiter Schritt**
 
 ![Zweiter Schritt des Algorithmuses](Algorithm_2.jpg)
 
 In diesem Schritt sind nur die Hotels mit 3,6 und 0,8 Sternen erreichbar. Deshalb wählt der Algorithmus das Hotel mit 3,6 Sternen und die Prozedur wird erneut aufgerufen.
 
-### Dritter Schritt
+#### **Dritter Schritt**
 
 ![Dritter Schritt des Algorithmuses](Algorithm_3.jpg)
 
 In diesem Schritt sind nur die Hotels mit 0,8 und 4,4 Sternen erreichbar. Deshalb wählt der Algorithmus das Hotel mit 4,4 Sternen und die Prozedur wird erneut aufgerufen.
 
-### Vierter Schritt
+#### **Vierter Schritt**
 
 ![Vierter Schritt des Algorithmuses](Algorithm_4.jpg)
 
 In diesem Schritt sind nur die Hotels mit 2,6 und 2,8 Sternen erreichbar. Deshalb wählt der Algorithmus das Hotel mit 2,8 Sternen und die Prozedur wird erneut aufgerufen.
 
-### Fünfter Schritt
+#### **Fünfter Schritt**
 
 ![Fünfter Schritt des Algorithmuses](Algorithm_5.jpg)
 
 In diesem Schritt sind nur die Hotels mit 2,1 und 2,8 Sternen erreichbar. Deshalb wählt der Algorithmus das Hotel mit 2,8 Sternen und die Prozedur wird erneut aufgerufen.
 
-### Sechster Schritt
+#### **Sechster Schritt**
 
 ![Sechster Schritt des Algorithmuses](Algorithm_6.jpg)
 
 In diesem Schritt ist nur das Hotel mit 3,8 Sternen erreichbar. Jedoch kann man vom momentanen Standpunkt aus das Ziel direkt erreichen, da es sich in der Reichweite von 360 Minuten befindet. Daher überspringt der Algorithmus das letzte Hotel und bewegt sich direkt zum Ziel.
 
-### Ziel erreicht
+#### **Ziel erreicht**
 
 ![Zustand zum Ende des Algorithmuses](Algorithm_End.jpg)
 
 Nachdem der Algorithmus das Ziel erreicht hat, wird die verfolgte Route gespeichert. Anschließend wird der Wert des schlechtesten Hotels der Route, also in diesem Fall 2,8 Sterne gespeichert. Dann wird der Algorithmus erneut begonnen. Diesmal werden jedoch alle Routen, deren schlechtestes Hotel schlechter ist, als der neue Schwellenwert verworfen. Am Ende können also nur noch bessere Routen, als die erste Iteration gespeichert werden. Jedes Mal nachdem eine neue (bessere) Route gefunden wird, wird der Wert des schlechtesten Hotels erneut gespeichert. Wenn irgendwann keine Routen mehr verfügbar sind und alle Kombinationen somit erschlossen wurden, sucht der Algorithmus die beste Route aus allen abgeschlossenen Routen aus. Dabei wird das beste schlechteste Hotel und die Route mit den besten durchschnittlichen Hotelbewertungen gewählt.
+
+### Beispiel 2 (hotels2.txt)
+
+Gesamtzahl Hotels: 25  
+Gesamtfahrtzeit: 1737 min
+
+**Optimale Route:**  
+Hotel 1: 341 min / 2.3 Sterne  
+Hotel 2: 442 min / 5.0 Sterne  
+Hotel 3: 700 min / 3.0 Sterne  
+Hotel 4: 1053 min / 4.8 Sterne  
+Hotel 5: 1380 min / 5.0 Sterne  
+
+### Beispiel 3 (hotels3.txt)
+
+Gesamtzahl Hotels: 500  
+Gesamtfahrzeit: 1793 min
+
+**Optimale Route:**  
+Hotel 1: 302 min / 4.9 Sterne  
+Hotel 2: 613 min / 5.0 Sterne  
+Hotel 3: 838 min / 4.8 Sterne  
+Hotel 4: 1120 min / 4.8 Sterne  
+Hotel 5: 1471 min / 4.8 Sterne  
+
+### Beispiel 4 (hotels4.txt)
+
+Gesamtzahl Hotels: 500  
+Gesamtfahrzeit: 1510 min
+
+**Optimale Route:**  
+Hotel 1: 173 min / 5.0 Sterne  
+Hotel 2: 467 min / 4.9 Sterne  
+Hotel 3: 791 min / 5.0 Sterne  
+Hotel 4: 1060 min / 5.0 Sterne  
+Hotel 5: 1301 min / 5.0 Sterne  
+
+### Beispiel 5 (hotels5.txt)
+
+Gesamtzahl Hotels: 1500  
+Gesamtfahrzeit: 1616 min
+
+**Optimale Route:**  
+Hotel 1: 317 min / 5.0 Sterne  
+Hotel 2: 636 min / 5.0 Sterne  
+Hotel 3: 987 min / 5.0 Sterne  
+Hotel 4: 1286 min / 5.0 Sterne  
