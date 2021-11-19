@@ -15,7 +15,7 @@ Wenn dieser Teil des Algorithmuses abgeschlossen wurde, dann existiert eine List
 ## Verwendung des Programmes
 
 Das Programm zur Lösung dieses Problemes befindet sich in der Datei "Aufgabe_2.jar". Das Programm kann mit der Befehlszeile (CMD auf Windows, bzw. Terminal auf MacOS) ausgeführt werden. Dafür navigiert man zuerst in den Ordner der JAR-Datei (hier Aufgabe 2). Anschließend führt man den Befehl "java -jar Aufgabe_2.jar \<Eingabedatei> \<Ausgabedatei>" aus.
-Die Eingabedateien befinden sich in dem Ordner "src/main/resources/" (Beispiel: "src/main/resources/hotels0.txt").
+Die Eingabedateien befinden sich in dem Ordner "Examples" (Beispiel: "Examples/hotels0.txt").
 Die Ausgabedatei ist optional. Wenn keine Ausgabedatei angegeben ist, dann wird das Ergebnis als "output.txt" in dem Ordner der JAR-Datei gespeichert.
 
 ## Implementierung
@@ -23,7 +23,7 @@ Die Ausgabedatei ist optional. Wenn keine Ausgabedatei angegeben ist, dann wird 
 ### Einlesen der Beispieldateien
 
 Der folgende Code liest eine der Beispieldateien ein und verwendet die enthaltenen Informationen, um ein Objekt der "RoutePlan"-Klasse erstellen zu können.
-Diese Klasse beeinhaltet alle Information zur geplanten Route und stellt die Hauptklasse des implementierten Algorihtmuses dar
+Diese Klasse beeinhaltet alle Information zur geplanten Route und stellt die Hauptklasse des implementierten Algorihtmuses dar.
 
 ```java
 //Lesen der einzelnen Zeilen der Datei

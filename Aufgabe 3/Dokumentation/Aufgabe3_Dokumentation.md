@@ -24,6 +24,7 @@ Beim letzten Schwierigkeitsgrad des Algorithmuses können Wörter horizontal, ve
 
 Das Programm zur Lösung dieses Problemes befindet sich in der Datei "Aufgabe_3.jar". Das Programm kann mit der Befehlszeile (CMD auf Windows bzw. Terminal auf MacOS) ausgeführt werden.
 Dafür navigiert man zuerst in den Ordner der JAR-Datei (hier Aufgabe 3). Anschließend führt man den Befehl "java -jar Aufgabe_3.jar \<Eingabedatei> \<Ausgabedatei>" aus.
+Die Eingabedateien befinden sich in dem Ordner "Examples" (Beispiel: "Examples/worte0.txt").
 Die Ausgabedatei ist optional. Wenn keine Ausgabedatei angegeben ist, dann wird das Ergebnis als "output.txt" in dem Ordner der JAR-Datei gespeichert.
 
 ## Implementierung

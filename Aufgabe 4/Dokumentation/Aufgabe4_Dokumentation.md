@@ -13,6 +13,7 @@ Das Hauptziel dieses Algorithmuses ist, anhand einer gegebenen Liste von verschi
 Das Programm zur Lösung dieses Problemes befindet sich in der Datei "Aufgabe_4.jar". Das Programm kann mit der Befehlszeile (CMD auf Windows bzw. Terminal auf MacOS) ausgeführt werden.
 Dafür navigiert man zuerst in den Ordner der JAR-Datei (hier Aufgabe 4).
 Anschließend führt man den Befehl "java -jar Aufgabe_4.jar \<Eingabedatei> \<Ausgabedatei> \<Debug> \<Wiederholungen>" aus.
+Die Eingabedateien befinden sich in dem Ordner "Examples" (Beispiel: "Examples/wuerfel0.txt").
 Die Ausgabedatei ist optional. Wenn keine Ausgabedatei angegeben ist, dann wird das Ergebnis als "output.txt" in dem Ordner der JAR-Datei gespeichert.
 Der Parameter "Debug" ist ein boolean und aktiviert die Ausgabe des Spielfeldes und der Abläufe, während der Algorithmus läuft. Dies ist standardmäßig ausgeschaltet.
 Der Parameter "Wiederholungen" ist ein Integer und gibt die Anzahl an Wiederholungen der Simulationen der einzelnen Würfel an. Der Standardwert hierfür ist 10000 Wiederholungen.
