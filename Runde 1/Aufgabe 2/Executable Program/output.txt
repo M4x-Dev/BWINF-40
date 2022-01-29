@@ -1,0 +1,4 @@
+Hotel 0: 317 min, 5.0 stars
+Hotel 1: 636 min, 5.0 stars
+Hotel 2: 987 min, 5.0 stars
+Hotel 3: 1286 min, 5.0 stars
