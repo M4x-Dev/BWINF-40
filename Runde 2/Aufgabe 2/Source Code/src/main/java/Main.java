@@ -4,10 +4,14 @@
  * Gymnasium Stadtfeld Wernigerode
  */
 
+import equations.EquationGenerator;
+
 /**
  * Hauptklasse des Programmes
  */
 public class Main {
+
+    public static final int OPERATOR_COUNT = 4;
 
     public static String OUTPUT_FILE = "output.txt";
 
@@ -22,6 +26,14 @@ public class Main {
         System.out.println("Bundeswettbewerb für Informatik - Runde 2 - Aufgabe 2 (Zahlenrätsel) - by Maximilian Flügel");
         System.out.println("-------------------------------------------------------------------------------------------");
         System.out.println();
+        System.out.println("Zahlenrätsel mit " + OPERATOR_COUNT + " Operatoren wird generiert...");
+
+        EquationGenerator generator = new EquationGenerator();
+        String equation = generator.generate(OPERATOR_COUNT);
+        
+        System.out.println();
+        System.out.println("Das folgende Zahlenrätsel wurde generiert:");
+        System.out.println(equation);
     }
 
 }
