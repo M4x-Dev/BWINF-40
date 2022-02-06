@@ -11,7 +11,7 @@ import equations.EquationGenerator;
  */
 public class Main {
 
-    public static final int OPERATOR_COUNT = 4;
+    public static final int OPERATOR_COUNT = 10;
 
     public static String OUTPUT_FILE = "output.txt";
 

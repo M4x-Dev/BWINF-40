@@ -7,10 +7,10 @@ import java.util.ArrayList;
 public class EquationCalculator {
 
     private static final ArrayList<String> OPERATOR_HIERARCHY = new ArrayList<>() {{
-        add(Constants.OPERATOR_ADD);
         add(Constants.OPERATOR_SUBTRACT);
-        add(Constants.OPERATOR_MULTIPLY);
         add(Constants.OPERATOR_DIVIDE);
+        add(Constants.OPERATOR_MULTIPLY);
+        add(Constants.OPERATOR_ADD);
     }};
 
     public static int calculate(String equation) {
@@ -23,11 +23,12 @@ public class EquationCalculator {
                 || equation.contains(Constants.OPERATOR_MULTIPLY)
                 || equation.contains(Constants.OPERATOR_DIVIDE)) {
             for(String operator : OPERATOR_HIERARCHY) {
-                if(equation.contains(operator))
+                if(equation.contains(operator)) {
                     equation = solveOperator(equation, operator);
+                    System.out.println(equation);
+                    break;
+                }
             }
-
-            System.out.println("Solved step: " + equation);
         }
 
         return Integer.parseInt(equation);
@@ -35,16 +36,28 @@ public class EquationCalculator {
 
     public static String solveOperator(String equation, String operator) {
         int operatorIndex = equation.indexOf(operator);
-        String node = equation.substring(operatorIndex - 1, operatorIndex + 2);
-        return equation.replace(node, solveNode(node));
+        int previousOperator = findNextOperatorIndex(equation, operatorIndex, false);
+        int nextOperator = findNextOperatorIndex(equation, operatorIndex, true);
+
+        String node = equation.substring(previousOperator == 0 ? previousOperator : previousOperator + 1, nextOperator == equation.length() - 1 ? nextOperator + 1 : nextOperator);
+        return equation.replace(node, solveNode(node, operator));
     }
 
-    public static String solveNode(String node) {
+    private static int findNextOperatorIndex(String equation, int start, boolean forward) {
+        for(int i = start + (forward ? 1 : -1); forward ? i < equation.length() : i >= 0; i += forward ? 1 : -1) {
+            if(OPERATOR_HIERARCHY.contains(equation.substring(i, i + 1)))
+                return i;
+        }
+
+        return forward ? equation.length() - 1 : 0;
+    }
+
+    public static String solveNode(String node, String operator) {
         int result = 0;
 
-        String operator = node.substring(1, 2);
-        int x = Integer.parseInt(node.substring(0, 1));
-        int y = Integer.parseInt(node.substring(2, 3));
+        int operatorIndex = node.indexOf(operator);
+        int x = Integer.parseInt(node.substring(0, operatorIndex));
+        int y = Integer.parseInt(node.substring(operatorIndex + 1));
 
         switch (operator) {
             case Constants.OPERATOR_ADD -> result = x + y;

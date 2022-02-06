@@ -36,8 +36,8 @@ public class EquationGenerator {
         equationBuilder.append(startNumber);
 
         while(currentOperators <= operatorCount) {
-            equationBuilder.append(buildChainElement());
-            EquationCalculator.calculate(equationBuilder.toString());
+            equationBuilder.append(buildChainElement(equationBuilder.toString()));
+            currentResult = EquationCalculator.calculate(equationBuilder.toString());
             currentOperators++;
         }
 
@@ -48,44 +48,37 @@ public class EquationGenerator {
         return hideSolution(equationBuilder.toString());
     }
 
-    public String buildChainElement() {
+    public String buildChainElement(String currentChain) {
         //Generieren der nächsten Operation
         //System.out.println("Teilelement wird generiert");
         ArrayList<String> nextOperationPool = new ArrayList<>(Arrays.asList(Constants.OPERATOR_ADD, Constants.OPERATOR_SUBTRACT, Constants.OPERATOR_MULTIPLY, Constants.OPERATOR_DIVIDE));
 
         if(!lastOperator.isEmpty()) nextOperationPool.remove(lastOperator);
-
-        nextOperationPool.remove(Constants.OPERATOR_MULTIPLY);
-        nextOperationPool.remove(Constants.OPERATOR_DIVIDE);
+        if(lastNumber <= 2) {
+            nextOperationPool.remove(Constants.OPERATOR_DIVIDE);
+            nextOperationPool.remove(Constants.OPERATOR_SUBTRACT);
+        }
 
         String nextOperator = nextOperationPool.get(numberGenerator.nextInt(nextOperationPool.size()));
-        int nextNumber = 0;
-        
-        switch(nextOperator) {
-            case Constants.OPERATOR_ADD:
-                //Nächste Operation ist die Addition
-                nextNumber = generateNumber();
-                currentResult = currentResult + nextNumber;
-                break;
-            case Constants.OPERATOR_SUBTRACT:
-                //Nächste Operation ist die Subtraktion
-                nextNumber = generateNumber(NUM_LOWER_BOUND, Math.min(currentResult, NUM_UPPER_BOUND), GeneratorMode.Ignore);
-                currentResult = currentResult - nextNumber;
-                break;
-            case Constants.OPERATOR_MULTIPLY:
-                //Nächste Operation ist die Multiplikation
-                nextNumber = generateNumber(1, NUM_UPPER_BOUND, GeneratorMode.Ignore);
-
-                break;
-            case Constants.OPERATOR_DIVIDE:
-                //Nächste Operation ist die Division
-                nextNumber = generateNumber(
-                        NUM_LOWER_BOUND,
-                        lastNumber,
-                        Utils.isEven(lastNumber) ? GeneratorMode.Even : GeneratorMode.Odd
-                );
-                break;
-        }
+        int nextNumber = switch (nextOperator) {
+            case Constants.OPERATOR_ADD ->
+                    //Nächste Operation ist die Addition
+                    generateNumber();
+            case Constants.OPERATOR_SUBTRACT ->
+                    //Nächste Operation ist die Subtraktion
+                    generateNumber(NUM_LOWER_BOUND, Math.min(lastNumber, NUM_UPPER_BOUND), GeneratorMode.Ignore);
+            case Constants.OPERATOR_MULTIPLY ->
+                    //Nächste Operation ist die Multiplikation
+                    generateNumber(1, NUM_UPPER_BOUND, GeneratorMode.Ignore);
+            case Constants.OPERATOR_DIVIDE ->
+                    //Nächste Operation ist die Division
+                    generateNumber(
+                            NUM_LOWER_BOUND,
+                            lastNumber,
+                            Utils.isEven(lastNumber) ? GeneratorMode.Even : GeneratorMode.Odd
+                    );
+            default -> 0;
+        };
 
         lastNumber = nextNumber;
         lastOperator = nextOperator;
