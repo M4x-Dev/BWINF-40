@@ -83,7 +83,7 @@ public class EquationGenerator {
                     generateNumber();
             case Constants.OPERATOR_SUBTRACT ->
                     //Nächste Operation ist die Subtraktion
-                    generateNumber(NUM_LOWER_BOUND, Math.min(lastNumber, NUM_UPPER_BOUND), GeneratorMode.Ignore);
+                    generateNumber(NUM_LOWER_BOUND, Math.min(currentCluster.length() > 1 ? EquationCalculator.calculate(currentCluster.toString()) : lastNumber, NUM_UPPER_BOUND), GeneratorMode.Ignore);
             case Constants.OPERATOR_MULTIPLY ->
                     //Nächste Operation ist die Multiplikation
                     generateNumber(1, NUM_UPPER_BOUND, GeneratorMode.Ignore);

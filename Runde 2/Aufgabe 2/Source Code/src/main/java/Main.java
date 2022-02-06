@@ -6,15 +6,18 @@
 
 import equations.EquationGenerator;
 import equations.EquationSolver;
+import test.MultiThreadingPerformanceTest;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Hauptklasse des Programmes
  */
 public class Main {
 
-    public static final int OPERATOR_COUNT = 2;
+    public static final int OPERATOR_COUNT = 15;
 
     public static String OUTPUT_FILE = "output.txt";
 
@@ -31,19 +34,25 @@ public class Main {
         System.out.println();
         System.out.println("Zahlenrätsel mit " + OPERATOR_COUNT + " Operatoren wird generiert...");
 
-        EquationGenerator generator = new EquationGenerator();
+        MultiThreadingPerformanceTest test = new MultiThreadingPerformanceTest();
+        test.startBenchmark(10);
+
+        /*EquationGenerator generator = new EquationGenerator();
         String equation = generator.generate(OPERATOR_COUNT);
         
         System.out.println();
         System.out.println("Das folgende Zahlenrätsel wurde generiert:");
         System.out.println(equation);
 
-        EquationSolver solver = new EquationSolver();
-        ArrayList<String> solutions = solver.solve(equation);
+        Executor s = Executors.newFixedThreadPool(10);
+        s.execute(() -> {
+            EquationSolver solver = new EquationSolver();
+            ArrayList<String> solutions = solver.solve(equation);
 
-        System.out.println();
-        System.out.println("Der Algorithmus konnte für das Zahlenrätsel folgende Lösungen bestimmen:");
-        for(String solution : solutions) System.out.println(solution);
+            System.out.println();
+            System.out.println("Der Algorithmus konnte für das Zahlenrätsel folgende Lösungen bestimmen:");
+            for(String solution : solutions) System.out.println(solution);
+        });*/
     }
 
 }

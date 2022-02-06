@@ -4,11 +4,15 @@ import utils.Constants;
 import utils.Utils;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class EquationSolver {
 
     private final ArrayList<String> iteratedSolutions = new ArrayList<>();
     private final ArrayList<String> solutions = new ArrayList<>();
+
+    private Executor executor = Executors.newFixedThreadPool(10);
 
     public ArrayList<String> solve(String equation) {
         iteratedSolutions.clear();
@@ -22,6 +26,7 @@ public class EquationSolver {
         int solutionCount = 0;
 
         for(int i = 1; i <= Math.pow(4, operatorCount + 1); i++) {
+            System.out.println("Solving: " + i);
             for(int o = 0; o < operatorCount; o++) {
                 if(i % Math.pow(4, o) == 0) {
                     String currentOperator = equationBody.substring(o * 2 + 1, o * 2 + 2);
@@ -33,8 +38,6 @@ public class EquationSolver {
                     boolean nextSuitableOperatorAvailable = nextOperatorSuitable(currentOperator, x, y);
                     String newOperator = findNextSuitableOperator(currentOperator, x, y);
                     equationBody = equationBody.substring(0, o * 2 + 1) + newOperator + equationBody.substring(o * 2 + 2);
-
-                    System.out.println(equationBody);
 
                     if(iteratedSolutions.contains(equationBody)) continue;
                     iteratedSolutions.add(equationBody);
