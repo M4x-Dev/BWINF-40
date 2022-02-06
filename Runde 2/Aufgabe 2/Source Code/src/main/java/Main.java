@@ -5,13 +5,16 @@
  */
 
 import equations.EquationGenerator;
+import equations.EquationSolver;
+
+import java.util.ArrayList;
 
 /**
  * Hauptklasse des Programmes
  */
 public class Main {
 
-    public static final int OPERATOR_COUNT = 10;
+    public static final int OPERATOR_COUNT = 2;
 
     public static String OUTPUT_FILE = "output.txt";
 
@@ -34,6 +37,13 @@ public class Main {
         System.out.println();
         System.out.println("Das folgende Zahlenrätsel wurde generiert:");
         System.out.println(equation);
+
+        EquationSolver solver = new EquationSolver();
+        ArrayList<String> solutions = solver.solve(equation);
+
+        System.out.println();
+        System.out.println("Der Algorithmus konnte für das Zahlenrätsel folgende Lösungen bestimmen:");
+        for(String solution : solutions) System.out.println(solution);
     }
 
 }

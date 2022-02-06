@@ -2,16 +2,7 @@ package equations;
 
 import utils.Constants;
 
-import java.util.ArrayList;
-
 public class EquationCalculator {
-
-    private static final ArrayList<String> OPERATOR_HIERARCHY = new ArrayList<>() {{
-        add(Constants.OPERATOR_SUBTRACT);
-        add(Constants.OPERATOR_DIVIDE);
-        add(Constants.OPERATOR_MULTIPLY);
-        add(Constants.OPERATOR_ADD);
-    }};
 
     public static int calculate(String equation) {
         //Entfernen aller Leerzeichen
@@ -22,10 +13,9 @@ public class EquationCalculator {
                 || equation.contains(Constants.OPERATOR_SUBTRACT)
                 || equation.contains(Constants.OPERATOR_MULTIPLY)
                 || equation.contains(Constants.OPERATOR_DIVIDE)) {
-            for(String operator : OPERATOR_HIERARCHY) {
+            for(String operator : Constants.OPERATOR_HIERARCHY) {
                 if(equation.contains(operator)) {
                     equation = solveOperator(equation, operator);
-                    System.out.println(equation);
                     break;
                 }
             }
@@ -45,7 +35,7 @@ public class EquationCalculator {
 
     private static int findNextOperatorIndex(String equation, int start, boolean forward) {
         for(int i = start + (forward ? 1 : -1); forward ? i < equation.length() : i >= 0; i += forward ? 1 : -1) {
-            if(OPERATOR_HIERARCHY.contains(equation.substring(i, i + 1)))
+            if(Constants.OPERATOR_HIERARCHY.contains(equation.substring(i, i + 1)))
                 return i;
         }
 

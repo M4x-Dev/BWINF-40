@@ -18,8 +18,6 @@ public class EquationGenerator {
     public static final int NUM_LOWER_BOUND = 1;
     public static final int NUM_UPPER_BOUND = 9;
 
-    public static final String OPERATOR_PLACEHOLDER = " o ";
-
     private final Random numberGenerator = new Random();
 
     private int currentResult = 0;
@@ -28,6 +26,9 @@ public class EquationGenerator {
     private int lastNumber;
     private String lastOperator = "";
 
+    private final ArrayList<String> clusters = new ArrayList<>();
+    private StringBuilder currentCluster = new StringBuilder();
+
     public String generate(int operatorCount) {
         StringBuilder equationBuilder = new StringBuilder();
 
@@ -35,22 +36,38 @@ public class EquationGenerator {
         currentResult = startNumber;
         equationBuilder.append(startNumber);
 
+        currentCluster = new StringBuilder(String.valueOf(startNumber));
+        clusters.clear();
+
         while(currentOperators <= operatorCount) {
-            equationBuilder.append(buildChainElement(equationBuilder.toString()));
+            String newChainElement = buildChainElement();
+
+            if((Utils.containsAny(currentCluster.toString(), Constants.LINE_OPERATORS)
+                    && Utils.containsAny(newChainElement, Constants.POINT_OPERATORS))
+                    || (Utils.containsAny(currentCluster.toString(), Constants.POINT_OPERATORS)
+                    && Utils.containsAny(newChainElement, Constants.LINE_OPERATORS))) {
+                clusters.add(currentCluster.toString());
+                currentCluster = new StringBuilder(currentCluster.substring(currentCluster.length() - 1) + newChainElement);
+            } else currentCluster.append(newChainElement);
+
+            equationBuilder.append(newChainElement);
+
             currentResult = EquationCalculator.calculate(equationBuilder.toString());
             currentOperators++;
         }
 
+        clusters.add(currentCluster.toString());
         equationBuilder.append(" = ").append(currentResult);
 
         System.out.println("Originallösung: " + equationBuilder);
+        System.out.print("Cluster: ");
+        for(String cluster : clusters) System.out.print("[" + cluster + "]");
 
         return hideSolution(equationBuilder.toString());
     }
 
-    public String buildChainElement(String currentChain) {
+    public String buildChainElement() {
         //Generieren der nächsten Operation
-        //System.out.println("Teilelement wird generiert");
         ArrayList<String> nextOperationPool = new ArrayList<>(Arrays.asList(Constants.OPERATOR_ADD, Constants.OPERATOR_SUBTRACT, Constants.OPERATOR_MULTIPLY, Constants.OPERATOR_DIVIDE));
 
         if(!lastOperator.isEmpty()) nextOperationPool.remove(lastOperator);
@@ -87,7 +104,7 @@ public class EquationGenerator {
     }
 
     public String hideSolution(String equation) {
-        return equation.replaceAll("[//+\"-//*//:]", OPERATOR_PLACEHOLDER);
+        return equation.replaceAll("[//+\"-//*//:]", " " + Constants.OPERATOR_PLACEHOLDER + " ");
     }
 
     public int generateNumber() {
