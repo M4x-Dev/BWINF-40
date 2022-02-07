@@ -1,6 +1,7 @@
 package equations;
 
 import utils.Constants;
+import utils.Utils;
 
 public class EquationCalculator {
 
@@ -9,10 +10,7 @@ public class EquationCalculator {
         equation = equation.replaceAll(" ", "");
 
         //Hauptschleife des Algorithmus
-        while(equation.contains(Constants.OPERATOR_ADD)
-                || equation.contains(Constants.OPERATOR_SUBTRACT)
-                || equation.contains(Constants.OPERATOR_MULTIPLY)
-                || equation.contains(Constants.OPERATOR_DIVIDE)) {
+        while(Utils.containsAny(equation, Constants.OPERATOR_LIST) && equation.length() > 2) {
             for(String operator : Constants.OPERATOR_HIERARCHY) {
                 if(equation.contains(operator)) {
                     equation = solveOperator(equation, operator);
@@ -22,6 +20,25 @@ public class EquationCalculator {
         }
 
         return Integer.parseInt(equation);
+    }
+
+    public static String toLineCalculation(String equation) {
+        //Entfernen aller Leerzeichen
+        equation = equation.replaceAll(" ", "");
+
+        if(equation.length() == 3) return equation;
+
+        //Hauptschleife des Algorithmus
+        while(Utils.containsAny(equation, Constants.POINT_OPERATORS) && equation.length() > 2) {
+            for(String operator : Constants.POINT_OPERATORS) {
+                if(equation.contains(operator)) {
+                    equation = solveOperator(equation, operator);
+                    break;
+                }
+            }
+        }
+
+        return equation;
     }
 
     public static String solveOperator(String equation, String operator) {
@@ -44,7 +61,7 @@ public class EquationCalculator {
 
     public static String solveNode(String node, String operator) {
         int result = 0;
-
+        
         int operatorIndex = node.indexOf(operator);
         int x = Integer.parseInt(node.substring(0, operatorIndex));
         int y = Integer.parseInt(node.substring(operatorIndex + 1));

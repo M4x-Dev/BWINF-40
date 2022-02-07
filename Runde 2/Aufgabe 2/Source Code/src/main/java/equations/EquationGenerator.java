@@ -62,6 +62,7 @@ public class EquationGenerator {
         System.out.println("Originallösung: " + equationBuilder);
         System.out.print("Cluster: ");
         for(String cluster : clusters) System.out.print("[" + cluster + "]");
+        System.out.print("\n");
 
         return hideSolution(equationBuilder.toString());
     }

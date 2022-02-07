@@ -18,11 +18,22 @@ public class Constants {
         add(OPERATOR_MULTIPLY);
         add(OPERATOR_DIVIDE);
     }};
-    public static final ArrayList<String> OPERATOR_HIERARCHY = new ArrayList<>() {{
+
+    public static final ArrayList<String> OPERATOR_LIST = new ArrayList<>() {{
+        add(Constants.OPERATOR_ADD);
         add(Constants.OPERATOR_SUBTRACT);
+        add(Constants.OPERATOR_MULTIPLY);
+        add(Constants.OPERATOR_DIVIDE);
+    }};
+    public static final ArrayList<String> OPERATOR_HIERARCHY = new ArrayList<>() {{
+        /*add(Constants.OPERATOR_SUBTRACT);
         add(Constants.OPERATOR_DIVIDE);
         add(Constants.OPERATOR_MULTIPLY);
+        add(Constants.OPERATOR_ADD);*/
+        add(Constants.OPERATOR_MULTIPLY);
+        add(Constants.OPERATOR_DIVIDE);
         add(Constants.OPERATOR_ADD);
+        add(Constants.OPERATOR_SUBTRACT);
     }};
 
 }

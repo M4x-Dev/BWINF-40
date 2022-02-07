@@ -5,12 +5,7 @@
  */
 
 import equations.EquationGenerator;
-import equations.EquationSolver;
-import test.MultiThreadingPerformanceTest;
-
-import java.util.ArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import equations.EquationVerifier;
 
 /**
  * Hauptklasse des Programmes
@@ -34,8 +29,16 @@ public class Main {
         System.out.println();
         System.out.println("Zahlenrätsel mit " + OPERATOR_COUNT + " Operatoren wird generiert...");
 
-        MultiThreadingPerformanceTest test = new MultiThreadingPerformanceTest();
-        test.startBenchmark(10);
+        /*MultiThreadingPerformanceTest test = new MultiThreadingPerformanceTest();
+        test.startBenchmark(10);*/
+
+        /*EquationGenerator generator = new EquationGenerator();
+        String equation = generator.generate(5);
+        System.out.println(equation);*/
+
+        EquationVerifier verifier = new EquationVerifier();
+        //System.out.println(verifier.verify("5 o 5 o 1 o 1 o 4 o 1 o 2 = 14"));
+        System.out.println(verifier.verify("2 o 2 o 3 = 12"));
 
         /*EquationGenerator generator = new EquationGenerator();
         String equation = generator.generate(OPERATOR_COUNT);
