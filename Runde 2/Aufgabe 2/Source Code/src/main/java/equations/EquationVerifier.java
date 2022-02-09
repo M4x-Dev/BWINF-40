@@ -44,6 +44,8 @@ public class EquationVerifier {
 
         equation = equation.substring(0, index * 2 + 1) + newOperator + equation.substring(index * 2 + 2);
 
+        if(!EquationCalculator.calculatable(equation)) return iterateOperators(equation, index, maxOperators);
+
         //if(!checkEquation(equation, maxOperators)) return iterateOperators(equation, index, maxOperators);
 
         if(Objects.equals(newOperator, Constants.OPERATOR_LIST.get(0))) {
@@ -57,10 +59,7 @@ public class EquationVerifier {
     }
 
     private static String getDescendantOperator(String equation, String operator, int index) {
-        /*int operatorIndex = Constants.OPERATOR_LIST.indexOf(currentOperator);
-        return Constants.OPERATOR_LIST.get(operatorIndex < 3 ? operatorIndex + 1 : 0);*/
-
-        String lineEquation = EquationCalculator.toLineCalculation(equation);
+        String lineEquation = EquationCalculator.transformEquation(equation, Constants.POINT_OPERATORS);
         int primaryCluster = EquationCalculator.calculate(lineEquation.substring(0, index * 2 + 1));
         int secondaryCluster = EquationCalculator.calculate(lineEquation.substring(index * 2 + 2));
 

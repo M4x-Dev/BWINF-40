@@ -1,5 +1,3 @@
-package test;
-
 import equations.EquationCalculator;
 
 import java.util.concurrent.Executor;

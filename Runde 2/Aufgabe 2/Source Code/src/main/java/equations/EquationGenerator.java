@@ -5,6 +5,7 @@ import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Random;
 
 public class EquationGenerator {
@@ -18,6 +19,7 @@ public class EquationGenerator {
     public static final int NUM_LOWER_BOUND = 1;
     public static final int NUM_UPPER_BOUND = 9;
 
+    private StringBuilder equationBuilder;
     private final Random numberGenerator = new Random();
 
     private int currentResult = 0;
@@ -30,7 +32,7 @@ public class EquationGenerator {
     private StringBuilder currentCluster = new StringBuilder();
 
     public String generate(int operatorCount) {
-        StringBuilder equationBuilder = new StringBuilder();
+        equationBuilder = new StringBuilder();
 
         int startNumber = generateNumber();
         currentResult = startNumber;
@@ -52,6 +54,8 @@ public class EquationGenerator {
 
             equationBuilder.append(newChainElement);
 
+            //System.out.println("Current equation: " + equationBuilder);
+
             currentResult = EquationCalculator.calculate(equationBuilder.toString());
             currentOperators++;
         }
@@ -71,32 +75,62 @@ public class EquationGenerator {
         //Generieren der nächsten Operation
         ArrayList<String> nextOperationPool = new ArrayList<>(Arrays.asList(Constants.OPERATOR_ADD, Constants.OPERATOR_SUBTRACT, Constants.OPERATOR_MULTIPLY, Constants.OPERATOR_DIVIDE));
 
+        String equationSumExpression = EquationCalculator.transformEquation(equationBuilder.toString(), Constants.excludeOperators(Constants.OPERATOR_ADD));
+        String equationDifferenceExpression = EquationCalculator.transformEquation(equationBuilder.toString(), Constants.excludeOperators(Constants.OPERATOR_SUBTRACT));
+        int sumExpressionLastNumber = Utils.extractLastNumber(equationSumExpression);
+
+        System.out.println("Difference: " + equationDifferenceExpression);
+
         if(!lastOperator.isEmpty()) nextOperationPool.remove(lastOperator);
         if(lastNumber <= 2) {
             nextOperationPool.remove(Constants.OPERATOR_DIVIDE);
             nextOperationPool.remove(Constants.OPERATOR_SUBTRACT);
         }
 
+        /*System.out.println("Available clusters:");
+        for(String cluster : clusters) System.out.print(cluster);
+        System.out.print("\n");*/
+
+        int nextNumber;
         String nextOperator = nextOperationPool.get(numberGenerator.nextInt(nextOperationPool.size()));
-        int nextNumber = switch (nextOperator) {
+        switch (nextOperator) {
             case Constants.OPERATOR_ADD ->
                     //Nächste Operation ist die Addition
-                    generateNumber();
+                    nextNumber = generateNumber();
             case Constants.OPERATOR_SUBTRACT ->
                     //Nächste Operation ist die Subtraktion
-                    generateNumber(NUM_LOWER_BOUND, Math.min(currentCluster.length() > 1 ? EquationCalculator.calculate(currentCluster.toString()) : lastNumber, NUM_UPPER_BOUND), GeneratorMode.Ignore);
-            case Constants.OPERATOR_MULTIPLY ->
-                    //Nächste Operation ist die Multiplikation
-                    generateNumber(1, NUM_UPPER_BOUND, GeneratorMode.Ignore);
+                    nextNumber = generateNumber(NUM_LOWER_BOUND, Math.min(lastNumber, sumExpressionLastNumber), GeneratorMode.Ignore);
+            case Constants.OPERATOR_MULTIPLY -> {
+                //Nächste Operation ist die Multiplikation
+                int upperBound;
+                int lastOperatorIndex = Utils.getLastOperatorIndex(equationBuilder.toString());
+                int lastDifferenceOperator = Utils.getLastOperatorIndex(equationDifferenceExpression);
+
+                if (equationBuilder.length() > 1 && equationBuilder.substring(lastOperatorIndex, lastOperatorIndex + 1).equals(Constants.OPERATOR_SUBTRACT)) {
+                    int x, y;
+                    if (equationDifferenceExpression.length() == 3) {
+                        x = Integer.parseInt(equationDifferenceExpression.substring(lastOperatorIndex - 1, lastOperatorIndex));
+                    } else {
+                        int previousOperatorIndex = Utils.getNextOperatorIndex(equationDifferenceExpression, lastOperatorIndex, false);
+                        System.out.println("Previous index: " + previousOperatorIndex + " | Last operator index: " + lastDifferenceOperator);
+                        x = Integer.parseInt(equationDifferenceExpression.substring(previousOperatorIndex + 1, lastDifferenceOperator));
+                    }
+
+                    y = Integer.parseInt(equationDifferenceExpression.substring(lastDifferenceOperator + 1));
+
+                    upperBound = x / y;
+                } else upperBound = NUM_UPPER_BOUND;
+                nextNumber = generateNumber(NUM_LOWER_BOUND, upperBound, GeneratorMode.Ignore);
+            }
             case Constants.OPERATOR_DIVIDE ->
                     //Nächste Operation ist die Division
-                    generateNumber(
+                    nextNumber = generateNumber(
                             NUM_LOWER_BOUND,
                             lastNumber,
                             Utils.isEven(lastNumber) ? GeneratorMode.Even : GeneratorMode.Odd
                     );
-            default -> 0;
-        };
+            default -> nextNumber = 0;
+        }
 
         lastNumber = nextNumber;
         lastOperator = nextOperator;

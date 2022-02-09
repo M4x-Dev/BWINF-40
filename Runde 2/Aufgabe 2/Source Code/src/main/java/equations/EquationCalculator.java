@@ -3,37 +3,48 @@ package equations;
 import utils.Constants;
 import utils.Utils;
 
+import java.util.ArrayList;
+
 public class EquationCalculator {
 
     public static int calculate(String equation) {
+        return Integer.parseInt(transformEquation(equation, Constants.OPERATOR_HIERARCHY));
+    }
+
+    public static boolean calculatable(String equation) {
         //Entfernen aller Leerzeichen
         equation = equation.replaceAll(" ", "");
 
         //Hauptschleife des Algorithmus
         while(Utils.containsAny(equation, Constants.OPERATOR_LIST) && equation.length() > 2) {
             for(String operator : Constants.OPERATOR_HIERARCHY) {
-                if(equation.contains(operator)) {
-                    equation = solveOperator(equation, operator);
-                    break;
+                if (equation.contains(operator)) {
+                    if(canSolveOperator(equation, operator)) {
+                        equation = solveOperator(equation, operator);
+                        break;
+                    } else {
+                        return false;
+                    }
                 }
             }
         }
 
-        return Integer.parseInt(equation);
+        return true;
     }
 
-    public static String toLineCalculation(String equation) {
+    public static String transformEquation(String equation, ArrayList<String> replaceOperators) {
         //Entfernen aller Leerzeichen
         equation = equation.replaceAll(" ", "");
 
-        if(equation.length() == 3) return equation;
-
         //Hauptschleife des Algorithmus
-        while(Utils.containsAny(equation, Constants.POINT_OPERATORS) && equation.length() > 2) {
-            for(String operator : Constants.POINT_OPERATORS) {
+        while(Utils.containsAny(equation, replaceOperators) && equation.length() > 2) {
+            for(String operator : replaceOperators) {
                 if(equation.contains(operator)) {
-                    equation = solveOperator(equation, operator);
-                    break;
+                    String inverseOperator = Constants.invertOperator(operator);
+                    int operatorIndex = equation.indexOf(operator);
+                    int inverseOperatorIndex = equation.indexOf(inverseOperator);
+
+                    equation = solveOperator(equation, operatorIndex < inverseOperatorIndex || inverseOperatorIndex == -1 ? operator : inverseOperator);
                 }
             }
         }
@@ -43,25 +54,25 @@ public class EquationCalculator {
 
     public static String solveOperator(String equation, String operator) {
         int operatorIndex = equation.indexOf(operator);
-        int previousOperator = findNextOperatorIndex(equation, operatorIndex, false);
-        int nextOperator = findNextOperatorIndex(equation, operatorIndex, true);
+        int previousOperator = Utils.getNextOperatorIndex(equation, operatorIndex, false);
+        int nextOperator = Utils.getNextOperatorIndex(equation, operatorIndex, true);
 
-        String node = equation.substring(previousOperator == 0 ? previousOperator : previousOperator + 1, nextOperator == equation.length() - 1 ? nextOperator + 1 : nextOperator);
+        String node = equation.length() > 3 ? equation.substring(previousOperator == 0 ? previousOperator : previousOperator + 1, nextOperator == equation.length() - 1 ? nextOperator + 1 : nextOperator) : equation;
         return equation.replace(node, solveNode(node, operator));
     }
 
-    private static int findNextOperatorIndex(String equation, int start, boolean forward) {
-        for(int i = start + (forward ? 1 : -1); forward ? i < equation.length() : i >= 0; i += forward ? 1 : -1) {
-            if(Constants.OPERATOR_HIERARCHY.contains(equation.substring(i, i + 1)))
-                return i;
-        }
+    public static boolean canSolveOperator(String equation, String operator) {
+        int operatorIndex = equation.indexOf(operator);
+        int previousOperator = Utils.getNextOperatorIndex(equation, operatorIndex, false);
+        int nextOperator = Utils.getNextOperatorIndex(equation, operatorIndex, true);
 
-        return forward ? equation.length() - 1 : 0;
+        String node = equation.substring(previousOperator == 0 ? previousOperator : previousOperator + 1, nextOperator == equation.length() - 1 ? nextOperator + 1 : nextOperator);
+        return canSolveNode(node, operator);
     }
 
     public static String solveNode(String node, String operator) {
         int result = 0;
-        
+
         int operatorIndex = node.indexOf(operator);
         int x = Integer.parseInt(node.substring(0, operatorIndex));
         int y = Integer.parseInt(node.substring(operatorIndex + 1));
@@ -74,6 +85,18 @@ public class EquationCalculator {
         }
 
         return String.valueOf(result);
+    }
+
+    public static boolean canSolveNode(String node, String operator) {
+        int operatorIndex = node.indexOf(operator);
+        int x = Integer.parseInt(node.substring(0, operatorIndex));
+        int y = Integer.parseInt(node.substring(operatorIndex + 1));
+
+        return switch(operator) {
+            case Constants.OPERATOR_SUBTRACT -> x - y > 0;
+            case Constants.OPERATOR_DIVIDE -> x / y > 0;
+            default -> true;
+        };
     }
 
 }
