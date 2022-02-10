@@ -1,6 +1,6 @@
 package equations;
 
-import utils.Constants;
+import utils.Operators;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -11,7 +11,7 @@ public class EquationVerifier {
 
     public boolean verify(String equation) {
         String[] equationParts = equation.split(" = ");
-        String equationBody = equationParts[0].replaceAll(" " + Constants.OPERATOR_PLACEHOLDER + " ", Constants.OPERATOR_ADD);
+        String equationBody = equationParts[0].replaceAll(" " + Operators.OPERATOR_PLACEHOLDER + " ", Operators.OPERATOR_ADD);
 
         int solution = Integer.parseInt(equationParts[1]);
         int operatorCount = (equationBody.length() - 1) / 2;
@@ -48,7 +48,7 @@ public class EquationVerifier {
 
         //if(!checkEquation(equation, maxOperators)) return iterateOperators(equation, index, maxOperators);
 
-        if(Objects.equals(newOperator, Constants.OPERATOR_LIST.get(0))) {
+        if(Objects.equals(newOperator, Operators.OPERATOR_LIST.get(0))) {
             if(index < maxOperators - 1)
                 return iterateOperators(equation, index + 1, maxOperators);
             else
@@ -59,23 +59,23 @@ public class EquationVerifier {
     }
 
     private static String getDescendantOperator(String equation, String operator, int index) {
-        String lineEquation = EquationCalculator.transformEquation(equation, Constants.POINT_OPERATORS);
+        String lineEquation = EquationCalculator.transformEquation(equation, Operators.POINT_OPERATORS);
         int primaryCluster = EquationCalculator.calculate(lineEquation.substring(0, index * 2 + 1));
         int secondaryCluster = EquationCalculator.calculate(lineEquation.substring(index * 2 + 2));
 
         switch(operator) {
-            case Constants.OPERATOR_ADD:
+            case Operators.OPERATOR_ADD:
                 //Neuer Operator: Subtrahieren
-                return secondaryCluster < primaryCluster ? Constants.OPERATOR_SUBTRACT : getDescendantOperator(equation, Constants.OPERATOR_SUBTRACT, index);
-            case Constants.OPERATOR_SUBTRACT:
+                return secondaryCluster < primaryCluster ? Operators.OPERATOR_SUBTRACT : getDescendantOperator(equation, Operators.OPERATOR_SUBTRACT, index);
+            case Operators.OPERATOR_SUBTRACT:
                 //Neuer Operator: Multiplizieren
-                return Constants.OPERATOR_MULTIPLY;
-            case Constants.OPERATOR_MULTIPLY:
+                return Operators.OPERATOR_MULTIPLY;
+            case Operators.OPERATOR_MULTIPLY:
                 //Neuer Operator: Dividieren
                 boolean validDivision = secondaryCluster <= primaryCluster && primaryCluster % secondaryCluster == 0;
-                return validDivision ? Constants.OPERATOR_DIVIDE : getDescendantOperator(equation, Constants.OPERATOR_DIVIDE, index);
+                return validDivision ? Operators.OPERATOR_DIVIDE : getDescendantOperator(equation, Operators.OPERATOR_DIVIDE, index);
             default:
-                return Constants.OPERATOR_ADD;
+                return Operators.OPERATOR_ADD;
         }
     }
 

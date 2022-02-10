@@ -17,9 +17,9 @@ public class Utils {
         return false;
     }
 
-    public static int getLastOperatorIndex(String equation) {
+    public static int getLastOperatorIndex(String equation, ArrayList<String> operatorSet) {
         int lastOperatorIndex = -1;
-        for(String operator : Constants.OPERATOR_HIERARCHY) {
+        for(String operator : operatorSet) {
             int index = equation.lastIndexOf(operator);
             if(index > lastOperatorIndex) lastOperatorIndex = index;
         }
@@ -29,7 +29,7 @@ public class Utils {
     public static int getNextOperatorIndex(String equation, int start, boolean forward) {
         try {
             for(int i = start + (forward ? 1 : -1); forward ? i < equation.length() - 1 : i >= 0; i += forward ? 1 : -1) {
-                if(Constants.OPERATOR_HIERARCHY.contains(equation.substring(i, i + 1)))
+                if(Operators.OPERATOR_HIERARCHY.contains(equation.substring(i, i + 1)))
                     return i;
             }
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class Utils {
     }
 
     public static int extractLastNumber(String equation) {
-        return Integer.parseInt(equation.substring(getLastOperatorIndex(equation) + 1));
+        return Integer.parseInt(equation.substring(getLastOperatorIndex(equation, Operators.OPERATOR_HIERARCHY) + 1));
     }
 
 }

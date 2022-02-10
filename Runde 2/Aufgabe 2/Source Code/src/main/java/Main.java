@@ -12,7 +12,7 @@ import equations.EquationVerifier;
  */
 public class Main {
 
-    public static final int OPERATOR_COUNT = 3;
+    public static final int OPERATOR_COUNT = 5;
 
     public static String OUTPUT_FILE = "output.txt";
 

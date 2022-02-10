@@ -2,7 +2,7 @@ package utils;
 
 import java.util.ArrayList;
 
-public class Constants {
+public class Operators {
 
     public static final String OPERATOR_ADD = "+";
     public static final String OPERATOR_SUBTRACT = "-";
@@ -35,16 +35,16 @@ public class Constants {
     }};
 
     public static final ArrayList<String> OPERATOR_LIST = new ArrayList<>() {{
-        add(Constants.OPERATOR_ADD);
-        add(Constants.OPERATOR_SUBTRACT);
-        add(Constants.OPERATOR_MULTIPLY);
-        add(Constants.OPERATOR_DIVIDE);
+        add(Operators.OPERATOR_ADD);
+        add(Operators.OPERATOR_SUBTRACT);
+        add(Operators.OPERATOR_MULTIPLY);
+        add(Operators.OPERATOR_DIVIDE);
     }};
     public static final ArrayList<String> OPERATOR_HIERARCHY = new ArrayList<>() {{
-        add(Constants.OPERATOR_MULTIPLY);
-        add(Constants.OPERATOR_DIVIDE);
-        add(Constants.OPERATOR_ADD);
-        add(Constants.OPERATOR_SUBTRACT);
+        add(Operators.OPERATOR_MULTIPLY);
+        add(Operators.OPERATOR_DIVIDE);
+        add(Operators.OPERATOR_ADD);
+        add(Operators.OPERATOR_SUBTRACT);
     }};
 
 }
