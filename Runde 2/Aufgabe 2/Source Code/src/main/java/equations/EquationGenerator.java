@@ -34,12 +34,16 @@ public class EquationGenerator {
 
     public String generateRaw(int operatorCount) {
         equationBuilder = new StringBuilder();
+        lastOperator = "";
+        lastNumber = 0;
+        currentResult = 0;
+        currentOperators = 0;
 
         int startNumber = generateNumber();
         currentResult = startNumber;
         equationBuilder.append(startNumber);
 
-        while(currentOperators <= operatorCount) {
+        while(currentOperators < operatorCount) {
             equationBuilder.append(buildChainElement(null));
             currentResult = EquationCalculator.calculate(equationBuilder.toString());
             currentOperators++;

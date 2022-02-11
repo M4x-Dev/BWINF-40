@@ -5,6 +5,7 @@ import utils.Operators;
 import utils.Utils;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class EquationCalculator {
 
@@ -27,6 +28,7 @@ public class EquationCalculator {
 
                     if(canSolveOperator(equation, operator)) {
                         equation = solveOperator(equation, operator);
+                        DebugUtils.println("Partially solved equation: " + equation);
                         break;
                     } else {
                         DebugUtils.println("Check failed");
@@ -47,6 +49,7 @@ public class EquationCalculator {
         while(Utils.containsAny(equation, replaceOperators) && equation.length() > 2) {
             for(String operator : replaceOperators) {
                 if(equation.contains(operator)) {
+                    DebugUtils.println("Transforming: " + equation);
                     equation = solveOperator(equation, checkInverseOperator(equation, operator));
                     break;
                 }
@@ -61,8 +64,15 @@ public class EquationCalculator {
         int previousOperator = Utils.getNextOperatorIndex(equation, operatorIndex, false);
         int nextOperator = Utils.getNextOperatorIndex(equation, operatorIndex, true);
 
+        DebugUtils.println("Current equation: " + equation);
+
         String node = equation.length() > 3 ? equation.substring(previousOperator == 0 ? previousOperator : previousOperator + 1, nextOperator == equation.length() - 1 ? nextOperator + 1 : nextOperator) : equation;
-        return equation.replaceFirst("\\b" + node.replace(operator, "\\" + operator) + "\\b", solveNode(node, operator));
+
+        DebugUtils.println("Current node: " + node);
+
+        String newEquation = equation.replaceFirst("\\b(" + Pattern.quote(node) + ")\\b", solveNode(node, operator));
+        DebugUtils.println("New equation: " + newEquation);
+        return newEquation;
     }
 
     public static boolean canSolveOperator(String equation, String operator) {
@@ -93,6 +103,7 @@ public class EquationCalculator {
             case Operators.OPERATOR_DIVIDE -> result = x / y;
         }
 
+        DebugUtils.println("Result of node: " + result);
         return String.valueOf(result);
     }
 
