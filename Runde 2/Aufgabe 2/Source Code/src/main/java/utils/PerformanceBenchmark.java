@@ -46,9 +46,10 @@ public class PerformanceBenchmark {
         singleThreadBenchmark.add(System.currentTimeMillis() - singleThreadStart);
 
         long multiThreadStart = System.currentTimeMillis();
-        boolean multiThreadResult = multiThreadVerifier.verifyMultithread(equation);
+        //boolean multiThreadResult = multiThreadVerifier.verifyMultithread(equation);
         multiThreadBenchmark.add(System.currentTimeMillis() - multiThreadStart);
 
-        return singleThreadResult && multiThreadResult;
+        //return singleThreadResult && multiThreadResult;
+        return false;
     }
 }

@@ -4,7 +4,6 @@ import utils.Operators;
 import utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,9 +14,11 @@ public class EquationVerifier {
 
     public interface VerifierActionResultListener {
         void onVerificationComplete(ArrayList<String> solutions);
-        void onSolutionFound(String solution);
     }
 
+    private static final AtomicInteger SolutionCounter = new AtomicInteger(1);
+    private static final AtomicInteger IterationCounter = new AtomicInteger(0);
+    private static int theoreticalIterations;
     private final ArrayList<String> allSolutions = new ArrayList<>();
 
     private VerifierActionResultListener localListener;
@@ -26,18 +27,13 @@ public class EquationVerifier {
     public boolean verifySinglethread(String equation) {
         try {
             allSolutions.clear();
-            AtomicInteger counter = new AtomicInteger(4);
-            localListener = new VerifierActionResultListener() {
-                @Override
-                public void onVerificationComplete(ArrayList<String> solutions) {
-
+            allSolutions.add(equation);
+            SolutionCounter.set(1);
+            localListener = solutions -> solutions.forEach(solution -> {
+                if(!allSolutions.contains(solution)) {
+                    allSolutions.add(solution);
                 }
-
-                @Override
-                public void onSolutionFound(String solution) {
-
-                }
-            };
+            });
 
             //Singlethread solution
             verifierExecutorService = Executors.newFixedThreadPool(4);
@@ -52,29 +48,26 @@ public class EquationVerifier {
         }
     }
 
-    public boolean verifyMultithread(String equation) {
+    public boolean verifyMultithread(String equation, String originalSolution) {
         try {
+            long startTime = System.currentTimeMillis();
             allSolutions.clear();
-            AtomicInteger counter = new AtomicInteger(4);
-            localListener = new VerifierActionResultListener() {
-                @Override
-                public void onVerificationComplete(ArrayList<String> solutions) {
-                    counter.decrementAndGet();
-                }
-
-                @Override
-                public void onSolutionFound(String solution) {
+            allSolutions.add(originalSolution.replace(" ", "").split("=")[0]);
+            SolutionCounter.set(1);
+            localListener = solutions -> solutions.forEach(solution -> {
+                if(!allSolutions.contains(solution))
                     allSolutions.add(solution);
-
-                    if(allSolutions.size() > 1)
-                        verifierExecutorService.shutdownNow();
-                }
-            };
+            });
 
             String[] equationParts = equation.split(" = ");
             String equationBody = equationParts[0].replaceAll(" " + Operators.OPERATOR_PLACEHOLDER + " ", Operators.OPERATOR_ADD);
             int solution = Integer.parseInt(equationParts[1]);
             int operatorCount = (equationBody.length() - 1) / 2;
+            theoreticalIterations = (int)Math.pow(4, operatorCount);
+
+            System.out.println("--- Starting verification ---");
+            System.out.println("Theoretical iterations: " + theoreticalIterations);
+            System.out.println("Estimated time: " + Math.round(((double)theoreticalIterations / 400000)) + " seconds");
 
             //Multithread solution
             verifierExecutorService.submit(new VerifierRunnable(localListener, equationBody, solution, operatorCount, Operators.OPERATOR_ADD, Operators.OPERATOR_SUBTRACT));
@@ -86,6 +79,9 @@ public class EquationVerifier {
             if(verifierExecutorService.awaitTermination(5, TimeUnit.MINUTES)) {
                 //Verification completed successfully
                 System.out.println("Verification complete (" + allSolutions.size() + "): ");
+                System.out.println("Theoretical combination count: " + Math.pow(4, operatorCount));
+                System.out.println("Total time needed: " + (System.currentTimeMillis() - startTime) + "ms");
+                System.out.println("Total iterations: " + IterationCounter.get());
                 for(String s : allSolutions)
                     System.out.println(s);
                 return allSolutions.size() == 1;
@@ -123,19 +119,16 @@ public class EquationVerifier {
                 int lastOperatorIndex = Utils.getLastOperatorIndex(equationBody, Operators.OPERATOR_LIST);
                 equationBody = equationBody.substring(0, lastOperatorIndex) + startOperatorConfiguration + equationBody.substring(lastOperatorIndex + 1);
 
-                while (equationBody != null && solutions.size() < 2) {
-                    if (EquationCalculator.calculate(equationBody) == solution) {
-                        System.out.println("Solution found");
-                        solutions.add(equationBody);
-                        listener.onSolutionFound(equationBody);
+                while (equationBody != null && SolutionCounter.get() < 2) {
+                    IterationCounter.incrementAndGet();
+                    //System.out.println("Running attempt " + IterationCounter.get() + "/" + theoreticalIterations);
+                    if (validEquation(equationBody, operatorCount) && EquationCalculator.calculatable(equationBody) && EquationCalculator.calculate(equationBody) == solution) {
+                        if(!solutions.contains(equationBody)) solutions.add(equationBody);
+                        SolutionCounter.incrementAndGet();
                     }
-
-                    System.out.println("Checking equation: " + equationBody);
 
                     equationBody = iterateOperators(equationBody, 0, operatorCount, endOperatorConfiguration);
                 }
-
-                System.out.println("Solutions found: " + solutions.size());
 
                 listener.onVerificationComplete(solutions);
             } catch (Exception e) {
@@ -150,14 +143,13 @@ public class EquationVerifier {
 
         equation = equation.substring(0, index * 2 + 1) + newOperator + equation.substring(index * 2 + 2);
 
-        if(!validEquation(equation, maxOperators) || !EquationCalculator.calculatable(equation)) return iterateOperators(equation, index, maxOperators, endConfiguration);
-
         if(Objects.equals(newOperator, Operators.OPERATOR_ADD)) {
+            if(index == maxOperators - 2) {
+                if(getDescendantOperator(extractOperator(equation, maxOperators - 1)).equals(endConfiguration))
+                    return null;
+            }
             if(index < maxOperators - 1) {
-                if(extractOperator(equation, maxOperators - 1).equals(endConfiguration)) return null;
-                else return iterateOperators(equation, index + 1, maxOperators, endConfiguration);
-            } else {
-                return null;
+                return iterateOperators(equation, index + 1, maxOperators, endConfiguration);
             }
         }
 
@@ -165,13 +157,11 @@ public class EquationVerifier {
     }
 
     private static boolean validEquation(String equation, int operatorCount) {
-        //Statische Regeln
-        int OPERATOR_COUNT_THRESHOLD = 4; //Maximale Anzahl an gleichen aufeinanderfolgenden Operatoren
-
-        int lastOperatorCount = 0;
         String lastOperator = "";
         for(int i = 0; i < operatorCount; i++) {
             String operator = extractOperator(equation, i);
+            if(lastOperator.equals(operator)) return false;
+            lastOperator = operator;
 
             //Überprüfen der Berechenbarkeit der Gleichung (Ergebnisse natürliche Zahlen)
             String node = extractNode(equation, i * 2 + 1);

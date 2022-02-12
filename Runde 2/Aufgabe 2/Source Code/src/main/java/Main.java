@@ -13,7 +13,7 @@ import utils.PerformanceBenchmark;
  */
 public class Main {
 
-    public static final int OPERATOR_COUNT = 15;
+    public static final int OPERATOR_COUNT = 1;
 
     public static String OUTPUT_FILE = "output.txt";
 
@@ -39,8 +39,9 @@ public class Main {
 
         EquationGenerator generator = new EquationGenerator();
         String equation = generator.generate(OPERATOR_COUNT);
+        String formattedEquation = generator.hideSolution(equation);
         EquationVerifier verifier = new EquationVerifier();
-        System.out.println("Is unique? " + verifier.verifyMultithread(equation));
+        System.out.println("Is unique? " + verifier.verifyMultithread(formattedEquation, equation));
         //System.out.println("Is unique? " + verifier.verifyMultithread("4 o 3 o 2 o 6 o 3 o 9 o 7 o 8 o 2 o 9 o 4 o 4 o 6 o 4 o 4 o 5 = 4792"));
 
         /*PerformanceBenchmark benchmark = new PerformanceBenchmark();

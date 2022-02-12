@@ -29,10 +29,6 @@ public class EquationGenerator {
     private String lastOperator = "";
 
     public String generate(int operatorCount) {
-        return hideSolution(generateRaw(operatorCount));
-    }
-
-    public String generateRaw(int operatorCount) {
         equationBuilder = new StringBuilder();
         lastOperator = "";
         lastNumber = 0;
@@ -51,6 +47,8 @@ public class EquationGenerator {
 
         equationBuilder.append(" = ").append(currentResult);
         DebugUtils.println("Originallösung: " + equationBuilder);
+
+        System.out.println("Equation: " + equationBuilder.toString());
 
         return equationBuilder.toString();
     }
