@@ -5,15 +5,14 @@
  */
 
 import equations.EquationGenerator;
-import equations.EquationVerifier;
-import utils.PerformanceBenchmark;
 
 /**
  * Hauptklasse des Programmes
  */
 public class Main {
 
-    public static final int OPERATOR_COUNT = 1;
+    public static final int OPERATOR_COUNT = 3;
+    public static final int MAX_ATTEMPTS = 10;
 
     public static String OUTPUT_FILE = "output.txt";
 
@@ -30,22 +29,13 @@ public class Main {
         System.out.println();
         System.out.println("Zahlenrätsel mit " + OPERATOR_COUNT + " Operatoren wird generiert...");
 
-        /*EquationGenerator generator = new EquationGenerator();
-        String equation = generator.generate(OPERATOR_COUNT);
+        EquationGenerator generator = new EquationGenerator();
+        String equation = generator.generate(OPERATOR_COUNT, MAX_ATTEMPTS);
         
         System.out.println();
         System.out.println("Das folgende Zahlenrätsel wurde generiert:");
-        System.out.println(equation);*/
-
-        EquationGenerator generator = new EquationGenerator();
-        String equation = generator.generate(OPERATOR_COUNT);
-        String formattedEquation = generator.hideSolution(equation);
-        EquationVerifier verifier = new EquationVerifier();
-        System.out.println("Is unique? " + verifier.verifyMultithread(formattedEquation, equation));
-        //System.out.println("Is unique? " + verifier.verifyMultithread("4 o 3 o 2 o 6 o 3 o 9 o 7 o 8 o 2 o 9 o 4 o 4 o 6 o 4 o 4 o 5 = 4792"));
-
-        /*PerformanceBenchmark benchmark = new PerformanceBenchmark();
-        benchmark.benchmark(5);*/
+        System.out.println(generator.hideSolution(equation));
+        System.out.println("Originallösung: " + equation);
     }
 
 }

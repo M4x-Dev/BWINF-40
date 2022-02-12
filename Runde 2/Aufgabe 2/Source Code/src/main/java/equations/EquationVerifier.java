@@ -1,5 +1,6 @@
 package equations;
 
+import utils.DebugUtils;
 import utils.Operators;
 import utils.Utils;
 
@@ -54,6 +55,7 @@ public class EquationVerifier {
             allSolutions.clear();
             allSolutions.add(originalSolution.replace(" ", "").split("=")[0]);
             SolutionCounter.set(1);
+            verifierExecutorService = Executors.newFixedThreadPool(4);
             localListener = solutions -> solutions.forEach(solution -> {
                 if(!allSolutions.contains(solution))
                     allSolutions.add(solution);
@@ -65,9 +67,9 @@ public class EquationVerifier {
             int operatorCount = (equationBody.length() - 1) / 2;
             theoreticalIterations = (int)Math.pow(4, operatorCount);
 
-            System.out.println("--- Starting verification ---");
-            System.out.println("Theoretical iterations: " + theoreticalIterations);
-            System.out.println("Estimated time: " + Math.round(((double)theoreticalIterations / 400000)) + " seconds");
+            DebugUtils.println("--- Starting verification ---");
+            DebugUtils.println("Theoretical iterations: " + theoreticalIterations);
+            DebugUtils.println("Estimated time: " + Math.round(((double)theoreticalIterations / 400000)) + " seconds");
 
             //Multithread solution
             verifierExecutorService.submit(new VerifierRunnable(localListener, equationBody, solution, operatorCount, Operators.OPERATOR_ADD, Operators.OPERATOR_SUBTRACT));
@@ -78,12 +80,12 @@ public class EquationVerifier {
             verifierExecutorService.shutdown();
             if(verifierExecutorService.awaitTermination(5, TimeUnit.MINUTES)) {
                 //Verification completed successfully
-                System.out.println("Verification complete (" + allSolutions.size() + "): ");
-                System.out.println("Theoretical combination count: " + Math.pow(4, operatorCount));
-                System.out.println("Total time needed: " + (System.currentTimeMillis() - startTime) + "ms");
-                System.out.println("Total iterations: " + IterationCounter.get());
+                DebugUtils.println("Verification complete (" + allSolutions.size() + "): ");
+                DebugUtils.println("Theoretical combination count: " + Math.pow(4, operatorCount));
+                DebugUtils.println("Total time needed: " + (System.currentTimeMillis() - startTime) + "ms");
+                DebugUtils.println("Total iterations: " + IterationCounter.get());
                 for(String s : allSolutions)
-                    System.out.println(s);
+                    DebugUtils.println(s);
                 return allSolutions.size() == 1;
             }
             return false;
@@ -121,7 +123,6 @@ public class EquationVerifier {
 
                 while (equationBody != null && SolutionCounter.get() < 2) {
                     IterationCounter.incrementAndGet();
-                    //System.out.println("Running attempt " + IterationCounter.get() + "/" + theoreticalIterations);
                     if (validEquation(equationBody, operatorCount) && EquationCalculator.calculatable(equationBody) && EquationCalculator.calculate(equationBody) == solution) {
                         if(!solutions.contains(equationBody)) solutions.add(equationBody);
                         SolutionCounter.incrementAndGet();

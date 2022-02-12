@@ -38,7 +38,7 @@ public class PerformanceBenchmark {
 
     private boolean evaluate(int operators) {
         System.out.println("Operator: " + operators);
-        String equation = generator.generate(operators);
+        String equation = generator.generate(operators, 1);
         System.out.println("Verifying equation: " + equation);
 
         long singleThreadStart = System.currentTimeMillis();

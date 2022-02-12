@@ -28,7 +28,30 @@ public class EquationGenerator {
     private int lastNumber;
     private String lastOperator = "";
 
-    public String generate(int operatorCount) {
+    public String generate(int operatorCount, int maxAttempts) {
+        boolean equationValid = false;
+        String equation = "";
+        int attempts = 0;
+
+        EquationVerifier verifier = new EquationVerifier();
+
+        while(attempts < maxAttempts && !equationValid) {
+            attempts++;
+            equation = generateRaw(operatorCount);
+            equationValid = verifier.verifyMultithread(hideSolution(equation), equation);
+
+            if(!equationValid) {
+                System.out.println("Equation is not unique, generating again...");
+
+                if(attempts == maxAttempts)
+                    System.err.println("Error: Cannot generate unique equation for the given parameters");
+            }
+        }
+
+        return equation;
+    }
+
+    public String generateRaw(int operatorCount) {
         equationBuilder = new StringBuilder();
         lastOperator = "";
         lastNumber = 0;
@@ -47,8 +70,7 @@ public class EquationGenerator {
 
         equationBuilder.append(" = ").append(currentResult);
         DebugUtils.println("Originallösung: " + equationBuilder);
-
-        System.out.println("Equation: " + equationBuilder.toString());
+        DebugUtils.println("Equation: " + equationBuilder.toString());
 
         return equationBuilder.toString();
     }
