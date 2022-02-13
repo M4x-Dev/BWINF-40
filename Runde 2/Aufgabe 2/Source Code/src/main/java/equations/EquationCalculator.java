@@ -92,6 +92,15 @@ public class EquationCalculator {
         return equation;
     }
 
+    /**
+     * Funktion, welche eine einzelne Operation einer gegebenen mathematischen Gleichung transformiert.
+     * Dabei ermittelt die Funktion den Teilterm des gegebenen Operatoren und berechnet dessen Ergebnis.
+     * Anschließend wird der Term in der ursprünglichen Gleichung ersetzt und die neue Gleichung wird zurückgegeben.
+     *
+     * @param equation
+     * @param operator
+     * @return
+     */
     public static String solveOperator(String equation, String operator) {
         int operatorIndex = equation.indexOf(operator);
         int previousOperator = Utils.getNextOperatorIndex(equation, operatorIndex, false);

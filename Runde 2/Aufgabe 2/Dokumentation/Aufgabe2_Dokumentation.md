@@ -38,9 +38,29 @@ Die Implementierung des Algorithmus besteht im Kern aus den folgenden drei Klass
 
 Darüber hinaus werden die folgenden Hilfsklassen verwendet:
 - NumberGenerator (Zufallsgenerator für die einzelnen Ziffern)
+- OperatorGenerator (Zufallsgenerator für die einzelnen Operatoren)
 - Operators (Variablen und Funktionen für die verschiedenen Operatoren)
 - Utils (Hilfsfunktionen, beispielsweise Bestimmung von geraden/ungeraden Zahlen)
 
 ### Generieren der Gleichungen
 
-Allgemein berechnet
+#### **Grundannahmen und Regeln**
+
+Die mathematischen Gleichungen, welche durch den Algorithmus generiert werden, besitzen die folgende Form:
+
+## x<sub>1</sub> X x<sub>2</sub> Y x<sub>3</sub> Z x<sub>4</sub> ... x<sub>n</sub> = y
+
+- x<sub>1</sub> ... x<sub>n</sub> &isin; &Nu; &and; 0 < x<sub>1</sub>...x<sub>n</sub> < 10
+- x<sub>1</sub> X x<sub>2</sub> &isin; &Nu; &and; x<sub>1</sub> X x<sub>2</sub> > 0
+- y &isin; &Nu; &and; y > 0
+
+Hierbei repräsentieren die Variablen x<sub>1</sub> ... x<sub>n</sub> die Ziffern und die Variablen X ... Z die Operatoren der Gleichungen.
+
+Zusätzlich zu dieser Definiton gelten die folgenden Regeln:
+- es dürfen keine Operatoren **mehrfach** hintereinander vorkommen (*max. 1*)
+- es dürfen keine Ziffern **mehrfach** hintereinander vorkommen (*max. 2*)
+- es wird die **Punkt- vor Strichrechnung** berechnet/angewandt
+- gleichrangige Operatoren werden **linksassoziativ** berechnet
+- die Gleichungen müssen **eindeutig** lösbar sein (eine Lösung)
+
+Diese Einschränkungen sollen gewährleisten, dass die generierten Gleichungen sowohl abwechslungsreich, als auch einzigartig sind und die Chance, eine Gleichung mehrfach zu erhalten somit möglichst gering gehalten wird.
