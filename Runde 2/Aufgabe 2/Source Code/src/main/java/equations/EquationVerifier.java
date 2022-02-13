@@ -20,6 +20,7 @@ public class EquationVerifier {
     private static final AtomicInteger SolutionCounter = new AtomicInteger(1);
     private static final AtomicInteger IterationCounter = new AtomicInteger(0);
     private static int theoreticalIterations;
+    private static int theoreticalSinglePercentage;
     private final ArrayList<String> allSolutions = new ArrayList<>();
 
     private VerifierActionResultListener localListener;
@@ -66,6 +67,7 @@ public class EquationVerifier {
             int solution = Integer.parseInt(equationParts[1]);
             int operatorCount = (equationBody.length() - 1) / 2;
             theoreticalIterations = (int)Math.pow(4, operatorCount);
+            theoreticalSinglePercentage = theoreticalIterations / 100;
 
             DebugUtils.println("--- Starting verification ---");
             DebugUtils.println("Theoretical iterations: " + theoreticalIterations);
@@ -95,16 +97,63 @@ public class EquationVerifier {
         }
     }
 
+    public int solveMultithread(String equation, String originalSolution) {
+        try {
+            long startTime = System.currentTimeMillis();
+            allSolutions.clear();
+            SolutionCounter.set(0);
+            IterationCounter.set(0);
+            verifierExecutorService = Executors.newFixedThreadPool(4);
+            localListener = solutions -> solutions.forEach(solution -> {
+                if (!allSolutions.contains(solution))
+                    allSolutions.add(solution);
+            });
+
+            String[] equationParts = equation.split(" = ");
+            String equationBody = equationParts[0].replaceAll(" " + Operators.OPERATOR_PLACEHOLDER + " ", Operators.OPERATOR_ADD);
+            int solution = Integer.parseInt(equationParts[1]);
+            int operatorCount = (equationBody.length() - 1) / 2;
+            theoreticalIterations = (int) Math.pow(4, operatorCount);
+            theoreticalSinglePercentage = theoreticalIterations / 100;
+
+            System.out.println("--- Starting Solving ---");
+            System.out.println("Theoretical iterations: " + theoreticalIterations);
+            System.out.println("Estimated time: " + Math.round(((double) theoreticalIterations / 400000)) + " seconds");
+
+            //Multithread solution
+            verifierExecutorService.submit(new SolverRunnable(localListener, equationBody, solution, operatorCount, Operators.OPERATOR_ADD, Operators.OPERATOR_SUBTRACT));
+            verifierExecutorService.submit(new SolverRunnable(localListener, equationBody, solution, operatorCount, Operators.OPERATOR_SUBTRACT, Operators.OPERATOR_MULTIPLY));
+            verifierExecutorService.submit(new SolverRunnable(localListener, equationBody, solution, operatorCount, Operators.OPERATOR_MULTIPLY, Operators.OPERATOR_DIVIDE));
+            verifierExecutorService.submit(new SolverRunnable(localListener, equationBody, solution, operatorCount, Operators.OPERATOR_DIVIDE, Operators.OPERATOR_ADD));
+
+            verifierExecutorService.shutdown();
+            if (verifierExecutorService.awaitTermination(5, TimeUnit.MINUTES)) {
+                //Verification completed successfully
+                System.out.println("Solving complete (" + allSolutions.size() + "): ");
+                System.out.println("Theoretical combination count: " + Math.pow(4, operatorCount));
+                System.out.println("Total time needed: " + (System.currentTimeMillis() - startTime) + "ms");
+                System.out.println("Total iterations: " + IterationCounter.get());
+                for (String s : allSolutions)
+                    System.out.println(s);
+                return allSolutions.size();
+            }
+            return 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public static class VerifierRunnable implements Runnable {
 
-        private final VerifierActionResultListener listener;
+        protected final VerifierActionResultListener listener;
 
-        private String equationBody;
-        private final int solution, operatorCount;
-        private final String startOperatorConfiguration;
-        private final String endOperatorConfiguration;
+        protected String equationBody;
+        protected final int solution, operatorCount;
+        protected final String startOperatorConfiguration;
+        protected final String endOperatorConfiguration;
 
-        private final ArrayList<String> solutions = new ArrayList<>();
+        protected final ArrayList<String> solutions = new ArrayList<>();
 
         public VerifierRunnable(VerifierActionResultListener listener, String equationBody, int solution, int operatorCount, String startOperatorConfiguration, String endOperatorConfiguration) {
             this.listener = listener;
@@ -123,6 +172,20 @@ public class EquationVerifier {
 
                 while (equationBody != null && SolutionCounter.get() < 2) {
                     IterationCounter.incrementAndGet();
+                    if(IterationCounter.get() % theoreticalSinglePercentage == 0) {
+                        String pattern = "\r|<bar>| (<percentage>)";
+                        int completed = IterationCounter.get() / theoreticalSinglePercentage;
+                        StringBuilder constructedBar = new StringBuilder();
+                        for(int i = 0; i < 100; i++) {
+                            if(i > completed) constructedBar.append(" ");
+                            else if(i < completed) constructedBar.append("=");
+                            else constructedBar.append(">");
+                        }
+                        pattern = pattern.replace("<bar>", constructedBar.toString())
+                                .replace("<percentage>", completed + "%");
+
+                        System.out.print(pattern);
+                    }
                     if (validEquation(equationBody, operatorCount) && EquationCalculator.calculatable(equationBody) && EquationCalculator.calculate(equationBody) == solution) {
                         if(!solutions.contains(equationBody)) solutions.add(equationBody);
                         SolutionCounter.incrementAndGet();
@@ -136,6 +199,50 @@ public class EquationVerifier {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static class SolverRunnable extends VerifierRunnable {
+
+        public SolverRunnable(VerifierActionResultListener listener, String equationBody, int solution, int operatorCount, String startOperatorConfiguration, String endOperatorConfiguration) {
+            super(listener, equationBody, solution, operatorCount, startOperatorConfiguration, endOperatorConfiguration);
+        }
+
+        @Override
+        public void run() {
+            try {
+                int lastOperatorIndex = Utils.getLastOperatorIndex(equationBody, Operators.OPERATOR_LIST);
+                equationBody = equationBody.substring(0, lastOperatorIndex) + startOperatorConfiguration + equationBody.substring(lastOperatorIndex + 1);
+
+                while (equationBody != null) {
+                    IterationCounter.incrementAndGet();
+                    if(IterationCounter.get() % theoreticalSinglePercentage == 0) {
+                        String pattern = "\r|<bar>| (<percentage>)";
+                        int completed = IterationCounter.get() / theoreticalSinglePercentage;
+                        StringBuilder constructedBar = new StringBuilder();
+                        for(int i = 0; i < 100; i++) {
+                            if(i > completed) constructedBar.append(" ");
+                            else if(i < completed) constructedBar.append("=");
+                            else constructedBar.append(">");
+                        }
+                        pattern = pattern.replace("<bar>", constructedBar.toString())
+                                .replace("<percentage>", completed + "%");
+
+                        System.out.print(pattern);
+                    }
+                    if (validEquation(equationBody, operatorCount) && EquationCalculator.calculatable(equationBody) && EquationCalculator.calculate(equationBody) == solution) {
+                        if(!solutions.contains(equationBody)) solutions.add(equationBody);
+                        SolutionCounter.incrementAndGet();
+                    }
+
+                    equationBody = iterateOperators(equationBody, 0, operatorCount, endOperatorConfiguration);
+                }
+
+                listener.onVerificationComplete(solutions);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     private static String iterateOperators(String equation, int index, int maxOperators, String endConfiguration) {

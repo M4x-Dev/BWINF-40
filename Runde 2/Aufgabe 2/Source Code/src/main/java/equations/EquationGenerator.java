@@ -1,5 +1,7 @@
 package equations;
 
+import numbers.NumberGenerator;
+import numbers.OperatorGenerator;
 import utils.Operators;
 import utils.DebugUtils;
 import utils.Utils;
@@ -9,12 +11,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class EquationGenerator {
-
-    public enum GeneratorMode {
-        Ignore,
-        Even,
-        Odd
-    }
 
     public static final int NUM_LOWER_BOUND = 1;
     public static final int NUM_UPPER_BOUND = 10;
@@ -58,7 +54,7 @@ public class EquationGenerator {
         currentResult = 0;
         currentOperators = 0;
 
-        int startNumber = generateNumber();
+        int startNumber = NumberGenerator.generateNumber(NUM_LOWER_BOUND, NUM_UPPER_BOUND, NumberGenerator.GeneratorMode.Ignore);
         currentResult = startNumber;
         equationBuilder.append(startNumber);
 
@@ -101,16 +97,17 @@ public class EquationGenerator {
         }
 
         int nextNumber;
-        String nextOperator = nextOperationPool.get(numberGenerator.nextInt(nextOperationPool.size()));
+        //String nextOperator = nextOperationPool.get(numberGenerator.nextInt(nextOperationPool.size()));
+        String nextOperator = OperatorGenerator.generateOperator(nextOperationPool);
         switch (nextOperator) {
             case Operators.OPERATOR_ADD -> {
                 //Nächste Operation ist die Addition
-                nextNumber = generateNumber();
+                nextNumber = NumberGenerator.generateNumber(NUM_LOWER_BOUND, NUM_UPPER_BOUND, lastNumber, NumberGenerator.GeneratorMode.Ignore);
             }
             case Operators.OPERATOR_SUBTRACT -> {
                 //Nächste Operation ist die Subtraktion
                 DebugUtils.println("Last: " + lastNumber + "; Last sum: " + sumExpressionLastNumber);
-                nextNumber = generateNumber(NUM_LOWER_BOUND, Math.min(lastNumber, sumExpressionLastNumber), GeneratorMode.Ignore);
+                nextNumber = NumberGenerator.generateNumber(NUM_LOWER_BOUND, Math.min(lastNumber, sumExpressionLastNumber), lastNumber, NumberGenerator.GeneratorMode.Ignore);
             }
             case Operators.OPERATOR_MULTIPLY -> {
                 //Nächste Operation ist die Multiplikation
@@ -140,12 +137,12 @@ public class EquationGenerator {
                     DebugUtils.println("Using default bounds (multiplication)");
                     upperBound = NUM_UPPER_BOUND;
                 }
-                nextNumber = generateNumber(NUM_LOWER_BOUND, upperBound, GeneratorMode.Ignore);
+                nextNumber = NumberGenerator.generateNumber(NUM_LOWER_BOUND, upperBound, lastNumber, NumberGenerator.GeneratorMode.Ignore);
             }
             case Operators.OPERATOR_DIVIDE -> {
                 //Nächste Operation ist die Division
                 ArrayList<Integer> dividers = getDividers(lastNumber);
-                nextNumber = dividers.get(generateNumber(0, dividers.size(), GeneratorMode.Ignore));
+                nextNumber = dividers.get(NumberGenerator.generateNumber(0, dividers.size(), NumberGenerator.GeneratorMode.Ignore));
 
                 if(equationDifferenceExpression.contains(Operators.OPERATOR_SUBTRACT)) {
                     int lastDifferenceOperator = Utils.getLastOperatorIndex(equationDifferenceExpression, Operators.LINE_OPERATORS);
@@ -180,31 +177,6 @@ public class EquationGenerator {
 
     public String hideSolution(String equation) {
         return equation.replaceAll("[//+\"-//*//:]", " " + Operators.OPERATOR_PLACEHOLDER + " ");
-    }
-
-    public int generateNumber() {
-        return generateNumber(NUM_LOWER_BOUND, NUM_UPPER_BOUND, GeneratorMode.Ignore);
-    }
-
-    public int generateNumber(int lower, int upper, GeneratorMode mode) {
-        int range = upper - lower;
-        int number = numberGenerator.nextInt(range > 0 ? range : 1) + lower;
-
-        if(mode.equals(GeneratorMode.Ignore)) return number;
-
-        if(mode.equals(GeneratorMode.Even)) {
-            if(Utils.isEven(number)) return number;
-
-            if(number - 1 < lower) return number + 1;
-            else return number - 1;
-        } else if(mode.equals(GeneratorMode.Odd)) {
-            if(!Utils.isEven(number)) return number;
-
-            if(number - 1 < lower) return number + 1;
-            else return number - 1;
-        }
-
-        return number;
     }
 
     public ArrayList<Integer> getDividers(int num) {

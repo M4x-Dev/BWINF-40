@@ -7,8 +7,22 @@ import utils.Utils;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+/**
+ * Klasse, welche mathematische Gleichungen nach den folgenden Regeln berechnen kann:
+ * <br>1. Natürliche Zahlen größer 0 als Ergebnisse/Zwischenergebnisse
+ * <br>2. Punkt- vor Strichrechnung
+ * <br>3. Linksassoziatives Berechnen bei gleichrangigen Operatoren
+ */
 public class EquationCalculator {
 
+    /**
+     * Funktion, welche das Ergebnis einer gegebenen mathematischen Gleichung berechnet.
+     * Diese Funktion verwendet die Funktion {@link #transformEquation}, um das Ergebnis zu berechnen.
+     *
+     * @param equation Mathematische Gleichung, welche berechnet werden soll.
+     *
+     * @return Gibt das Ergebnis der Gleichung zurück (natürliche Zahl größer 0).
+     */
     public static int calculate(String equation) {
         DebugUtils.println("Calculating: " + equation);
         return Integer.parseInt(transformEquation(equation, Operators.OPERATOR_HIERARCHY));
@@ -41,6 +55,23 @@ public class EquationCalculator {
         return true;
     }
 
+    /**
+     * Funktion, welche eine gegebene mathematische Gleichung transformiert.
+     * Dabei berechnet die Funktion die Teilergebnisse der einzelnen Terme und fügt das Ergebnis in die Gleichung ein, bis nur noch das Ergebnis übrig bleibt.
+     * Dabei werden nur Operatoren berechnet, welche sich in dem replaceOperators-Parameter befinden.
+     * Dadurch kann die Funktion eine Gleichung in eine Summe umwandeln, wenn sich die Addition nicht in der Liste befindet.
+     *
+     * <br><br>Beispiel zum Vorgehen des Algorithmus (replaceOperators beeinhaltet alle Operatoren):
+     * <br>Ausgangsgleichung: 1 + 2 * 3 - 4
+     * <br>1. Schritt: 1 + 6 - 4
+     * <br>2. Schritt: 7 - 4
+     * <br>3. Schritt: 3
+     *
+     * @param equation Mathematische Gleichung, welche transformiert werden soll.
+     * @param replaceOperators Operatoren, welche durch den Algorithmus ersetzt/berechnet werden sollen.
+     *
+     * @return Gibt die transformierte Gleichung zurück.
+     */
     public static String transformEquation(String equation, ArrayList<String> replaceOperators) {
         //Entfernen aller Leerzeichen
         equation = equation.replaceAll(" ", "");
@@ -49,6 +80,7 @@ public class EquationCalculator {
         while(Utils.containsAny(equation, replaceOperators) && equation.length() > 2) {
             for(String operator : replaceOperators) {
                 if(equation.contains(operator)) {
+                    //Berechnung eines Teiltermes
                     DebugUtils.println("Transforming: " + equation);
                     equation = solveOperator(equation, checkInverseOperator(equation, operator));
                     break;
@@ -56,6 +88,7 @@ public class EquationCalculator {
             }
         }
 
+        //Rückgabe der transformierten Gleichung
         return equation;
     }
 
