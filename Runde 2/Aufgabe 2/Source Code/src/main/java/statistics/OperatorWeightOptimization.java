@@ -4,8 +4,6 @@ import equations.EquationGenerator;
 import equations.EquationVerifier;
 import numbers.OperatorGenerator;
 
-import java.util.ArrayList;
-
 public class OperatorWeightOptimization {
 
     private static final int STEP_SIZE = 1;

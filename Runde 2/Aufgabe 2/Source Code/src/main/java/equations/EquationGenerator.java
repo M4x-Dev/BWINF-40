@@ -8,7 +8,6 @@ import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 public class EquationGenerator {
 
@@ -16,12 +15,12 @@ public class EquationGenerator {
     public static final int NUM_UPPER_BOUND = 10;
 
     private StringBuilder equationBuilder;
-    private final Random numberGenerator = new Random();
 
     private int currentResult = 0;
     private int currentOperators = 0;
 
     private int lastNumber;
+    private String previousLastOperator = "";
     private String lastOperator = "";
 
     public String generate(int operatorCount, int maxAttempts) {
@@ -32,9 +31,12 @@ public class EquationGenerator {
         EquationVerifier verifier = new EquationVerifier();
 
         while(attempts < maxAttempts && !equationValid) {
+            System.out.println("Generating equation");
             attempts++;
             equation = generateRaw(operatorCount);
             equationValid = verifier.verifyMultithread(hideSolution(equation), equation);
+
+            System.out.println("Validating equation: " + equation);
 
             if(!equationValid) {
                 System.out.println("Equation is not unique, generating again...");
@@ -81,7 +83,9 @@ public class EquationGenerator {
 
         DebugUtils.println("Difference: " + equationDifferenceExpression);
 
-        if(!lastOperator.isEmpty()) nextOperationPool.remove(lastOperator);
+        //if(!lastOperator.isEmpty()) nextOperationPool.remove(lastOperator);
+        if(previousLastOperator.equals(lastOperator) && !previousLastOperator.isEmpty())
+            nextOperationPool.remove(lastOperator);
 
         if(lastNumber <= 2) {
             nextOperationPool.remove(Operators.OPERATOR_DIVIDE);
@@ -137,12 +141,12 @@ public class EquationGenerator {
                     DebugUtils.println("Using default bounds (multiplication)");
                     upperBound = NUM_UPPER_BOUND;
                 }
-                nextNumber = NumberGenerator.generateNumber(NUM_LOWER_BOUND, upperBound, lastNumber, NumberGenerator.GeneratorMode.Ignore);
+                nextNumber = NumberGenerator.generateNumber(NUM_LOWER_BOUND + 1, upperBound, lastNumber, NumberGenerator.GeneratorMode.Ignore);
             }
             case Operators.OPERATOR_DIVIDE -> {
                 //Nächste Operation ist die Division
                 ArrayList<Integer> dividers = getDividers(lastNumber);
-                nextNumber = dividers.get(NumberGenerator.generateNumber(0, dividers.size(), NumberGenerator.GeneratorMode.Ignore));
+                nextNumber = dividers.get(dividers.size() > 1 ? NumberGenerator.generateNumberGeneric(0, dividers.size()) : 0);
 
                 if(equationDifferenceExpression.contains(Operators.OPERATOR_SUBTRACT)) {
                     int lastDifferenceOperator = Utils.getLastOperatorIndex(equationDifferenceExpression, Operators.LINE_OPERATORS);
@@ -170,6 +174,7 @@ public class EquationGenerator {
         }
 
         lastNumber = nextNumber;
+        previousLastOperator = lastOperator;
         lastOperator = nextOperator;
 
         return nextOperator + nextNumber;
@@ -181,8 +186,8 @@ public class EquationGenerator {
 
     public ArrayList<Integer> getDividers(int num) {
         ArrayList<Integer> dividers = new ArrayList<>();
-        for(int i = 1; i <= num; i++) {
-            if(num % i == 0)
+        for(int i = 2; i <= num; i++) {
+            if(num % i == 0 && i != num)
                 dividers.add(i);
         }
         dividers.remove((Integer)num);

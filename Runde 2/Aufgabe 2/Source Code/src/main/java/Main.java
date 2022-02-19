@@ -4,11 +4,13 @@
  * Gymnasium Stadtfeld Wernigerode
  */
 
+import equations.ClusteredEquationGenerator;
 import equations.EquationGenerator;
 import equations.EquationVerifier;
 import numbers.OperatorGenerator;
 import statistics.OperatorBenchmark;
 import statistics.OperatorWeightOptimization;
+import statistics.SolutionBenchmark;
 
 /**
  * Hauptklasse des Programmes
@@ -50,14 +52,23 @@ public class Main {
         verifier.solveMultithread(equation, equation);*/
 
         //Generieren des Zahlenrätsels
-        EquationGenerator generator = new EquationGenerator();
+        /*EquationGenerator generator = new EquationGenerator();
         String equation = generator.generate(OPERATOR_COUNT, MAX_ATTEMPTS);
 
         //Ausgabe des Zahlenrätsels
         System.out.println();
         System.out.println("Das folgende Zahlenrätsel wurde generiert:");
         System.out.println(generator.hideSolution(equation));
-        System.out.println("Originallösung: " + equation);
+        System.out.println("Originallösung: " + equation);*/
+
+        //Clustered generator test
+        ClusteredEquationGenerator generator = new ClusteredEquationGenerator();
+        String equation = generator.generateFifteen();
+        System.out.println("Generated clustered equation: " + equation);
+
+        //Solution count benchmark
+        /*SolutionBenchmark benchmark = new SolutionBenchmark();
+        benchmark.benchmark(10, 20);*/
     }
 
 }

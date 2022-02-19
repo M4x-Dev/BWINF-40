@@ -187,8 +187,11 @@ public class EquationVerifier {
                         System.out.print(pattern);
                     }
                     if (validEquation(equationBody, operatorCount) && EquationCalculator.calculatable(equationBody) && EquationCalculator.calculate(equationBody) == solution) {
-                        if(!solutions.contains(equationBody)) solutions.add(equationBody);
-                        SolutionCounter.incrementAndGet();
+                        if(!solutions.contains(equationBody)) {
+                            System.out.println("\nSolution found: " + equationBody);
+                            solutions.add(equationBody);
+                            SolutionCounter.incrementAndGet();
+                        }
                     }
 
                     equationBody = iterateOperators(equationBody, 0, operatorCount, endOperatorConfiguration);
@@ -230,8 +233,10 @@ public class EquationVerifier {
                         System.out.print(pattern);
                     }
                     if (validEquation(equationBody, operatorCount) && EquationCalculator.calculatable(equationBody) && EquationCalculator.calculate(equationBody) == solution) {
-                        if(!solutions.contains(equationBody)) solutions.add(equationBody);
-                        SolutionCounter.incrementAndGet();
+                        if(!solutions.contains(equationBody)){
+                            solutions.add(equationBody);
+                            SolutionCounter.incrementAndGet();
+                        }
                     }
 
                     equationBody = iterateOperators(equationBody, 0, operatorCount, endOperatorConfiguration);
@@ -266,9 +271,12 @@ public class EquationVerifier {
 
     private static boolean validEquation(String equation, int operatorCount) {
         String lastOperator = "";
+        int lastOperatorCount = 0;
         for(int i = 0; i < operatorCount; i++) {
             String operator = extractOperator(equation, i);
-            if(lastOperator.equals(operator)) return false;
+            if(lastOperatorCount > 2) return false;
+            if(!lastOperator.equals(operator)) lastOperatorCount = 0;
+            lastOperatorCount++;
             lastOperator = operator;
 
             //Überprüfen der Berechenbarkeit der Gleichung (Ergebnisse natürliche Zahlen)
